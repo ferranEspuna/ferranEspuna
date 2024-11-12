@@ -1,0 +1,30 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+header {
+  padding: 10px; /* Decrease padding */
+  margin-bottom: 10px; /* Reduce space below header */
+}
+
+header h2 {
+  font-size: 1.2em; /* Smaller heading font size */
+  margin: 0; /* Remove top and bottom margin */
+}
+
+header ul {
+  padding: 0;
+  margin: 0;
+  list-style: none; /* Remove list bullets */
+}
+
+header li {
+  font-size: 0.9em; /* Smaller font size for list items */
+  line-height: 1.4; /* Reduce line height */
+  margin-bottom: 5px; /* Less space between items */
+}
+
+section {
+  padding-top: 10px; /* Add space at the top if needed */
+}
