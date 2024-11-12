@@ -1,44 +1,84 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Page</title>
+  {% seo %}
+  <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+  <style>
+    /* Basic reset for body */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-    {% seo %}
-    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header style="padding: 10px; margin-bottom: 10px;">
-        <h2 id="contact-info" style="font-size: 1.2em; margin: 0;">
-          Contact Info
-        </h2>
-        <ul style="padding: 0; margin: 0; list-style: none;">
-          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-            <strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a>
-          </li>
-          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-            <strong>Location</strong>: Barcelona, Spain
-          </li>
-          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-            <strong>Phone</strong>: +34 600 24 69 87
-          </li>
-          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-            <strong>GitHub:</strong> <a href="https://github.com/ferranEspuna">ferranEspuna</a>
-          </li>
-          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-            <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a>
-          </li>
-        </ul>
-      </header>
-      <section style="padding-top: 10px;">
-        {{ content }}
-      </section>
-    </div>
-    <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
-  </body>
-  </html>
+    /* Wrapper for overall page alignment */
+    .wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Styling for the header */
+    header {
+      padding: 15px;
+      background-color: #f0f0f0;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    header h2 {
+      font-size: 1.5em;
+      margin: 0 0 10px;
+    }
+
+    header ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+    }
+
+    header li {
+      font-size: 1em;
+      margin: 5px 0;
+    }
+
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 600px) {
+      header h2 {
+        font-size: 1.2em;
+      }
+      header li {
+        font-size: 0.9em;
+      }
+    }
+
+    /* Styling for the content section */
+    section {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Header with contact information -->
+    <header>
+      <h2>Contact Info</h2>
+      <ul>
+        <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
+        <li><strong>Location</strong>: Barcelona, Spain</li>
+        <li><strong>Phone</strong>: +34 600 24 69 87</li>
+        <li><strong>GitHub</strong>: <a href="https://github.com/ferranEspuna">ferranEspuna</a></li>
+        <li><strong>LinkedIn</strong>: <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a></li>
+      </ul>
+    </header>
+
+    <!-- Main content section -->
+    <section>
+      {{ content }}
+    </section>
+  </div>
+</body>
+</html>
+
