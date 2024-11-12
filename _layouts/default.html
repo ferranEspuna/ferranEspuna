@@ -9,27 +9,27 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
     }
 
     /* Wrapper for overall page alignment */
     .wrapper {
-      width: 100%;
       padding: 20px;
       transition: margin-left 0.3s;
     }
 
     /* Styling for the header */
     .header {
-      border-bottom: 1px solid #ddd;
-      padding: 15px;
       position: sticky;
       top: 0;
+      width: 100%; /* Ensures full-width in vertical mode */
       background-color: white;
+      border-bottom: 1px solid #ddd;
+      padding: 15px;
       z-index: 1000;
+      transition: transform 0.3s ease; /* Smooth hide/show animation */
     }
 
+    /* Header content styling */
     .header h2 {
       font-size: 1.5em;
       margin: 0 0 10px;
@@ -51,7 +51,7 @@
     /* Sidebar layout for larger screens */
     @media (min-width: 800px) {
       body {
-        flex-direction: row;
+        display: flex;
       }
 
       .header {
@@ -64,6 +64,7 @@
         border-right: 1px solid #ddd;
         border-bottom: none;
         text-align: left;
+        transform: none; /* Keep it visible at all times */
       }
 
       .wrapper {
@@ -74,7 +75,7 @@
 </head>
 <body>
   <!-- Sticky Header on smaller screens and sidebar on larger screens -->
-  <header class="header">
+  <header class="header" id="header">
     <h2>Contact Info</h2>
     <ul>
       <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
@@ -91,5 +92,24 @@
       {{ content }}
     </section>
   </div>
+
+  <!-- JavaScript for scroll-up show/hide header functionality -->
+  <script>
+    let lastScrollY = window.scrollY;
+    const header = document.getElementById('header');
+
+    window.addEventListener('scroll', () => {
+      if (window.innerWidth < 800) { // Only apply on vertical/smaller screens
+        if (window.scrollY > lastScrollY) {
+          // Scrolling down, hide header
+          header.style.transform = 'translateY(-100%)';
+        } else {
+          // Scrolling up, show header
+          header.style.transform = 'translateY(0)';
+        }
+        lastScrollY = window.scrollY;
+      }
+    });
+  </script>
 </body>
 </html>
