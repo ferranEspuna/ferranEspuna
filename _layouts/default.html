@@ -9,71 +9,116 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Full-width wrapper */
+    /* Wrapper for overall page alignment */
     .wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
       padding: 20px;
     }
 
-    /* Styling for the header */
-    header {
-      padding: 15px;
-      background-color: #f0f0f0;
+    /* Collapsible header styling */
+    .header {
       border-bottom: 1px solid #ddd;
-      text-align: center;
+      padding: 15px;
     }
 
-    header h2 {
+    .header h2 {
       font-size: 1.5em;
       margin: 0 0 10px;
     }
 
-    header ul {
+    .header ul {
       padding: 0;
       margin: 0;
       list-style-type: none;
     }
 
-    header li {
+    .header li {
       font-size: 1em;
       margin: 5px 0;
     }
 
-    /* Responsive adjustments for smaller screens */
-    @media (max-width: 600px) {
-      header h2 {
-        font-size: 1.2em;
+    /* Toggle button styling */
+    .toggle-button {
+      display: none;
+      background-color: transparent;
+      border: none;
+      font-size: 1.2em;
+      margin: 10px;
+    }
+
+    /* Sidebar layout for larger screens */
+    @media (min-width: 800px) {
+      body {
+        flex-direction: row;
       }
-      header li {
-        font-size: 0.9em;
+
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 200px;
+        border-right: 1px solid #ddd;
+        padding: 20px;
+      }
+
+      .wrapper {
+        margin-left: 220px; /* Offset for the sidebar */
+      }
+
+      .toggle-button {
+        display: none;
       }
     }
 
-    /* Styling for the content section */
-    section {
-      padding: 20px;
+    /* Collapsed header on smaller screens */
+    @media (max-width: 799px) {
+      .header ul {
+        display: none; /* Hide list by default */
+      }
+
+      .toggle-button {
+        display: inline; /* Show toggle button */
+      }
+
+      .header.show ul {
+        display: block; /* Show list when header is expanded */
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <!-- Header with contact information -->
-    <header>
-      <h2>Contact Info</h2>
-      <ul>
-        <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
-        <li><strong>Location</strong>: Barcelona, Spain</li>
-        <li><strong>Phone</strong>: +34 600 24 69 87</li>
-        <li><strong>GitHub</strong>: <a href="https://github.com/ferranEspuna">ferranEspuna</a></li>
-        <li><strong>LinkedIn</strong>: <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a></li>
-      </ul>
-    </header>
+  <!-- Collapsible Header -->
+  <header class="header">
+    <button class="toggle-button" onclick="toggleHeader()">☰</button>
+    <h2>Contact Info</h2>
+    <ul>
+      <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
+      <li><strong>Location</strong>: Barcelona, Spain</li>
+      <li><strong>Phone</strong>: +34 600 24 69 87</li>
+      <li><strong>GitHub</strong>: <a href="https://github.com/ferranEspuna">ferranEspuna</a></li>
+      <li><strong>LinkedIn</strong>: <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a></li>
+    </ul>
+  </header>
 
-    <!-- Main content section -->
+  <!-- Main content section -->
+  <div class="wrapper">
     <section>
       {{ content }}
     </section>
   </div>
+
+  <!-- JavaScript for toggling header on smaller screens -->
+  <script>
+    function toggleHeader() {
+      document.querySelector('.header').classList.toggle('show');
+    }
+  </script>
 </body>
 </html>
