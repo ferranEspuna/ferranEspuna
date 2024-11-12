@@ -5,59 +5,40 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% seo %}
+    {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
     <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
-<style>
-    /* Media query for intermediate screen sizes */
-    @media (max-width: 768px) {
-      header {
-        padding: 5px; /* Reduce padding for smaller screens */
-      }
-      header h2 {
-        font-size: 1em; /* Reduce font size of header */
-      }
-      header ul li {
-        font-size: 0.8em; /* Reduce font size of list items */
-        margin-bottom: 3px; /* Reduce space between items */
-      }
-      section {
-        padding-top: 5px; /* Add top padding to prevent overlap */
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <header style="padding: 10px; margin-bottom: 10px;">
-      <h2 id="contact-info" style="font-size: 1.2em; margin: 0;">
-        Contact Info
-        <a class="anchorjs-link" href="#contact-info" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a>
-      </h2>
-      <ul style="padding: 0; margin: 0; list-style: none;">
-        <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-          <strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a>
-        </li>
-        <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-          <strong>Location</strong>: Barcelona, Spain
-        </li>
-        <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-          <strong>Phone</strong>: +34 600 24 69 87
-        </li>
-        <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-          <strong>GitHub:</strong> <a href="https://github.com/ferranEspuna">ferranEspuna</a>
-        </li>
-        <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
-          <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a>
-        </li>
-      </ul>
-    </header>
-    <section style="padding-top: 10px;">
-      {{ content }}
-    </section>
-  </div>
-  <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
-</body>
-</html>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header style="padding: 10px; margin-bottom: 10px;">
+        <h2 id="contact-info" style="font-size: 1.2em; margin: 0;">
+          Contact Info
+        </h2>
+        <ul style="padding: 0; margin: 0; list-style: none;">
+          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
+            <strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a>
+          </li>
+          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
+            <strong>Location</strong>: Barcelona, Spain
+          </li>
+          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
+            <strong>Phone</strong>: +34 600 24 69 87
+          </li>
+          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
+            <strong>GitHub:</strong> <a href="https://github.com/ferranEspuna">ferranEspuna</a>
+          </li>
+          <li style="font-size: 0.9em; line-height: 1.4; margin-bottom: 5px;">
+            <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a>
+          </li>
+        </ul>
+      </header>
+      <section style="padding-top: 10px;">
+        {{ content }}
+      </section>
+    </div>
+    <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
+  </body>
+  </html>
