@@ -1,5 +1,3 @@
-# [ferranEspuna](http://ferran.info/)
-
 # Ferran Espuña: Deep Learning Research Engineer, Mathematician and Computer Scientist
 
 ## About Me
