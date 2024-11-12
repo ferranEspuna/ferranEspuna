@@ -15,41 +15,37 @@
 
     /* Wrapper for overall page alignment */
     .wrapper {
-      display: flex;
-      flex-direction: column;
       width: 100%;
       padding: 20px;
+      transition: margin-left 0.3s;
     }
 
-    /* Collapsible header styling */
+    /* Styling for the header */
     .header {
       border-bottom: 1px solid #ddd;
       padding: 15px;
+      position: sticky;
+      top: 0;
+      background-color: white;
+      z-index: 1000;
     }
 
     .header h2 {
       font-size: 1.5em;
       margin: 0 0 10px;
+      text-align: center;
     }
 
     .header ul {
       padding: 0;
       margin: 0;
       list-style-type: none;
+      text-align: center;
     }
 
     .header li {
       font-size: 1em;
       margin: 5px 0;
-    }
-
-    /* Toggle button styling */
-    .toggle-button {
-      display: none;
-      background-color: transparent;
-      border: none;
-      font-size: 1.2em;
-      margin: 10px;
     }
 
     /* Sidebar layout for larger screens */
@@ -64,39 +60,21 @@
         left: 0;
         height: 100vh;
         width: 200px;
-        border-right: 1px solid #ddd;
         padding: 20px;
+        border-right: 1px solid #ddd;
+        border-bottom: none;
+        text-align: left;
       }
 
       .wrapper {
-        margin-left: 220px; /* Offset for the sidebar */
-      }
-
-      .toggle-button {
-        display: none;
-      }
-    }
-
-    /* Collapsed header on smaller screens */
-    @media (max-width: 799px) {
-      .header ul {
-        display: none; /* Hide list by default */
-      }
-
-      .toggle-button {
-        display: inline; /* Show toggle button */
-      }
-
-      .header.show ul {
-        display: block; /* Show list when header is expanded */
+        margin-left: 220px; /* Offset to ensure content is not covered by sidebar */
       }
     }
   </style>
 </head>
 <body>
-  <!-- Collapsible Header -->
+  <!-- Sticky Header on smaller screens and sidebar on larger screens -->
   <header class="header">
-    <button class="toggle-button" onclick="toggleHeader()">☰</button>
     <h2>Contact Info</h2>
     <ul>
       <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
@@ -113,12 +91,5 @@
       {{ content }}
     </section>
   </div>
-
-  <!-- JavaScript for toggling header on smaller screens -->
-  <script>
-    function toggleHeader() {
-      document.querySelector('.header').classList.toggle('show');
-    }
-  </script>
 </body>
 </html>
