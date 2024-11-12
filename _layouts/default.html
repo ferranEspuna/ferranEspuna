@@ -10,11 +10,30 @@
     <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
-  </head>
-  <body>
+<style>
+    /* Media query for intermediate screen sizes */
+    @media (max-width: 768px) {
+      header {
+        padding: 5px; /* Reduce padding for smaller screens */
+      }
+      header h2 {
+        font-size: 1em; /* Reduce font size of header */
+      }
+      header ul li {
+        font-size: 0.8em; /* Reduce font size of list items */
+        margin-bottom: 3px; /* Reduce space between items */
+      }
+      section {
+        padding-top: 5px; /* Add top padding to prevent overlap */
+      }
+    }
+  </style>
+</head>
+<body>
   <div class="wrapper">
     <header style="padding: 10px; margin-bottom: 10px;">
-      <h2 id="contact-info" style="font-size: 1.2em; margin: 0;">Contact Info
+      <h2 id="contact-info" style="font-size: 1.2em; margin: 0;">
+        Contact Info
         <a class="anchorjs-link" href="#contact-info" aria-label="Anchor" data-anchorjs-icon="" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a>
       </h2>
       <ul style="padding: 0; margin: 0; list-style: none;">
