@@ -4,11 +4,15 @@
 
 I have a double degree in mathematics and computer science and am currently working in the field of artificial intelligence research. I thoroughly enjoy solving problems of any kind and am very curious, hard-working, and proactive given the right motivations. I work well both independently, as a leader, and as a part of a team.
 
+---
+
 ## Contact Info
 
 - **Email**: [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com)
 - **Location**: Barcelona, Spain
 - **Phone**: +34 600 24 69 87
+
+---
 
 ## Professional Experience
 
@@ -37,6 +41,8 @@ Contributed to the European research project ChipScope aimed at creating a high-
 - Implementing wave backpropagation algorithms to remove interference artifacts caused by the small scale of the setup.
 - Designing a user interface to make the process user-friendly.
 
+---
+
 ## Education
 
 ### Master’s degree in Advanced Mathematics and Mathematical Engineering | UPC
@@ -51,6 +57,8 @@ Contributed to the European research project ChipScope aimed at creating a high-
 - GPA: 9.0/10
 - Achieved honors in courses like Computer Vision, Computer Graphics, Distributed Software, Databases, Advanced Algorithms, Numerical Methods, and Differential Equations, among many others.
 
+---
+
 ## Publications
 
 ### A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages
@@ -61,6 +69,8 @@ Proceedings of the 2024 Joint International Conference on Computational Linguist
 - Developed a [neural network](https://github.com/ferranEspuna/machineLearning/blob/main/neural_network_from_scratch.ipynb) from scratch, enhancing understanding of calculus, linear algebra, and gradient descent.
 - Created visualizations for various 2D fractals and physical simulations.
 - Designed a framework for 3D visualization of [polynomial zeros](https://github.com/ferranEspuna/Grafics_P1/blob/main/Modelling/Objects/PolynomialEq.cpp) through raytracing, applying my knowledge of Computer Graphics and Differential Geometry.
+
+---
 
 ## Skills
 
@@ -76,6 +86,8 @@ Proceedings of the 2024 Joint International Conference on Computational Linguist
   - Spanish (native)
   - Catalan (native)
   - English (C2 / Proficiency)
+
+---
 
 ## Certifications
 
