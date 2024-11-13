@@ -26,8 +26,7 @@
       border-bottom: 1px solid #ddd;
       padding: 15px;
       z-index: 1000;
-      transition: transform 0.3s ease; /* Smooth transition for slide effect */
-      transform: translateY(0); /* Default visible position */
+      transition: transform 0.3s ease; /* Smooth hide/show animation */
     }
 
     /* Header content styling */
@@ -60,7 +59,7 @@
         top: 0;
         left: 0;
         height: 100vh;
-        width: 200px;
+        width: 250px;
         padding: 20px;
         border-right: 1px solid #ddd;
         border-bottom: none;
@@ -94,24 +93,3 @@
       {{ content }}
     </section>
   </div>
-
-  <!-- JavaScript for scroll-up show/hide header functionality -->
-  <script>
-    let lastScrollY = window.scrollY;
-    let header = document.getElementById('header');
-
-    window.addEventListener('scroll', () => {
-      if (window.innerWidth < 800) { // Only apply on vertical/smaller screens
-        let currentScrollY = window.scrollY;
-        let scrollDifference = currentScrollY - lastScrollY;
-        
-        // Adjust transform based on scroll direction and intensity
-        let translateY = Math.min(0, Math.max(-100, -scrollDifference));
-        header.style.transform = `translateY(${translateY}px)`;
-        
-        lastScrollY = currentScrollY;
-      }
-    });
-  </script>
-</body>
-</html>
