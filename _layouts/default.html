@@ -1,117 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  {% seo %}
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ferran Espuña</title>
-  <style>
-    /* Basic reset for body */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
 
-    /* Wrapper for overall page alignment */
-    .wrapper {
-      padding: 20px;
-      transition: margin-left 0.3s;
-    }
+  {%- include head.html -%}
 
-    /* Styling for the header */
-    .header {
-      position: sticky;
-      top: 0;
-      width: 100%; /* Ensures full-width in vertical mode */
-      background-color: white;
-      border-bottom: 1px solid #ddd;
-      padding: 15px;
-      z-index: 1000;
-      transition: transform 0.3s ease; /* Smooth hide/show animation */
-    }
-
-    /* Header content styling */
-    .header h2 {
-      font-size: 1.5em;
-      margin: 0 0 10px;
-      text-align: center;
-    }
-
-    .header ul {
-      padding: 0;
-      margin: 0;
-      list-style-type: none;
-      text-align: center;
-    }
-
-    .header li {
-      font-size: 1em;
-      margin: 5px 0;
-    }
-
-    /* Sidebar layout for larger screens */
-    @media (min-width: 800px) {
-      body {
-        display: flex;
-      }
-
-      .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 200px;
-        padding: 20px;
-        border-right: 1px solid #ddd;
-        border-bottom: none;
-        text-align: left;
-        transform: none; /* Keep it visible at all times */
-      }
-
-      .wrapper {
-        margin-left: 220px; /* Offset to ensure content is not covered by sidebar */
-        padding: 40px; /* Additional padding for horizontal mode */
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Sticky Header on smaller screens and sidebar on larger screens -->
-  <header class="header" id="header">
-    <h2>Contact Info</h2>
-    <ul>
-      <li><strong>Email</strong>: <a href="mailto:ferranespuna@gmail.com">ferranespuna@gmail.com</a></li>
-      <li><strong>Location</strong>: Barcelona, Spain</li>
-      <li><strong>Phone</strong>: +34 600 24 69 87</li>
-      <li><strong>GitHub</strong>: <a href="https://github.com/ferranEspuna">ferranEspuna</a></li>
-      <li><strong>LinkedIn</strong>: <a href="https://linkedin.com/in/ferran-espuna-bertomeu-5813897">ferran-espuna-bertomeu-5813897</a></li>
-    </ul>
-  </header>
-
-  <!-- Main content section -->
-  <div class="wrapper">
-    <section>
-      {{ content }}
-    </section>
-  </div>
-
-  <!-- JavaScript for scroll-up show/hide header functionality -->
-  <script>
-    let lastScrollY = window.scrollY;
-    const header = document.getElementById('header');
-
-    window.addEventListener('scroll', () => {
-      if (window.innerWidth < 800) { // Only apply on vertical/smaller screens
-        if (window.scrollY > lastScrollY) {
-          // Scrolling down, hide header
-          header.style.transform = 'translateY(-100%)';
-        } else {
-          // Scrolling up, show header
-          header.style.transform = 'translateY(0)';
-        }
-        lastScrollY = window.scrollY;
-      }
-    });
-  </script>
-</body>
+  <body>
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </main>
+  </body>
 </html>
