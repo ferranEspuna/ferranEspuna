@@ -9,5 +9,20 @@
         {{ content }}
       </div>
     </main>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Select all h2 and larger headings
+        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    
+        headings.forEach(heading => {
+          // Create an <hr> element
+          const hr = document.createElement('hr');
+          
+          // Insert the <hr> before the heading
+          heading.parentNode.insertBefore(hr, heading);
+        });
+      });
+    </script>
+    
   </body>
 </html>
