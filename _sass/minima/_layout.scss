@@ -1,7 +1,7 @@
 /**
  * Site header
  */
-.site-header {
+ .site-header {
   border-top: 5px solid $border-color-03;
   border-bottom: 1px solid $border-color-01;
   min-height: $spacing-unit * 1.865;
@@ -202,8 +202,7 @@
  */
 .page-content {
   padding: $spacing-unit 0;
-  max-width: none; // Remove any max-width
-  width: 100%;     // Make sure the width covers the whole space
+  flex: 1 0 auto;
 }
 
 .page-heading {
@@ -328,5 +327,16 @@
         border: 1px dashed;
       }
     }
+  }
+}
+
+
+
+/**
+ * Grid helpers
+ */
+@media screen and (min-width: $on-large) {
+  .one-half {
+    width: calc(50% - (#{$spacing-unit} / 2));
   }
 }
