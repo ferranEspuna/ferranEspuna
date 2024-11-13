@@ -203,6 +203,8 @@
 .page-content {
   padding: $spacing-unit 0;
   flex: 1 0 auto;
+  max-width: none; // Remove any max-width
+  width: 100%;     // Make sure the width covers the whole space
 }
 
 .page-heading {
