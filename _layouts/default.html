@@ -26,7 +26,9 @@
       border-bottom: 1px solid #ddd;
       padding: 15px;
       z-index: 1000;
-      transition: transform 0.3s ease; /* Smooth hide/show animation */
+      transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition for fade and slide */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Header content styling */
@@ -65,6 +67,7 @@
         border-bottom: none;
         text-align: left;
         transform: none; /* Keep it visible at all times */
+        opacity: 1;
       }
 
       .wrapper {
@@ -94,21 +97,24 @@
     </section>
   </div>
 
-  <!-- JavaScript for scroll-up show/hide header functionality -->
+  <!-- JavaScript for smooth scroll-based header fade/slide behavior -->
   <script>
     let lastScrollY = window.scrollY;
-    const header = document.getElementById('header');
+    let header = document.getElementById('header');
 
     window.addEventListener('scroll', () => {
       if (window.innerWidth < 800) { // Only apply on vertical/smaller screens
-        if (window.scrollY > lastScrollY) {
-          // Scrolling down, hide header
-          header.style.transform = 'translateY(-100%)';
-        } else {
-          // Scrolling up, show header
-          header.style.transform = 'translateY(0)';
-        }
-        lastScrollY = window.scrollY;
+        let currentScrollY = window.scrollY;
+        let scrollDifference = currentScrollY - lastScrollY;
+        
+        // Calculate opacity based on scroll direction and intensity
+        let opacityChange = Math.min(1, Math.max(0, 1 - (scrollDifference / 100)));
+        let translateChange = Math.min(0, Math.max(-100, -scrollDifference));
+
+        header.style.opacity = opacityChange;
+        header.style.transform = `translateY(${translateChange}px)`;
+        
+        lastScrollY = currentScrollY;
       }
     });
   </script>
