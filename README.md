@@ -1,9 +1,6 @@
 # Ferran Espuña: Deep Learning Research Engineer, Mathematician and Computer Scientist
 
 ## About Me
-
----
-
 I have a double degree in mathematics and computer science and am currently working in the field of artificial intelligence research. I thoroughly enjoy solving problems of any kind and am very curious, hard-working, and proactive given the right motivations. I work well both independently, as a leader, and as a part of a team.
 
 ## Contact Info
