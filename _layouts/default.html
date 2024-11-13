@@ -59,7 +59,7 @@
         top: 0;
         left: 0;
         height: 100vh;
-        width: 250px;
+        width: 200px;
         padding: 20px;
         border-right: 1px solid #ddd;
         border-bottom: none;
@@ -93,3 +93,24 @@
       {{ content }}
     </section>
   </div>
+
+  <!-- JavaScript for scroll-up show/hide header functionality -->
+  <script>
+    let lastScrollY = window.scrollY;
+    const header = document.getElementById('header');
+
+    window.addEventListener('scroll', () => {
+      if (window.innerWidth < 800) { // Only apply on vertical/smaller screens
+        if (window.scrollY > lastScrollY) {
+          // Scrolling down, hide header
+          header.style.transform = 'translateY(-100%)';
+        } else {
+          // Scrolling up, show header
+          header.style.transform = 'translateY(0)';
+        }
+        lastScrollY = window.scrollY;
+      }
+    });
+  </script>
+</body>
+</html>
