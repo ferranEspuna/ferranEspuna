@@ -76,6 +76,7 @@ Proceedings of the 2024 Joint International Conference on Computational Linguist
   - Spanish (native)
   - Catalan (native)
   - English (C2 / Proficiency)
+  
 ## Certifications
 
 - **Stanford University**: Machine Learning Specialization
