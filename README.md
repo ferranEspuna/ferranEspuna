@@ -49,7 +49,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 **February 2023**
 
 - GPA: 9.0/10
-- Achieved honors in courses like Computer Vision, Computer Graphics, Distributed Software, Databases, Advanced Algorithms, Numerical Methods, and Differential Equations, among many others.
+- Achieved honors in courses like Linear Algebra, Algebraic Equations, Complex and Real Analysis, Differential Equations, Advanced Algorithms, and my Bachelor's Thesis, among many others.
 
 ## Publications
 
@@ -65,13 +65,11 @@ Proceedings of the 2024 Joint International Conference on Computational Linguist
 ## Skills
 
 - **Programming Languages and Technologies**:
-  - Python (NumPy, Pandas, TensorFlow, PyTorch, OpenCV)
-  - NeMo Framework
+  - Python (NumPy, Pandas, TensorFlow, PyTorch, NeMo Framework)
   - Slurm
   - C/C++
   - Bash
   - Java
-  - MySQL
 - **Languages**:
   - Spanish (native)
   - Catalan (native)
