@@ -56,6 +56,8 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ### A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages
 Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation, European Language Resource Association and the International Committee on Computational Linguistics.
 
+### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025). A deterministic polynomial-time algorithm for locating large complete *k*-partite subgraphs in dense *k*-uniform hypergraphs. Preprint submitted to *Electronic Journal of Combinatorics*. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
+
 ## Personal Projects
 
 - Developed a [neural network](https://github.com/ferranEspuna/machineLearning/blob/main/neural_network_from_scratch.ipynb) from scratch, enhancing understanding of calculus, linear algebra, and gradient descent.
