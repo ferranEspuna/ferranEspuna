@@ -1,7 +1,7 @@
 # Ferran Espuña: Deep Learning Research Engineer, Mathematician and Computer Scientist
 
 ## About Me
-I have a double degree in mathematics and computer science and am currently working in the field of artificial intelligence research. I thoroughly enjoy solving problems of any kind and am very curious, hard-working, and proactive given the right motivations. I work well both independently, as a leader, and as a part of a team.
+I have a double Bachelor's Degree in mathematics and computer science, and a Master's Degree and am currently working in artificial intelligence research. I excel at proposing novel solutions to challenging problems, and have the technical skills to execute them and overcome obstacles independently, while coordingating as part of a larger team.
 
 ## Contact Info
 
@@ -17,8 +17,9 @@ As a Deep Learning Research Engineer for Language Technologies, my main work foc
 
 - Building and automating [CURATE](https://github.com/langtech-bsc/CURATE), a text processing pipeline designed to work in High Performance Computing environments and used to create [CATalog](https://huggingface.co/datasets/projecte-aina/CATalog), the largest pretraining dataset in Catalan.
 - Actively participating in design decisions and writing pretraining scripts for the [Salamandra models](https://huggingface.co/collections/BSC-LT/salamandra-66fc171485944df79469043a), a collection of highly multilingual language models pretrained from scratch using the Marenostrum 5 cluster.
-- Researching ways to better evaluate the performance of our language models in open generation settings (not multiple choice).
+- Researching ways to better evaluate the performance of our language models in open generation settings.
 - Opening research lines such as those for alternatives to Transformers (SSMs in particular) and mechanistic interpretability techniques (in particular, Sparse Autoencoders).
+- Designing and experimenting with new architectures for better and more efficient multimodal models.
 
 ### Computer Vision Center | Research Intern
 **2022**  
@@ -40,7 +41,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ## Education
 
 ### Master’s degree in Advanced Mathematics and Mathematical Engineering | UPC
-**Expected Graduation**: June 2025
+**June 2025**
 
 - Courses so far: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics and Graph Theory.
 - Currently working on my master’s thesis Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
@@ -58,12 +59,6 @@ Proceedings of the 2024 Joint International Conference on Computational Linguist
 
 ### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025).
 Preprint submitted to *Electronic Journal of Combinatorics*. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
-
-## Personal Projects
-
-- Developed a [neural network](https://github.com/ferranEspuna/machineLearning/blob/main/neural_network_from_scratch.ipynb) from scratch, enhancing understanding of calculus, linear algebra, and gradient descent.
-- Created visualizations for various 2D fractals and physical simulations.
-- Designed a framework for 3D visualization of [polynomial zeros](https://github.com/ferranEspuna/Grafics_P1/blob/main/Modelling/Objects/PolynomialEq.cpp) through raytracing, applying my knowledge of Computer Graphics and Differential Geometry.
 
 ## Skills
 
