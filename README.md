@@ -44,7 +44,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 **June 2025**
 
 - Courses so far: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics and Graph Theory.
-- Currently working on my master’s thesis Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
+- Master's Thesis: Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
   
 ### Double Degree in Mathematics and Computer Science | UB
 **February 2023**
