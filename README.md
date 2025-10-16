@@ -1,7 +1,7 @@
 # Ferran Espuña: Deep Learning Research Engineer, Mathematician and Computer Scientist
 
 ## About Me
-I have a double Bachelor's Degree in mathematics and computer science, and a Master's Degree and am currently working in artificial intelligence research. I excel at proposing novel solutions to challenging problems, and have the technical skills to execute them and overcome obstacles independently, while coordingating as part of a larger team.
+I have a double Bachelor's Degree in mathematics and computer science, and a Master's Degree in Advanced Mathematics. I am currently working in artificial intelligence research. I excel at proposing novel solutions to challenging problems, and have the technical skills to execute them and overcome obstacles independently, while coordingating as part of a larger team.
 
 ## Contact Info
 
