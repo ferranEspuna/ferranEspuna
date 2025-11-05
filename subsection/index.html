@@ -29,33 +29,32 @@ title: My New Subsection
     </div>
 
 
-    <script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/umd/glsl-canvas.min.js"></script>
-
-    <script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/umd/glsl-canvas.min.js"></script>
+   <script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/umd/glsl-canvas.min.js"></script>
     
-    <script type="module">
-    import GlslCanvas from "https://unpkg.com/glsl-canvas-js@0.2.9/dist/glsl-canvas.esm.js";
-
-    window.addEventListener('load', async () => {
+    <script>
+    window.addEventListener('load', async function() {
         const canvas = document.querySelector('.glslCanvas');
         const slider = document.getElementById('iterSlider');
         const iterDisplay = document.getElementById('iterValue');
-
-        const sandbox = new GlslCanvas(canvas);
+    
+        // The global name for the UMD build:
+        const sandbox = new window.GLSL.Canvas(canvas);
+    
         const fragUrl = canvas.getAttribute('data-fragment-url');
         const response = await fetch(fragUrl);
         const fragShader = await response.text();
         sandbox.load(fragShader);
-
+    
         sandbox.setUniform('u_iterations', parseInt(slider.value, 10));
-
+    
         slider.addEventListener('input', function() {
             const iterations = parseInt(this.value, 10);
             sandbox.setUniform('u_iterations', iterations);
             iterDisplay.textContent = iterations;
         });
     });
-</script>
+    </script>
+
 
 
 
