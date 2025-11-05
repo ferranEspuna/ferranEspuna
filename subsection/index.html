@@ -28,30 +28,28 @@ title: My New Subsection
         <span id="iterValue">5</span>
     </div>
 
+    
     <script type="module">
-        import GlslCanvas from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
-    
-        window.addEventListener('load', async () => {
-            const canvas = document.querySelector('.glslCanvas');
-            const slider = document.getElementById('iterSlider');
-            const iterDisplay = document.getElementById('iterValue');
-    
-            const sandbox = new GlslCanvas(canvas);
-            const fragUrl = canvas.getAttribute('data-fragment-url');
-            const response = await fetch(fragUrl);
-            const fragShader = await response.text();
-            sandbox.load(fragShader);
-    
-            sandbox.setUniform('u_iterations', parseInt(slider.value, 10));
-    
-            slider.addEventListener('input', function() {
-                const iterations = parseInt(this.value, 10);
-                sandbox.setUniform('u_iterations', iterations);
-                iterDisplay.textContent = iterations;
-            });
+        import * as Glsl from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
+        
+        window.addEventListener('load', () => {
+          const canvas = document.querySelector('.glslCanvas');
+          const sandbox = new Glsl.default(canvas);
+        
+          const frag = `
+            #ifdef GL_ES
+            precision mediump float;
+            #endif
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            void main() {
+                vec2 st = gl_FragCoord.xy / u_resolution;
+                gl_FragColor = vec4(st.x, st.y, 0.0, 1.0);
+            }
+          `;
+          sandbox.load(frag);
         });
     </script>
-
 
 
 
