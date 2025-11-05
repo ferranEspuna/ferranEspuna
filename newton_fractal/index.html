@@ -143,17 +143,16 @@ title: Newton's Fractal
       <p>
         <strong>How to interact (mobile):</strong><br>
         • Two of the roots are fixed in place.<br>
-        • <strong>Drag with one finger</strong> to move the third root (one finger).<br>
-        • <strong>Drag with two fingers</strong> to pan the view.<br>
-        • <strong>Pinch</strong> to zoom.<br>
+        • <strong>Move the third root:</strong> Drag a single finger <em>near the current root</em> or <em>double-tap + drag</em> anywhere.<br>
+        • <strong>Pan:</strong> Drag with two fingers.<br>
+        • <strong>Zoom:</strong> Pinch with two fingers.<br>
         • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
         • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
       </p>
       <p>
         <strong>Known issues on mobile:</strong><br>
-        • The image does not initially render when starting the page. Tap anywhere on the page to fix.<br>
-        • Due to precision issues, your mileage may vary on correctly displaying the fractal 
-        on mobile, especially at extreme zoom values. For a better experience, switch to desktop.
+        • The image may not initially render. Tap anywhere on the page to fix.<br>
+        • Precision may be limited at extreme zooms; for best experience, use desktop.
       </p>
       `;
 
@@ -291,30 +290,44 @@ title: Newton's Fractal
       });
 
       // -------------------
-      // Mobile interactions
+      // Mobile interactions (updated)
       // -------------------
+      let lastTapTime = 0;
+      const doubleTapThreshold = 300; // ms
+      const rootTouchRadius = 0.1; // proximity threshold in shader coordinates
+      
+      function distance2D(a, b) {
+        return Math.hypot(a[0] - b[0], a[1] - b[1]);
+      }
+      
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
         ongoingTouches = [...e.touches];
-
+      
         if (ongoingTouches.length === 1) {
-          touchMode = null;
+          const [x, y] = getTouchPos(ongoingTouches[0]);
+          const now = Date.now();
+          const timeSinceLastTap = now - lastTapTime;
+      
+          if (timeSinceLastTap < doubleTapThreshold) {
+            touchMode = 'root'; // double-tap + drag
+          } else if (distance2D([x, y], rootPosition) < rootTouchRadius) {
+            touchMode = 'root'; // touch near root
+          } else {
+            touchMode = null;
+          }
+      
           touchStartPos = { x: ongoingTouches[0].clientX, y: ongoingTouches[0].clientY };
+          lastTapTime = now;
         } else if (ongoingTouches.length === 2) {
           touchMode = 'pan';
         }
       });
-
+      
       canvas.addEventListener("touchmove", (e) => {
         e.preventDefault();
         if (e.touches.length === 2) touchMode = 'pan';
-
-        if (touchMode === null && e.touches.length === 1) {
-          const dx = e.touches[0].clientX - touchStartPos.x;
-          const dy = e.touches[0].clientY - touchStartPos.y;
-          if (Math.hypot(dx, dy) > 5) touchMode = 'root';
-        }
-
+      
         if (touchMode === 'root' && e.touches.length === 1) {
           const [x, y] = getTouchPos(e.touches[0]);
           rootPosition = [x, y];
@@ -324,36 +337,31 @@ title: Newton's Fractal
           const t1 = e.touches[1];
           const prevT0 = ongoingTouches[0];
           const prevT1 = ongoingTouches[1];
-
+      
           const prevDist = Math.hypot(prevT0.clientX - prevT1.clientX, prevT0.clientY - prevT1.clientY);
           const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
           const zoomFactor = prevDist / newDist;
           zoom *= zoomFactor;
           zoom = Math.max(0.0001, zoom);
-
+      
           const prevMidX = (prevT0.clientX + prevT1.clientX)/2;
           const prevMidY = (prevT0.clientY + prevT1.clientY)/2;
           const newMidX = (t0.clientX + t1.clientX)/2;
           const newMidY = (t0.clientY + t1.clientY)/2;
-
+      
           const rect = canvas.getBoundingClientRect();
           const small_resol = Math.min(rect.width, rect.height);
           const deltaX_shader = ((newMidX - prevMidX) * 2.0 / small_resol) * zoom;
           const deltaY_shader = ((newMidY - prevMidY) * 2.0 / small_resol) * zoom;
-
+      
           pan[0] -= deltaX_shader;
           pan[1] += deltaY_shader;
-
+      
           sandbox.setUniform("u_zoom", zoom);
           sandbox.setUniform("u_pan", pan[0], pan[1]);
         }
-
+      
         ongoingTouches = [...e.touches];
-      });
-
-      canvas.addEventListener("touchend", (e) => {
-        ongoingTouches = [...e.touches];
-        if (ongoingTouches.length === 0) touchMode = null;
       });
 
       // -------------------
