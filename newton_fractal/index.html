@@ -309,10 +309,12 @@ title: Newton's Fractal
           const now = Date.now();
           const timeSinceLastTap = now - lastTapTime;
       
+          const dynamicRadius = rootTouchRadius * zoom; // scale with zoom
+      
           if (timeSinceLastTap < doubleTapThreshold) {
             touchMode = 'root'; // double-tap + drag
-          } else if (distance2D([x, y], rootPosition) < rootTouchRadius) {
-            touchMode = 'root'; // touch near root
+          } else if (distance2D([x, y], rootPosition) < dynamicRadius) {
+            touchMode = 'root'; // touch near root, radius depends on zoom
           } else {
             touchMode = null;
           }
@@ -323,7 +325,7 @@ title: Newton's Fractal
           touchMode = 'pan';
         }
       });
-      
+            
       canvas.addEventListener("touchmove", (e) => {
         e.preventDefault();
         if (e.touches.length === 2) touchMode = 'pan';
