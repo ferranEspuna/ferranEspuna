@@ -1,0 +1,223 @@
+---
+layout: default
+title: My New Subsection
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newton's Fractal Shader</title>
+
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+
+  <style>
+    body {
+      background-color: #111;
+      color: #ddd;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 2em;
+      /* Prevent page scroll on canvas interaction */
+      overflow: hidden; 
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1/1;
+      margin: 1em auto;
+      border-radius: 0.5em;
+      /* MODIFICATION: Set default cursor */
+      cursor: crosshair; 
+    }
+
+    nav {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+
+    a {
+      color: #9cf;
+      text-decoration: none;
+    }
+
+    .controls {
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html">&larr; Back to ferran.info</a>
+  </nav>
+
+  <h2>Newton's Fractal</h2>
+
+  <div class="shader-window">
+    <canvas class="glslCanvas" data-fragment-url="shader.frag"></canvas>
+  </div>
+
+  <div class="controls">
+    <label for="iterSlider">Iterations:</label>
+    <input type="range" id="iterSlider" min="0" max="30" value="5">
+    <span id="iterValue">5</span>
+  </div>
+
+  <script type="module">
+    import GlslCanvas from "https://esm.run/glslCanvas";
+
+    window.addEventListener("load", async () => {
+      const canvas = document.querySelector(".glslCanvas");
+      const slider = document.getElementById("iterSlider");
+      const iterDisplay = document.getElementById("iterValue");
+      const sandbox = new GlslCanvas(canvas);
+
+      // --- State Management ---
+      let interactionMode = 'root'; // 'root' or 'pan'
+      let zoom = 1.0;
+      let pan = [0.0, 0.0];
+      let rootPosition = [0.0, 0.0];
+      let isDragging = false;
+      let lastMousePos = { x: 0, y: 0 };
+
+      // --- Helper Function ---
+      // Translates screen pixel coordinates to shader's UV coordinate space
+      function getShaderMouse(event) {
+        const rect = canvas.getBoundingClientRect();
+        
+        // 1. Get mouse position in CSS pixels relative to canvas
+        const x_css = event.clientX - rect.left;
+        const y_css = event.clientY - rect.top;
+
+        // 2. Convert from CSS pixels to buffer (canvas.width/height) pixels
+        const x_buffer = x_css * (canvas.width / rect.width);
+        const y_buffer = y_css * (canvas.height / rect.height);
+
+        // 3. Convert from buffer pixels to shader's coordinate space
+        // (This mirrors the 'uv' calculation in the shader)
+        const small_resol = Math.min(canvas.width, canvas.height);
+        const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
+        // Y is flipped (screen-space Y=0 is top, shader-space Y=0 is bottom)
+        const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
+
+        // 4. Apply current zoom and pan to find the *true* shader coordinate
+        const shaderX = (uv_x * zoom) + pan[0];
+        const shaderY = (uv_y * zoom) + pan[1];
+
+        return [shaderX, shaderY];
+      }
+
+      // --- Load Shader ---
+      const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
+      try {
+        const response = await fetch(fragUrl, { mode: "same-origin" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const fragShader = await response.text();
+        sandbox.load(fragShader);
+      } catch (err) {
+        console.error("Failed to load shader:", err);
+        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
+        return;
+      }
+
+      // --- Set Initial Uniforms ---
+      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+      sandbox.setUniform("u_zoom", zoom);
+      sandbox.setUniform("u_pan", pan[0], pan[1]);
+      sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+
+      // --- Iterations Slider ---
+      slider.addEventListener("input", () => {
+        const iterations = parseInt(slider.value, 10);
+        sandbox.setUniform("u_iterations", iterations);
+        iterDisplay.textContent = iterations;
+      });
+
+      // --- NEW: Interaction Event Listeners ---
+
+      // 1. Right-Click: Toggle Mode
+      canvas.addEventListener("contextmenu", (e) => {
+        e.preventDefault(); // Stop the browser menu
+        if (interactionMode === 'root') {
+          interactionMode = 'pan';
+          canvas.style.cursor = 'move';
+        } else {
+          interactionMode = 'root';
+          canvas.style.cursor = 'crosshair';
+        }
+      });
+
+      // 2. Mouse Down: Start Panning
+      canvas.addEventListener("mousedown", (e) => {
+        // Only pan with left click
+        if (interactionMode === 'pan' && e.button === 0) {
+          isDragging = true;
+          lastMousePos = { x: e.clientX, y: e.clientY };
+        }
+      });
+
+      // 3. Mouse Up: Stop Panning
+      window.addEventListener("mouseup", (e) => {
+        if (e.button === 0) {
+          isDragging = false;
+        }
+      });
+
+      // 4. Mouse Move: Pan or Set Root
+      window.addEventListener("mousemove", (e) => {
+        const [shaderX, shaderY] = getShaderMouse(e);
+        
+        if (isDragging && interactionMode === 'pan') {
+          // --- Panning Logic ---
+          const deltaX_css = e.clientX - lastMousePos.x;
+          const deltaY_css = e.clientY - lastMousePos.y;
+
+          // Convert CSS pixel delta to shader space delta
+          const rect = canvas.getBoundingClientRect();
+          const small_resol = Math.min(canvas.width, canvas.height);
+          const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
+          const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
+
+          pan[0] -= deltaX_shader;
+          pan[1] += deltaY_shader; // Y-axis is inverted
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+
+          lastMousePos = { x: e.clientX, y: e.clientY };
+          
+        } else if (interactionMode === 'root') {
+          // --- Root Setting Logic ---
+          rootPosition = [shaderX, shaderY];
+          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        }
+      });
+
+      // 5. Scroll Wheel: Zoom
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault(); // Stop page from scrolling
+        if (interactionMode === 'pan') {
+          const [mouseX_before, mouseY_before] = getShaderMouse(e);
+          const oldZoom = zoom;
+          
+          // Calculate new zoom
+          const zoomAmount = e.deltaY * 0.005; // Sensitivity
+          zoom *= (1.0 + zoomAmount);
+          zoom = Math.max(0.0001, zoom); // Clamp zoom
+          sandbox.setUniform("u_zoom", zoom);
+
+          // Adjust pan to zoom "into" the mouse cursor
+          const [mouseX_after, mouseY_after] = getShaderMouse(e);
+          pan[0] += (mouseX_before - mouseX_after);
+          pan[1] += (mouseY_before - mouseY_before);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
