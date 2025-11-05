@@ -22,20 +22,24 @@ title: My New Subsection
       padding: 2em;
       overflow: hidden;
     }
+
     nav {
       position: absolute;
       top: 20px;
       left: 20px;
       z-index: 10;
     }
+
     a {
       color: #9cf;
       text-decoration: none;
     }
+
     .shader-window {
       max-width: 800px;
       margin: 0 auto;
     }
+
     canvas {
       display: block;
       width: 100%;
@@ -43,9 +47,11 @@ title: My New Subsection
       border-radius: 0.5em;
       cursor: crosshair;
     }
+
     .controls {
       margin-top: 1em;
     }
+
     .description {
       max-width: 800px;
       margin: 1em auto 2em auto;
@@ -54,15 +60,45 @@ title: My New Subsection
       color: #bbb;
       text-align: left;
     }
-  
+
     .description code {
       background: #222;
       padding: 0.15em 0.3em;
       border-radius: 0.25em;
       color: #9cf;
-  }
+    }
+
+    button {
+      background: #222;
+      color: #ddd;
+      border: 1px solid #444;
+      padding: 0.4em 0.8em;
+      border-radius: 0.3em;
+      cursor: pointer;
+      margin-top: 0.5em;
+      font-size: 0.9em;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    /* Make the canvas cover the screen in fullscreen mode */
+    canvas:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0;
+    }
+
+    canvas:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0;
+    }
   </style>
 </head>
+
 <body>
 
   <nav>
@@ -83,7 +119,8 @@ title: My New Subsection
       • <strong>Right-click</strong> to toggle between <em>root placement</em> and <em>panning mode</em>.<br>
       • In <em>panning mode</em>, <strong>click and drag</strong> to move the view.<br>
       • <strong>Scroll</strong> to zoom in or out (zoom centers around the mouse).<br>
-      • Use the <strong>iterations</strong> slider below to control the number of Newton iterations.
+      • Use the <strong>iterations</strong> slider below to control the number of Newton iterations.<br>
+      • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
     </p>
   </div>
 
@@ -95,129 +132,162 @@ title: My New Subsection
     <label for="iterSlider">Iterations:</label>
     <input type="range" id="iterSlider" min="0" max="30" value="5">
     <span id="iterValue">5</span>
+    <br>
+    <button id="fullscreenBtn">Fullscreen</button>
   </div>
 
   <script type="module">
-      import GlslCanvas from "https://esm.run/glslCanvas";
+    import GlslCanvas from "https://esm.run/glslCanvas";
   
-      window.addEventListener("load", async () => {
-        const canvas = document.querySelector(".glslCanvas");
-        const slider = document.getElementById("iterSlider");
-        const iterDisplay = document.getElementById("iterValue");
-        const sandbox = new GlslCanvas(canvas);
+    window.addEventListener("load", async () => {
+      const canvas = document.querySelector(".glslCanvas");
+      const slider = document.getElementById("iterSlider");
+      const iterDisplay = document.getElementById("iterValue");
+      const fullscreenBtn = document.getElementById("fullscreenBtn");
+      const sandbox = new GlslCanvas(canvas);
   
-        let interactionMode = 'root'; 
-        let zoom = 1.0;
-        let pan = [0.0, 0.0];
-        let rootPosition = [0.0, 0.0];
-        let isDragging = false;
-        let lastMousePos = { x: 0, y: 0 };
+      let interactionMode = 'root'; 
+      let zoom = 1.0;
+      let pan = [0.0, 0.0];
+      let rootPosition = [0.0, 0.0];
+      let isDragging = false;
+      let lastMousePos = { x: 0, y: 0 };
   
-        function getShaderMouse(event) {
-          const rect = canvas.getBoundingClientRect();
-          const x_css = event.clientX - rect.left;
-          const y_css = event.clientY - rect.top;
-          const x_buffer = x_css * (canvas.width / rect.width);
-          const y_buffer = y_css * (canvas.height / rect.height);
-          const small_resol = Math.min(canvas.width, canvas.height);
-          const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
-          const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
-          const shaderX = (uv_x * zoom) + pan[0];
-          const shaderY = (uv_y * zoom) + pan[1];
-          return [shaderX, shaderY];
-        }
-  
-        function handleResize() {
-          const cssWidth = canvas.clientWidth;
-          const cssHeight = canvas.clientHeight;
-          const dpr = window.devicePixelRatio || 1;
-          canvas.width = Math.round(cssWidth * dpr);
-          canvas.height = Math.round(cssHeight * dpr);
-          sandbox.resize(); 
-        }
-  
-        const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
-        try {
-          const response = await fetch(fragUrl, { mode: "same-origin" });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const fragShader = await response.text();
-          sandbox.load(fragShader);
-          requestAnimationFrame(handleResize); 
-        } catch (err) {
-          console.error("Failed to load shader:", err);
-          canvas.getContext("2d").fillText("Error loading shader", 20, 20);
-          return;
-        }
-  
-        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-        sandbox.setUniform("u_zoom", zoom);
-        sandbox.setUniform("u_pan", pan[0], pan[1]);
-        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-  
-        slider.addEventListener("input", () => {
-          const iterations = parseInt(slider.value, 10);
-          sandbox.setUniform("u_iterations", iterations);
-          iterDisplay.textContent = iterations;
-        });
-  
-        canvas.addEventListener("contextmenu", (e) => {
-          e.preventDefault(); 
-          if (interactionMode === 'root') {
-            interactionMode = 'pan';
-            canvas.style.cursor = 'move';
-          } else {
-            interactionMode = 'root';
-            canvas.style.cursor = 'crosshair';
-          }
-        });
-  
-        canvas.addEventListener("mousedown", (e) => {
-          if (interactionMode === 'pan' && e.button === 0) {
-            isDragging = true;
-            lastMousePos = { x: e.clientX, y: e.clientY };
-          }
-        });
-        window.addEventListener("mouseup", (e) => {
-          if (e.button === 0) {
-            isDragging = false;
-          }
-        });
-        window.addEventListener("mousemove", (e) => {
-          const [shaderX, shaderY] = getShaderMouse(e);
-          if (isDragging && interactionMode === 'pan') {
-            const deltaX_css = e.clientX - lastMousePos.x;
-            const deltaY_css = e.clientY - lastMousePos.y;
-            const rect = canvas.getBoundingClientRect();
-            const small_resol = Math.min(canvas.width, canvas.height);
-            const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
-            const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
-            pan[0] -= deltaX_shader;
-            pan[1] += deltaY_shader; 
-            sandbox.setUniform("u_pan", pan[0], pan[1]);
-            lastMousePos = { x: e.clientX, y: e.clientY };
-          } else if (interactionMode === 'root') {
-            rootPosition = [shaderX, shaderY];
-            sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-          }
-        });
-        canvas.addEventListener("wheel", (e) => {
-          e.preventDefault(); 
-          if (interactionMode === 'pan') {
-            const [mouseX_before, mouseY_before] = getShaderMouse(e);
-            const zoomAmount = e.deltaY * 0.005; 
-            zoom *= (1.0 + zoomAmount);
-            zoom = Math.max(0.0001, zoom); 
-            sandbox.setUniform("u_zoom", zoom);
-            const [mouseX_after, mouseY_after] = getShaderMouse(e);
-            pan[0] += (mouseX_before - mouseX_after);
-            pan[1] += (mouseY_before - mouseY_after);
-            sandbox.setUniform("u_pan", pan[0], pan[1]);
-          }
-        });
-  
-        window.addEventListener("resize", handleResize);
+      function getShaderMouse(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x_css = event.clientX - rect.left;
+        const y_css = event.clientY - rect.top;
+        const x_buffer = x_css * (canvas.width / rect.width);
+        const y_buffer = y_css * (canvas.height / rect.height);
+        const small_resol = Math.min(canvas.width, canvas.height);
+        const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
+        const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
+        const shaderX = (uv_x * zoom) + pan[0];
+        const shaderY = (uv_y * zoom) + pan[1];
+        return [shaderX, shaderY];
+      }
+
+      function resizeToCurrentDisplay() {
+        const cssWidth = canvas.clientWidth;
+        const cssHeight = canvas.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(cssWidth * dpr);
+        canvas.height = Math.round(cssHeight * dpr);
+        sandbox.resize();
+      }
+
+      function handleResize() {
+        resizeToCurrentDisplay();
+      }
+
+      // Load shader
+      const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
+      try {
+        const response = await fetch(fragUrl, { mode: "same-origin" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const fragShader = await response.text();
+        sandbox.load(fragShader);
+        requestAnimationFrame(handleResize);
+      } catch (err) {
+        console.error("Failed to load shader:", err);
+        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
+        return;
+      }
+
+      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+      sandbox.setUniform("u_zoom", zoom);
+      sandbox.setUniform("u_pan", pan[0], pan[1]);
+      sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+
+      slider.addEventListener("input", () => {
+        const iterations = parseInt(slider.value, 10);
+        sandbox.setUniform("u_iterations", iterations);
+        iterDisplay.textContent = iterations;
       });
-    </script>
-  
+
+      // Interaction events
+      canvas.addEventListener("contextmenu", (e) => {
+        e.preventDefault(); 
+        if (interactionMode === 'root') {
+          interactionMode = 'pan';
+          canvas.style.cursor = 'move';
+        } else {
+          interactionMode = 'root';
+          canvas.style.cursor = 'crosshair';
+        }
+      });
+
+      canvas.addEventListener("mousedown", (e) => {
+        if (interactionMode === 'pan' && e.button === 0) {
+          isDragging = true;
+          lastMousePos = { x: e.clientX, y: e.clientY };
+        }
+      });
+
+      window.addEventListener("mouseup", (e) => {
+        if (e.button === 0) isDragging = false;
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        const [shaderX, shaderY] = getShaderMouse(e);
+        if (isDragging && interactionMode === 'pan') {
+          const deltaX_css = e.clientX - lastMousePos.x;
+          const deltaY_css = e.clientY - lastMousePos.y;
+          const rect = canvas.getBoundingClientRect();
+          const small_resol = Math.min(canvas.width, canvas.height);
+          const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
+          const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
+          pan[0] -= deltaX_shader;
+          pan[1] += deltaY_shader; 
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+          lastMousePos = { x: e.clientX, y: e.clientY };
+        } else if (interactionMode === 'root') {
+          rootPosition = [shaderX, shaderY];
+          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        }
+      });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault(); 
+        if (interactionMode === 'pan') {
+          const [mouseX_before, mouseY_before] = getShaderMouse(e);
+          const zoomAmount = e.deltaY * 0.005; 
+          zoom *= (1.0 + zoomAmount);
+          zoom = Math.max(0.0001, zoom); 
+          sandbox.setUniform("u_zoom", zoom);
+          const [mouseX_after, mouseY_after] = getShaderMouse(e);
+          pan[0] += (mouseX_before - mouseX_after);
+          pan[1] += (mouseY_before - mouseY_after);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+        }
+      });
+
+      // Handle resizing
+      window.addEventListener("resize", handleResize);
+
+      // --- Fullscreen handling ---
+      fullscreenBtn.addEventListener("click", async () => {
+        if (!document.fullscreenElement) {
+          await canvas.requestFullscreen();
+          fullscreenBtn.textContent = "Exit Fullscreen";
+          setTimeout(resizeToCurrentDisplay, 100);
+        } else {
+          await document.exitFullscreen();
+          fullscreenBtn.textContent = "Fullscreen";
+          setTimeout(resizeToCurrentDisplay, 100);
+        }
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          fullscreenBtn.textContent = "Fullscreen";
+          setTimeout(resizeToCurrentDisplay, 100);
+        } else {
+          fullscreenBtn.textContent = "Exit Fullscreen";
+          setTimeout(resizeToCurrentDisplay, 100);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
