@@ -15,7 +15,8 @@ title: Newton's Fractal
       text-align: center;
       margin: 0;
       padding: 2em;
-      overflow: hidden;
+      overflow-y: auto; /* Allow vertical scrolling */
+      overflow-x: hidden;
     }
 
     nav {
@@ -64,7 +65,7 @@ title: Newton's Fractal
       transition: background 0.2s;
     }
 
-    /* Make the canvas cover the screen in fullscreen mode */
+    /* Fullscreen canvas */
     canvas:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
@@ -101,7 +102,7 @@ title: Newton's Fractal
       • <strong>Move the mouse</strong> to adjust the position of the third root.<br>
       • <strong>Right-click</strong> to toggle between <em>root placement</em> and <em>panning mode</em>.<br>
       • In <em>panning mode</em>, <strong>click and drag</strong> to move the view.<br>
-      • <strong>Scroll</strong> to zoom in or out (zoom centers around the mouse).<br>
+      • <strong>Scroll</strong> to zoom in or out (zoom centers around the mouse) — only in panning mode.<br>
       • Use the <strong>iterations</strong> slider below to control the number of Newton iterations.<br>
       • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
     </p>
@@ -231,9 +232,10 @@ title: Newton's Fractal
         }
       });
 
+      // Only intercept wheel events on canvas in pan mode
       canvas.addEventListener("wheel", (e) => {
-        e.preventDefault(); 
         if (interactionMode === 'pan') {
+          e.preventDefault();
           const [mouseX_before, mouseY_before] = getShaderMouse(e);
           const zoomAmount = e.deltaY * 0.005; 
           zoom *= (1.0 + zoomAmount);
@@ -244,11 +246,11 @@ title: Newton's Fractal
           pan[1] += (mouseY_before - mouseY_after);
           sandbox.setUniform("u_pan", pan[0], pan[1]);
         }
+        // Otherwise let scroll propagate for page scrolling
       });
 
       // --- Fullscreen handling ---
       function reapplyState() {
-        // Force the shader to redraw after context resize
         sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
         sandbox.setUniform("u_zoom", zoom);
         sandbox.setUniform("u_pan", pan[0], pan[1]);
@@ -269,18 +271,15 @@ title: Newton's Fractal
       document.addEventListener("fullscreenchange", () => {
         const isFullscreen = !!document.fullscreenElement;
         fullscreenBtn.textContent = isFullscreen ? "Exit Fullscreen" : "Fullscreen";
-      
-        // Keep slider visually consistent
         iterDisplay.textContent = slider.value;
-      
-        // Delay to ensure context + layout have settled
         setTimeout(() => {
           resizeToCurrentDisplay();
           reapplyState();
         }, 150);
       });
-  });
 
+      window.addEventListener("resize", handleResize);
+  });
   </script>
 </body>
 </html>
