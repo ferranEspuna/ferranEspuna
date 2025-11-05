@@ -72,6 +72,13 @@ Preprint submitted to *Information Processing Letters*. [arXiv:2508.10641 [math.
   - Spanish (native)
   - Catalan (native)
   - English (C2 / Proficiency)
+
+## Personal Projects
+
+Below are some selected side-projects that reflect my interest in mathematics, programming and their intersection:
+
+- **Newton’s Fractal Shader** — An interactive GLSL fragment shader visualising the Newton fractal for a cubic polynomial.  
+  Explore it live [here](https://ferranespuna.com/newton_fractal).
   
 ## Certifications
 
