@@ -88,5 +88,7 @@ void main() { // Use main() instead of mainImage() for glslCanvas
     color = mix(color, zero, circle(uv, root1, dot_r));
     color = mix(color, zero, circle(uv, root2, dot_r));
 
+    color = vec3(1.0, 1.0, 1.0);
+
     gl_FragColor = vec4(color, 1.0);
 }
