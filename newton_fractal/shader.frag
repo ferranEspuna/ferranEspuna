@@ -69,9 +69,10 @@ void main() {
     // We need to apply zoom to the dot radius so it stays the same size on screen
     float dot_r = 0.02 * u_zoom;
     vec3 zero = vec3(0.0);
+    vec3 one = vec3(1.0);
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
-    color = mix(color, zero, circle(uv, root2, dot_r));
+    color = mix(color, one, circle(uv, root2, dot_r));
 
     gl_FragColor = vec4(color, 1.0);
 }
