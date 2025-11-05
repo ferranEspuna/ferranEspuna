@@ -15,7 +15,7 @@ title: Newton's Fractal
       text-align: center;
       margin: 0;
       padding: 2em;
-      overflow-y: auto; /* Allow vertical scrolling */
+      overflow-y: auto; /* allow scrolling */
       overflow-x: hidden;
     }
 
@@ -37,7 +37,7 @@ title: Newton's Fractal
       aspect-ratio: 1/1;
       border-radius: 0.5em;
       cursor: crosshair;
-      touch-action: none; /* required for handling multi-touch gestures */
+      touch-action: none; /* needed for multi-touch */
     }
 
     .controls {
@@ -88,55 +88,7 @@ title: Newton's Fractal
 
   <h1>Newton's Fractal</h1>
 
-  <div class="description" id="description">
-  <!-- content will be injected by JS -->
-</div>
-
-  <script>
-    const descriptionEl = document.getElementById("description");
-  
-    const baseText = `
-      <p>
-        This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots, shown as black dots.  
-        Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.  
-        The color indicates which root the iteration converges to — red, green, and blue correspond to each of the three roots.  
-        Intermediate colors appear where points are influenced by more than one root, while very dark regions represent points far from all roots.  
-        As the number of iterations increases, most points are drawn toward one of the three roots, dividing the plane into three <strong>basins of attraction</strong>.  
-        The boundaries between these basins are typically disconnected and exhibit a highly chaotic, fractal structure.
-      </p>
-    `;
-  
-    const desktopInstructions = `
-      <p>
-        <strong>How to interact (desktop):</strong><br>
-        • Two of the roots are fixed in place.<br>
-        • <strong>Right-click</strong> on the image to toggle between <em>Root Placement Mode</em> and <em>Panning Mode</em>.<br>
-        • <em>Panning mode:</em> click & drag to pan the view, Scroll</strong> to zoom around the mouse.<br>
-        • <em>Root Placement Mode:</em> Move the mouse to move the third  root around.<br>
-        • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
-        • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
-      </p>
-    `;
-  
-    const mobileInstructions = `
-      <p>
-        <strong>How to interact (mobile):</strong><br>
-        • Two of the roots are fixed in place.<br>
-        • <strong>Drag with one finger</strong> to move the third root (one finger).<br>
-        • <strong>Drag with two fingers</strong> to pan the view.<br>
-        • <strong>Pinch</strong> to zoom around the finger midpoint.<br>
-        • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
-        • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
-        Note that due to precision issues, your mileage may vary on correctly displaying the fractal 
-        on mobile, especially at extreme zoom values. For a better experience, switch to desktop.
-      </p>
-    `;
-  
-    // Simple mobile detection
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  
-    descriptionEl.innerHTML = baseText + (isMobile ? mobileInstructions : desktopInstructions);
-  </script>
+  <div class="description" id="description"></div>
 
   <div class="shader-window">
     <canvas class="glslCanvas" data-fragment-url="shader.frag"></canvas>
@@ -152,14 +104,61 @@ title: Newton's Fractal
 
   <script type="module">
     import GlslCanvas from "https://esm.run/glslCanvas";
-  
+
     window.addEventListener("load", async () => {
       const canvas = document.querySelector(".glslCanvas");
       const slider = document.getElementById("iterSlider");
       const iterDisplay = document.getElementById("iterValue");
       const fullscreenBtn = document.getElementById("fullscreenBtn");
+      const descriptionEl = document.getElementById("description");
       const sandbox = new GlslCanvas(canvas);
-  
+
+      // -------------------
+      // Conditional instructions
+      // -------------------
+      const baseText = `
+        <p>
+          This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots, shown as black dots.  
+          Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.  
+          The color indicates which root the iteration converges to — red, green, and blue correspond to each of the three roots.  
+          Intermediate colors appear where points are influenced by more than one root, while very dark regions represent points far from all roots.  
+          As the number of iterations increases, most points are drawn toward one of the three roots, dividing the plane into three <strong>basins of attraction</strong>.  
+          The boundaries between these basins are typically disconnected and exhibit a highly chaotic, fractal structure.
+        </p>
+      `;
+
+      const desktopInstructions = `
+      <p>
+        <strong>How to interact (desktop):</strong><br>
+        • Two of the roots are fixed in place.<br>
+        • <strong>Right-click</strong> on the image to toggle between <em>Root Placement Mode</em> and <em>Panning Mode</em>.<br>
+        • <em>Panning mode:</em> click & drag to pan the view, Scroll</strong> to zoom around the mouse.<br>
+        • <em>Root Placement Mode:</em> Move the mouse to move the third  root around.<br>
+        • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
+        • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
+      </p>
+      `;
+
+      const mobileInstructions = `
+      <p>
+        <strong>How to interact (mobile):</strong><br>
+        • Two of the roots are fixed in place.<br>
+        • <strong>Drag with one finger</strong> to move the third root (one finger).<br>
+        • <strong>Drag with two fingers</strong> to pan the view.<br>
+        • <strong>Pinch</strong> to zoom around the finger midpoint.<br>
+        • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
+        • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
+        Note that due to precision issues, your mileage may vary on correctly displaying the fractal 
+        on mobile, especially at extreme zoom values. For a better experience, switch to desktop.
+      </p>
+      `;
+
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      descriptionEl.innerHTML = baseText + (isMobile ? mobileInstructions : desktopInstructions);
+
+      // -------------------
+      // State
+      // -------------------
       let interactionMode = 'root'; 
       let zoom = 1.0;
       let pan = [0.0, 0.0];
@@ -167,7 +166,7 @@ title: Newton's Fractal
       let isDragging = false;
       let lastMousePos = { x: 0, y: 0 };
       let ongoingTouches = [];
-      let touchMode = null; // 'root' or 'pan'
+      let touchMode = null;
       let touchStartPos = null;
 
       function getShaderMouse(event) {
@@ -201,7 +200,9 @@ title: Newton's Fractal
 
       function handleResize() { resizeToCurrentDisplay(); }
 
+      // -------------------
       // Load shader
+      // -------------------
       const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
       try {
         const response = await fetch(fragUrl, { mode: "same-origin" });
@@ -209,6 +210,7 @@ title: Newton's Fractal
         const fragShader = await response.text();
         sandbox.load(fragShader);
         requestAnimationFrame(handleResize);
+        sandbox.forceRender && sandbox.forceRender(); // initial render
       } catch (err) {
         console.error("Failed to load shader:", err);
         canvas.getContext("2d").fillText("Error loading shader", 20, 20);
@@ -227,7 +229,9 @@ title: Newton's Fractal
         iterDisplay.textContent = iterations;
       });
 
+      // -------------------
       // Desktop interactions
+      // -------------------
       canvas.addEventListener("contextmenu", (e) => {
         e.preventDefault(); 
         if (interactionMode === 'root') {
@@ -258,7 +262,7 @@ title: Newton's Fractal
           const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
           const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
           pan[0] -= deltaX_shader;
-          pan[1] += deltaY_shader; 
+          pan[1] += deltaY_shader;
           sandbox.setUniform("u_pan", pan[0], pan[1]);
           lastMousePos = { x: e.clientX, y: e.clientY };
         } else if (interactionMode === 'root') {
@@ -268,8 +272,8 @@ title: Newton's Fractal
       });
 
       canvas.addEventListener("wheel", (e) => {
+        e.preventDefault(); 
         if (interactionMode === 'pan') {
-          e.preventDefault();
           const [mouseX_before, mouseY_before] = getShaderMouse(e);
           const zoomAmount = e.deltaY * 0.005; 
           zoom *= (1.0 + zoomAmount);
@@ -282,13 +286,15 @@ title: Newton's Fractal
         }
       });
 
-      // Touch interactions
+      // -------------------
+      // Mobile interactions
+      // -------------------
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
         ongoingTouches = [...e.touches];
 
         if (ongoingTouches.length === 1) {
-          touchMode = null; // undecided
+          touchMode = null;
           touchStartPos = { x: ongoingTouches[0].clientX, y: ongoingTouches[0].clientY };
         } else if (ongoingTouches.length === 2) {
           touchMode = 'pan';
@@ -346,7 +352,9 @@ title: Newton's Fractal
         if (ongoingTouches.length === 0) touchMode = null;
       });
 
+      // -------------------
       // Fullscreen
+      // -------------------
       function reapplyState() {
         sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
         sandbox.setUniform("u_zoom", zoom);
@@ -371,6 +379,20 @@ title: Newton's Fractal
       });
 
       window.addEventListener("resize", handleResize);
+
+      // -------------------
+      // Fix for mobile blank canvas
+      // -------------------
+      function ensureCanvasRenders() { sandbox.forceRender && sandbox.forceRender(); }
+
+      function firstInteractionHandler() {
+        ensureCanvasRenders();
+        window.removeEventListener('touchstart', firstInteractionHandler);
+        window.removeEventListener('mousedown', firstInteractionHandler);
+      }
+
+      window.addEventListener('touchstart', firstInteractionHandler, { once: true });
+      window.addEventListener('mousedown', firstInteractionHandler, { once: true });
 
     });
   </script>
