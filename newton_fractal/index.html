@@ -20,32 +20,44 @@ title: My New Subsection
       text-align: center;
       margin: 0;
       padding: 2em;
-      overflow: hidden; /* Good for full-screen feel */
+      overflow: hidden;
     }
     nav {
       position: absolute;
       top: 20px;
       left: 20px;
-      z-index: 10; /* Make sure it's on top */
+      z-index: 10;
     }
     a {
       color: #9cf;
       text-decoration: none;
     }
     .shader-window {
-      /* This container helps control the max size */
-      max-width: 800px; /* Example: prevents canvas from getting TOO big */
+      max-width: 800px;
       margin: 0 auto;
     }
     canvas {
       display: block;
-      width: 100%; /* Makes it responsive */
-      aspect-ratio: 1/1; /* Keeps it square */
+      width: 100%;
+      aspect-ratio: 1/1;
       border-radius: 0.5em;
       cursor: crosshair;
     }
     .controls {
       margin-top: 1em;
+    }
+    .description {
+      max-width: 800px;
+      margin: 1em auto 2em auto;
+      font-size: 0.95em;
+      line-height: 1.5em;
+      color: #bbb;
+    }
+    .description code {
+      background: #222;
+      padding: 0.15em 0.3em;
+      border-radius: 0.25em;
+      color: #9cf;
     }
   </style>
 </head>
@@ -56,6 +68,22 @@ title: My New Subsection
   </nav>
 
   <h2>Newton's Fractal</h2>
+
+  <div class="description">
+    <p>
+      This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots.
+      Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.
+      The color indicates which root the iteration converges to — red, green, and blue correspond to each of the three roots.
+    </p>
+    <p>
+      <strong>How to interact:</strong><br>
+      • <strong>Move the mouse</strong> to adjust the position of the third root.<br>
+      • <strong>Right-click</strong> to toggle between <em>root placement</em> and <em>panning mode</em>.<br>
+      • In <em>panning mode</em>, <strong>click and drag</strong> to move the view.<br>
+      • <strong>Scroll</strong> to zoom in or out (zoom centers around the mouse).<br>
+      • Use the <strong>iterations</strong> slider below to control the number of Newton iterations.
+    </p>
+  </div>
 
   <div class="shader-window">
     <canvas class="glslCanvas" data-fragment-url="shader.frag"></canvas>
@@ -76,7 +104,6 @@ title: My New Subsection
         const iterDisplay = document.getElementById("iterValue");
         const sandbox = new GlslCanvas(canvas);
   
-        // --- State Management (Same as before) ---
         let interactionMode = 'root'; 
         let zoom = 1.0;
         let pan = [0.0, 0.0];
@@ -84,7 +111,6 @@ title: My New Subsection
         let isDragging = false;
         let lastMousePos = { x: 0, y: 0 };
   
-        // --- Helper Function (Same as before) ---
         function getShaderMouse(event) {
           const rect = canvas.getBoundingClientRect();
           const x_css = event.clientX - rect.left;
@@ -99,63 +125,39 @@ title: My New Subsection
           return [shaderX, shaderY];
         }
   
-        // -----------------------------------------------------------------
-        // --- NEW: MANUAL RESIZE FUNCTION ---
-        // -----------------------------------------------------------------
         function handleResize() {
           const cssWidth = canvas.clientWidth;
           const cssHeight = canvas.clientHeight;
-          const dpr = window.devicePixelRatio || 1; // Get screen pixel density
-          
-          // Calculate the correct, high-DPI buffer size
-          const bufferWidth = Math.round(cssWidth * dpr);
-          const bufferHeight = Math.round(cssHeight * dpr);
-  
-          // Manually set the canvas buffer size
-          canvas.width = bufferWidth;
-          canvas.height = bufferHeight;
-          
-          // Tell glslCanvas to update its viewport to the size we just set
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.round(cssWidth * dpr);
+          canvas.height = Math.round(cssHeight * dpr);
           sandbox.resize(); 
-          
-          console.log(`Resized: CSS=${cssWidth}x${cssHeight}, DPR=${dpr}, Buffer=${canvas.width}x${canvas.height}`);
         }
-        // -----------------------------------------------------------------
   
-        // --- Load Shader ---
         const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
         try {
           const response = await fetch(fragUrl, { mode: "same-origin" });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const fragShader = await response.text();
           sandbox.load(fragShader);
-          
-          // --- FIX ---
-          // Call our new resize function after the browser has
-          // had time to calculate the CSS layout.
           requestAnimationFrame(handleResize); 
-  
         } catch (err) {
           console.error("Failed to load shader:", err);
           canvas.getContext("2d").fillText("Error loading shader", 20, 20);
           return;
         }
   
-        // --- Set Initial Uniforms (Same as before) ---
         sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
         sandbox.setUniform("u_zoom", zoom);
         sandbox.setUniform("u_pan", pan[0], pan[1]);
         sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
   
-        // --- Iterations Slider (Same as before) ---
         slider.addEventListener("input", () => {
           const iterations = parseInt(slider.value, 10);
           sandbox.setUniform("u_iterations", iterations);
           iterDisplay.textContent = iterations;
         });
   
-        // --- Interaction Event Listeners (All same as before) ---
-        // 1. Right-Click
         canvas.addEventListener("contextmenu", (e) => {
           e.preventDefault(); 
           if (interactionMode === 'root') {
@@ -166,20 +168,18 @@ title: My New Subsection
             canvas.style.cursor = 'crosshair';
           }
         });
-        // 2. Mouse Down
+  
         canvas.addEventListener("mousedown", (e) => {
           if (interactionMode === 'pan' && e.button === 0) {
             isDragging = true;
             lastMousePos = { x: e.clientX, y: e.clientY };
           }
         });
-        // 3. Mouse Up
         window.addEventListener("mouseup", (e) => {
           if (e.button === 0) {
             isDragging = false;
           }
         });
-        // 4. Mouse Move
         window.addEventListener("mousemove", (e) => {
           const [shaderX, shaderY] = getShaderMouse(e);
           if (isDragging && interactionMode === 'pan') {
@@ -198,7 +198,6 @@ title: My New Subsection
             sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
           }
         });
-        // 5. Scroll Wheel
         canvas.addEventListener("wheel", (e) => {
           e.preventDefault(); 
           if (interactionMode === 'pan') {
@@ -214,8 +213,6 @@ title: My New Subsection
           }
         });
   
-        // --- FIX ---
-        // Also call our new resize function when the window is resized
         window.addEventListener("resize", handleResize);
       });
     </script>
