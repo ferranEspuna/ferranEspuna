@@ -262,32 +262,40 @@ title: My New Subsection
         }
       });
 
-      // Handle resizing
-      window.addEventListener("resize", handleResize);
-
       // --- Fullscreen handling ---
-      fullscreenBtn.addEventListener("click", async () => {
+      function reapplyState() {
+        // Force the shader to redraw after context resize
+        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        sandbox.setUniform("u_zoom", zoom);
+        sandbox.setUniform("u_pan", pan[0], pan[1]);
+        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        requestAnimationFrame(() => sandbox.forceRender && sandbox.forceRender());
+      }
+      
+      async function toggleFullscreen() {
         if (!document.fullscreenElement) {
           await canvas.requestFullscreen();
-          fullscreenBtn.textContent = "Exit Fullscreen";
-          setTimeout(resizeToCurrentDisplay, 100);
         } else {
           await document.exitFullscreen();
-          fullscreenBtn.textContent = "Fullscreen";
-          setTimeout(resizeToCurrentDisplay, 100);
         }
+      }
+      
+      fullscreenBtn.addEventListener("click", toggleFullscreen);
+      
+      document.addEventListener("fullscreenchange", () => {
+        const isFullscreen = !!document.fullscreenElement;
+        fullscreenBtn.textContent = isFullscreen ? "Exit Fullscreen" : "Fullscreen";
+      
+        // Keep slider visually consistent
+        iterDisplay.textContent = slider.value;
+      
+        // Delay to ensure context + layout have settled
+        setTimeout(() => {
+          resizeToCurrentDisplay();
+          reapplyState();
+        }, 150);
       });
 
-      document.addEventListener("fullscreenchange", () => {
-        if (!document.fullscreenElement) {
-          fullscreenBtn.textContent = "Fullscreen";
-          setTimeout(resizeToCurrentDisplay, 100);
-        } else {
-          fullscreenBtn.textContent = "Exit Fullscreen";
-          setTimeout(resizeToCurrentDisplay, 100);
-        }
-      });
-    });
   </script>
 </body>
 </html>
