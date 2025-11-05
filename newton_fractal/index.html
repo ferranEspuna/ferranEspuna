@@ -20,7 +20,6 @@ title: My New Subsection
       text-align: center;
       margin: 0;
       padding: 2em;
-      /* Prevent page scroll on canvas interaction */
       overflow: hidden; 
     }
 
@@ -30,7 +29,6 @@ title: My New Subsection
       aspect-ratio: 1/1;
       margin: 1em auto;
       border-radius: 0.5em;
-      /* MODIFICATION: Set default cursor */
       cursor: crosshair; 
     }
 
@@ -86,29 +84,17 @@ title: My New Subsection
       let lastMousePos = { x: 0, y: 0 };
 
       // --- Helper Function ---
-      // Translates screen pixel coordinates to shader's UV coordinate space
       function getShaderMouse(event) {
         const rect = canvas.getBoundingClientRect();
-        
-        // 1. Get mouse position in CSS pixels relative to canvas
         const x_css = event.clientX - rect.left;
         const y_css = event.clientY - rect.top;
-
-        // 2. Convert from CSS pixels to buffer (canvas.width/height) pixels
         const x_buffer = x_css * (canvas.width / rect.width);
         const y_buffer = y_css * (canvas.height / rect.height);
-
-        // 3. Convert from buffer pixels to shader's coordinate space
-        // (This mirrors the 'uv' calculation in the shader)
         const small_resol = Math.min(canvas.width, canvas.height);
         const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
-        // Y is flipped (screen-space Y=0 is top, shader-space Y=0 is bottom)
         const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
-
-        // 4. Apply current zoom and pan to find the *true* shader coordinate
         const shaderX = (uv_x * zoom) + pan[0];
         const shaderY = (uv_y * zoom) + pan[1];
-
         return [shaderX, shaderY];
       }
 
@@ -119,6 +105,12 @@ title: My New Subsection
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const fragShader = await response.text();
         sandbox.load(fragShader);
+        
+        // --- THIS IS THE FIX ---
+        // Force sandbox to sync its buffer with the CSS size
+        sandbox.resize(); 
+        // ---------------------
+
       } catch (err) {
         console.error("Failed to load shader:", err);
         canvas.getContext("2d").fillText("Error loading shader", 20, 20);
@@ -142,7 +134,7 @@ title: My New Subsection
 
       // 1. Right-Click: Toggle Mode
       canvas.addEventListener("contextmenu", (e) => {
-        e.preventDefault(); // Stop the browser menu
+        e.preventDefault(); 
         if (interactionMode === 'root') {
           interactionMode = 'pan';
           canvas.style.cursor = 'move';
@@ -154,7 +146,6 @@ title: My New Subsection
 
       // 2. Mouse Down: Start Panning
       canvas.addEventListener("mousedown", (e) => {
-        // Only pan with left click
         if (interactionMode === 'pan' && e.button === 0) {
           isDragging = true;
           lastMousePos = { x: e.clientX, y: e.clientY };
@@ -173,24 +164,20 @@ title: My New Subsection
         const [shaderX, shaderY] = getShaderMouse(e);
         
         if (isDragging && interactionMode === 'pan') {
-          // --- Panning Logic ---
           const deltaX_css = e.clientX - lastMousePos.x;
           const deltaY_css = e.clientY - lastMousePos.y;
-
-          // Convert CSS pixel delta to shader space delta
           const rect = canvas.getBoundingClientRect();
           const small_resol = Math.min(canvas.width, canvas.height);
           const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
           const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
 
           pan[0] -= deltaX_shader;
-          pan[1] += deltaY_shader; // Y-axis is inverted
+          pan[1] += deltaY_shader; 
           sandbox.setUniform("u_pan", pan[0], pan[1]);
 
           lastMousePos = { x: e.clientX, y: e.clientY };
           
         } else if (interactionMode === 'root') {
-          // --- Root Setting Logic ---
           rootPosition = [shaderX, shaderY];
           sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
         }
@@ -198,18 +185,14 @@ title: My New Subsection
 
       // 5. Scroll Wheel: Zoom
       canvas.addEventListener("wheel", (e) => {
-        e.preventDefault(); // Stop page from scrolling
+        e.preventDefault(); 
         if (interactionMode === 'pan') {
           const [mouseX_before, mouseY_before] = getShaderMouse(e);
           const oldZoom = zoom;
-          
-          // Calculate new zoom
-          const zoomAmount = e.deltaY * 0.005; // Sensitivity
+          const zoomAmount = e.deltaY * 0.005; 
           zoom *= (1.0 + zoomAmount);
-          zoom = Math.max(0.0001, zoom); // Clamp zoom
+          zoom = Math.max(0.0001, zoom); 
           sandbox.setUniform("u_zoom", zoom);
-
-          // Adjust pan to zoom "into" the mouse cursor
           const [mouseX_after, mouseY_after] = getShaderMouse(e);
           pan[0] += (mouseX_before - mouseX_after);
           pan[1] += (mouseY_before - mouseY_before);
