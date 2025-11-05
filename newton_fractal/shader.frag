@@ -24,7 +24,7 @@ vec2 cinv(vec2 z) {
 
 float circle(vec2 uv, vec2 c, float r) {
     float d = length(uv - c);
-    return smoothstep(r, r * 0.9, d);
+    return smoothstep(r, r * 0.5, d);
 }
 
 vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
@@ -52,9 +52,9 @@ void main() {
     vec2 root2 = u_root_position; // Use the uniform directly
 
     vec2 out_comp = newton(uv, root0, root1, root2);
-    float r = exp(-1.5 * length(out_comp - root0));
-    float g = exp(-1.5 * length(out_comp - root1));
-    float b = exp(-1.5 * length(out_comp - root2));
+    float r = exp(-2.0 * length(out_comp - root0));
+    float g = exp(-2.0 * length(out_comp - root1));
+    float b = exp(-2.0 * length(out_comp - root2));
 
     vec3 color = vec3(r, g, b);
 
