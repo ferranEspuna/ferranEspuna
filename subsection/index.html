@@ -9,7 +9,6 @@ title: My New Subsection
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Newton's Fractal Shader</title>
 
-  <!-- These headers make fetch() reliable in private browsing -->
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
 
@@ -27,6 +26,9 @@ title: My New Subsection
       display: block;
       margin: 1em auto;
       border-radius: 0.5em;
+      
+      width: 600px;
+      height: 600px;
     }
 
     nav {
@@ -54,7 +56,7 @@ title: My New Subsection
   <h2>Newton's Fractal</h2>
 
   <div class="shader-window">
-    <canvas class="glslCanvas" data-fragment-url="shader.frag" width="600" height="600"></canvas>
+    <canvas class="glslCanvas" data-fragment-url="shader.frag"></canvas>
   </div>
 
   <div class="controls">
