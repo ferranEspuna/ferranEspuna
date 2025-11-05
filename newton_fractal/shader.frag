@@ -67,7 +67,7 @@ void main() {
     vec3 color = vec3(r, g, b);
 
     // We need to apply zoom to the dot radius so it stays the same size on screen
-    float dot_r = 0.02 / (u_zoom * u_zoom);
+    float dot_r = 0.02 * u_zoom;
     vec3 zero = vec3(0.0);
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
