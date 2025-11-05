@@ -80,9 +80,6 @@ void main() {
         exp(-k * (1.0 - bary.z))
     );
 
-    // Optional: normalize so max component is 1
-    color /= max(max(color.r, color.g), color.b);
-
     // Draw root dots
     float dot_r = 0.02 * u_zoom;
     vec3 zero = vec3(0.0);
