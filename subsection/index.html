@@ -29,30 +29,27 @@ title: My New Subsection
     </div>
 
     <script type="module">
-    import GlslCanvas from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
-    
-    window.addEventListener("load", async () => {
-      const canvas = document.querySelector(".glslCanvas");
-      const slider = document.getElementById("iterSlider");
-      const iterDisplay = document.getElementById("iterValue");
-    
-      const sandbox = new GlslCanvas(canvas); // ✅ works now
-    
-      // Load shader
-      const fragUrl = canvas.getAttribute("data-fragment-url");
-      const fragShader = await (await fetch(fragUrl)).text();
-      sandbox.load(fragShader);
-    
-      // Initial uniform
-      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-    
-      // On slider input
-      slider.addEventListener("input", () => {
-        const iterations = parseInt(slider.value, 10);
-        sandbox.setUniform("u_iterations", iterations);
-        iterDisplay.textContent = iterations;
-      });
-    });
+        import GlslCanvas from "https://esm.run/glslCanvas";
+        
+        window.addEventListener("load", async () => {
+          const canvas = document.querySelector(".glslCanvas");
+          const slider = document.getElementById("iterSlider");
+          const iterDisplay = document.getElementById("iterValue");
+        
+          const sandbox = new GlslCanvas(canvas);
+        
+          const fragUrl = canvas.getAttribute("data-fragment-url");
+          const fragShader = await (await fetch(fragUrl)).text();
+          sandbox.load(fragShader);
+        
+          sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        
+          slider.addEventListener("input", () => {
+            const iterations = parseInt(slider.value, 10);
+            sandbox.setUniform("u_iterations", iterations);
+            iterDisplay.textContent = iterations;
+          });
+        });
     </script>
 
 
