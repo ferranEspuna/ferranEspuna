@@ -1,14 +1,12 @@
 ---
 layout: default
-title: My New Subsection
+title: Newton's Fractal
 ---
 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Newton's Fractal Shader</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
 
@@ -87,13 +85,16 @@ title: My New Subsection
     <a href="../index.html">&larr; Back to ferran.info</a>
   </nav>
 
-  <h2>Newton's Fractal</h2>
+  <h1>Newton's Fractal</h1>
 
   <div class="description">
     <p>
-      This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots.
-      Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.
-      The color indicates which root the iteration converges to — red, green, and blue correspond to each of the three roots.
+    This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots, shown as black dots.  
+    Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.  
+    The color indicates which root the iteration converges to — red, green, and blue correspond to each of the three roots.  
+    Intermediate colors appear where points are influenced by more than one root, while very dark regions represent points far from all roots.  
+    As the number of iterations increases, most points are drawn toward one of the three roots, dividing the plane into three <strong>basins of attraction</strong>.  
+    The boundaries between these basins are typically disconnected and exhibit a highly chaotic, fractal structure.
     </p>
     <p>
       <strong>How to interact:</strong><br>
