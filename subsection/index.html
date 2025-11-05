@@ -28,34 +28,30 @@ title: My New Subsection
         <span id="iterValue">5</span>
     </div>
 
-
-   <script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/umd/glsl-canvas.min.js"></script>
-
-    <script>
-    window.addEventListener('load', async function() {
-        const canvas = document.querySelector('.glslCanvas');
-        const slider = document.getElementById('iterSlider');
-        const iterDisplay = document.getElementById('iterValue');
+    <script type="module">
+        import GlslCanvas from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
     
-        const sandbox = new window.GlslCanvas(canvas);
+        window.addEventListener('load', async () => {
+            const canvas = document.querySelector('.glslCanvas');
+            const slider = document.getElementById('iterSlider');
+            const iterDisplay = document.getElementById('iterValue');
     
-        // Load shader
-        const fragUrl = canvas.getAttribute('data-fragment-url');
-        const response = await fetch(fragUrl);
-        const fragShader = await response.text();
-        sandbox.load(fragShader);
+            const sandbox = new GlslCanvas(canvas);
+            const fragUrl = canvas.getAttribute('data-fragment-url');
+            const response = await fetch(fragUrl);
+            const fragShader = await response.text();
+            sandbox.load(fragShader);
     
-        // Initialize uniform
-        sandbox.setUniform('u_iterations', parseInt(slider.value, 10));
+            sandbox.setUniform('u_iterations', parseInt(slider.value, 10));
     
-        // Update uniform on input
-        slider.addEventListener('input', function() {
-            const iterations = parseInt(this.value, 10);
-            sandbox.setUniform('u_iterations', iterations);
-            iterDisplay.textContent = iterations;
+            slider.addEventListener('input', function() {
+                const iterations = parseInt(this.value, 10);
+                sandbox.setUniform('u_iterations', iterations);
+                iterDisplay.textContent = iterations;
+            });
         });
-    });
     </script>
+
 
 
 
