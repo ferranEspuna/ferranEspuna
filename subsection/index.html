@@ -29,14 +29,14 @@ title: My New Subsection
     </div>
 
     <script type="module">
-    import * as Glsl from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
+    import { GlslCanvas } from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
     
     window.addEventListener("load", async () => {
       const canvas = document.querySelector(".glslCanvas");
       const slider = document.getElementById("iterSlider");
       const iterDisplay = document.getElementById("iterValue");
     
-      const sandbox = new Glsl.default(canvas);
+      const sandbox = new GlslCanvas(canvas); // ✅ use the class directly
     
       // Load shader
       const fragUrl = canvas.getAttribute("data-fragment-url");
@@ -54,6 +54,7 @@ title: My New Subsection
       });
     });
     </script>
+
 
 
 
