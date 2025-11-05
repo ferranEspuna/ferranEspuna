@@ -24,7 +24,7 @@ vec2 cinv(vec2 z) {
 
 float circle(vec2 uv, vec2 c, float r) {
     float d = length(uv - c);
-    return smoothstep(0.0, r, d);
+    return 1.0 - smoothstep(0.0, r, d);
 }
 
 vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
