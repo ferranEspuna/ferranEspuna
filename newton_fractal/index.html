@@ -8,7 +8,7 @@ title: My New Subsection
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Newton's Fractal Shader</title>
-
+  
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
 
@@ -20,29 +20,30 @@ title: My New Subsection
       text-align: center;
       margin: 0;
       padding: 2em;
-      overflow: hidden; 
+      overflow: hidden; /* Good for full-screen feel */
     }
-
-    canvas {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1/1;
-      margin: 1em auto;
-      border-radius: 0.5em;
-      cursor: crosshair; 
-    }
-
     nav {
       position: absolute;
       top: 20px;
       left: 20px;
+      z-index: 10; /* Make sure it's on top */
     }
-
     a {
       color: #9cf;
       text-decoration: none;
     }
-
+    .shader-window {
+      /* This container helps control the max size */
+      max-width: 800px; /* Example: prevents canvas from getting TOO big */
+      margin: 0 auto;
+    }
+    canvas {
+      display: block;
+      width: 100%; /* Makes it responsive */
+      aspect-ratio: 1/1; /* Keeps it square */
+      border-radius: 0.5em;
+      cursor: crosshair;
+    }
     .controls {
       margin-top: 1em;
     }
@@ -83,16 +84,22 @@ title: My New Subsection
       let isDragging = false;
       let lastMousePos = { x: 0, y: 0 };
 
-      // --- Helper Function ---
+      // --- Helper Function (This is correct) ---
       function getShaderMouse(event) {
         const rect = canvas.getBoundingClientRect();
         const x_css = event.clientX - rect.left;
         const y_css = event.clientY - rect.top;
+
+        // Correctly maps CSS pixels to Buffer pixels
         const x_buffer = x_css * (canvas.width / rect.width);
         const y_buffer = y_css * (canvas.height / rect.height);
+        
+        // Correctly maps Buffer pixels to Shader UV space
         const small_resol = Math.min(canvas.width, canvas.height);
         const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
         const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
+        
+        // Applies zoom and pan
         const shaderX = (uv_x * zoom) + pan[0];
         const shaderY = (uv_y * zoom) + pan[1];
         return [shaderX, shaderY];
@@ -106,10 +113,12 @@ title: My New Subsection
         const fragShader = await response.text();
         sandbox.load(fragShader);
         
-        // --- THIS IS THE FIX ---
-        // Force sandbox to sync its buffer with the CSS size
+        // -----------------------------------------------------------------
+        // --- THIS IS THE RESOLUTION FIX ---
+        // Force sandbox to sync its buffer (canvas.width/height)
+        // with its CSS size (canvas.clientWidth/clientHeight)
         sandbox.resize(); 
-        // ---------------------
+        // -----------------------------------------------------------------
 
       } catch (err) {
         console.error("Failed to load shader:", err);
@@ -130,7 +139,7 @@ title: My New Subsection
         iterDisplay.textContent = iterations;
       });
 
-      // --- NEW: Interaction Event Listeners ---
+      // --- Interaction Event Listeners (All this logic is correct) ---
 
       // 1. Right-Click: Toggle Mode
       canvas.addEventListener("contextmenu", (e) => {
@@ -168,6 +177,8 @@ title: My New Subsection
           const deltaY_css = e.clientY - lastMousePos.y;
           const rect = canvas.getBoundingClientRect();
           const small_resol = Math.min(canvas.width, canvas.height);
+
+          // This logic is also correct, as it's based on the same ratios
           const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
           const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
 
@@ -193,11 +204,18 @@ title: My New Subsection
           zoom *= (1.0 + zoomAmount);
           zoom = Math.max(0.0001, zoom); 
           sandbox.setUniform("u_zoom", zoom);
+
+          // Zoom to cursor
           const [mouseX_after, mouseY_after] = getShaderMouse(e);
           pan[0] += (mouseX_before - mouseX_after);
-          pan[1] += (mouseY_before - mouseY_before);
+          pan[1] += (mouseY_before - mouseY_after);
           sandbox.setUniform("u_pan", pan[0], pan[1]);
         }
+      });
+
+      // Optional: Add a resize listener to handle window resizing
+      window.addEventListener("resize", () => {
+        sandbox.resize();
       });
     });
   </script>
