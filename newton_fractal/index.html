@@ -198,6 +198,7 @@ title: My New Subsection
       sandbox.setUniform("u_zoom", zoom);
       sandbox.setUniform("u_pan", pan[0], pan[1]);
       sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+      iterDisplay.textContent = slider.value;
 
       slider.addEventListener("input", () => {
         const iterations = parseInt(slider.value, 10);
