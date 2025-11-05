@@ -30,9 +30,11 @@ vec3 complex_color(vec2 z) {
     return col;
 }
 
-float circle(vec2 uv, vec2 c, float r) {
+// UPDATED: now scales edge softness with zoom
+float circle(vec2 uv, vec2 c, float r, float zoom) {
     float d = length(uv - c);
-    return smoothstep(r, r - 0.002, d);
+    float edge = 0.002 / zoom; // keep edge width constant in screen space
+    return smoothstep(r, r - edge, d);
 }
 
 vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
@@ -50,28 +52,29 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
 
 void main() {
     float small_resol = min(u_resolution.x, u_resolution.y);
-    // MODIFIED UV CALCULATION
+
+    // UV with zoom & pan
     vec2 uv = (2.0 * gl_FragCoord.xy - u_resolution.xy) / small_resol;
-    uv = (uv * u_zoom) + u_pan; // Apply zoom and pan
+    uv = (uv * u_zoom) + u_pan;
 
     vec2 root0 = vec2(-0.4, 0.0);
     vec2 root1 = vec2(0.4, 0.0);
-    // MODIFIED ROOT2 CALCULATION
-    vec2 root2 = u_root_position; // Use the uniform directly
+    vec2 root2 = u_root_position;
 
     vec2 out_comp = newton(uv, root0, root1, root2);
+
     float r = exp(-1.5 * length(out_comp - root0));
     float g = exp(-1.5 * length(out_comp - root1));
     float b = exp(-1.5 * length(out_comp - root2));
 
     vec3 color = vec3(r, g, b);
 
-    // We need to apply zoom to the dot radius so it stays the same size on screen
-    float dot_r = 0.02 * u_zoom; 
+    // FIXED: keep dots constant size on screen
+    float dot_r = 0.02 / u_zoom;
     vec3 zero = vec3(0.0);
-    color = mix(color, zero, circle(uv, root0, dot_r));
-    color = mix(color, zero, circle(uv, root1, dot_r));
-    color = mix(color, zero, circle(uv, root2, dot_r));
+    color = mix(color, zero, circle(uv, root0, dot_r, u_zoom));
+    color = mix(color, zero, circle(uv, root1, dot_r, u_zoom));
+    color = mix(color, zero, circle(uv, root2, dot_r, u_zoom));
 
     gl_FragColor = vec4(color, 1.0);
 }
