@@ -113,12 +113,26 @@ title: My New Subsection
         const fragShader = await response.text();
         sandbox.load(fragShader);
         
-        // -----------------------------------------------------------------
-        // --- THIS IS THE RESOLUTION FIX ---
-        // Force sandbox to sync its buffer (canvas.width/height)
-        // with its CSS size (canvas.clientWidth/clientHeight)
-        sandbox.resize(); 
-        // -----------------------------------------------------------------
+        // --- THIS IS THE FIX ---
+        
+        // 1. Log the size BEFORE resizing. This will probably be 0 or 300.
+        console.log("Canvas CSS size (before timeout):", canvas.clientWidth, "x", canvas.clientHeight);
+
+        // 2. Use setTimeout to wait for the browser to finish layout
+        setTimeout(() => {
+          // 3. Log the size AGAIN. This should now be your *correct* CSS size (e.g., 800x800)
+          console.log("Canvas CSS size (inside timeout):", canvas.clientWidth, "x", canvas.clientHeight);
+          console.log("Device Pixel Ratio:", window.devicePixelRatio);
+
+          // 4. NOW we call resize, when it can read the correct size.
+          sandbox.resize(); 
+
+          // 5. Log the FINAL buffer size. This should be (CSS Size * Pixel Ratio)
+          console.log("Canvas Buffer size (after resize):", canvas.width, "x", canvas.height);
+
+        }, 0); // 0ms is all it takes to push this to the end of the queue
+        
+        // ---------------------
 
       } catch (err) {
         console.error("Failed to load shader:", err);
