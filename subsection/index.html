@@ -33,40 +33,39 @@ title: My New Subsection
   </div>
 
   <script type="module">
-    import GlslCanvas from "https://esm.run/glslCanvas";
-
-    window.addEventListener("load", async () => {
-      const canvas = document.querySelector(".glslCanvas");
-      const slider = document.getElementById("iterSlider");
-      const iterDisplay = document.getElementById("iterValue");
-
-      const sandbox = new GlslCanvas(canvas);
-
-      // Make sure to resolve shader.frag to an absolute, same-origin URL
-      const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
-
-      try {
-        const response = await fetch(fragUrl, { mode: "same-origin" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const fragShader = await response.text();
-        sandbox.load(fragShader);
-      } catch (err) {
-        console.error("Failed to load shader:", err);
-        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
-        return;
-      }
-
-      // Set initial uniform
-      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-
-      // Update uniform on slider input
-      slider.addEventListener("input", () => {
-        const iterations = parseInt(slider.value, 10);
-        sandbox.setUniform("u_iterations", iterations);
-        iterDisplay.textContent = iterations;
-      });
+  import GlslCanvas from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
+  
+  window.addEventListener("load", async () => {
+    const canvas = document.querySelector(".glslCanvas");
+    const slider = document.getElementById("iterSlider");
+    const iterDisplay = document.getElementById("iterValue");
+  
+    const sandbox = new GlslCanvas(canvas);
+  
+    const fragUrl = canvas.getAttribute("data-fragment-url");
+    const fragShader = await (await fetch(fragUrl)).text();
+    sandbox.load(fragShader);
+  
+    // Initial uniform
+    sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+  
+    // Update iterations from slider
+    slider.addEventListener("input", () => {
+      const iterations = parseInt(slider.value, 10);
+      sandbox.setUniform("u_iterations", iterations);
+      iterDisplay.textContent = iterations;
     });
+  
+    // --- FIXED MOUSE HANDLING ---
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = rect.height - (e.clientY - rect.top); // Flip Y-axis
+      sandbox.setUniform("u_mouse", [x, y]);
+    });
+  });
   </script>
+
 
 </body>
 </html>
