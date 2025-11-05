@@ -1,106 +1,186 @@
----
+ ---
+
 layout: default
+
 title: My New Subsection
+
 ---
+
 
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Newton's Fractal Shader</title>
 
+
+  <!-- These headers make fetch() reliable in private browsing -->
+
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
 
+
   <style>
+
     body {
+
       background-color: #111;
+
       color: #ddd;
+
       font-family: sans-serif;
+
       text-align: center;
+
       margin: 0;
+
       padding: 2em;
+
     }
+
 
     canvas {
+
       display: block;
-      /* MODIFICATION 1: Make canvas responsive */
-      width: 100%;       /* Fill the available width */
-      aspect-ratio: 1/1;  /* Maintain a square shape (like 600/600) */
-      /* End of modification */
+
       margin: 1em auto;
+
       border-radius: 0.5em;
+
     }
+
 
     nav {
+
       position: absolute;
+
       top: 20px;
+
       left: 20px;
+
     }
+
 
     a {
+
       color: #9cf;
+
       text-decoration: none;
+
     }
+
 
     .controls {
+
       margin-top: 1em;
+
     }
+
   </style>
+
 </head>
+
 <body>
 
+
   <nav>
+
     <a href="../index.html">&larr; Back to ferran.info</a>
+
   </nav>
+
 
   <h2>Newton's Fractal</h2>
 
+
   <div class="shader-window">
-    <canvas class="glslCanvas" data-fragment-url="shader.frag"></canvas>
+
+    <canvas class="glslCanvas" data-fragment-url="shader.frag" width="600" height="600"></canvas>
+
   </div>
+
 
   <div class="controls">
+
     <label for="iterSlider">Iterations:</label>
+
     <input type="range" id="iterSlider" min="0" max="30" value="5">
+
     <span id="iterValue">5</span>
+
   </div>
 
+
   <script type="module">
+
     import GlslCanvas from "https://esm.run/glslCanvas";
 
+
     window.addEventListener("load", async () => {
+
       const canvas = document.querySelector(".glslCanvas");
+
       const slider = document.getElementById("iterSlider");
+
       const iterDisplay = document.getElementById("iterValue");
+
 
       const sandbox = new GlslCanvas(canvas);
 
+
       // Make sure to resolve shader.frag to an absolute, same-origin URL
+
       const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
 
+
       try {
+
         const response = await fetch(fragUrl, { mode: "same-origin" });
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
         const fragShader = await response.text();
+
         sandbox.load(fragShader);
+
       } catch (err) {
+
         console.error("Failed to load shader:", err);
+
         canvas.getContext("2d").fillText("Error loading shader", 20, 20);
+
         return;
+
       }
 
+
       // Set initial uniform
+
       sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
 
+
       // Update uniform on slider input
+
       slider.addEventListener("input", () => {
+
         const iterations = parseInt(slider.value, 10);
+
         sandbox.setUniform("u_iterations", iterations);
+
         iterDisplay.textContent = iterations;
+
       });
+
     });
+
   </script>
 
+
 </body>
-</html>
+
+</html> 
