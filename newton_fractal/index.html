@@ -68,171 +68,157 @@ title: My New Subsection
   </div>
 
   <script type="module">
-    import GlslCanvas from "https://esm.run/glslCanvas";
-
-    window.addEventListener("load", async () => {
-      const canvas = document.querySelector(".glslCanvas");
-      const slider = document.getElementById("iterSlider");
-      const iterDisplay = document.getElementById("iterValue");
-      const sandbox = new GlslCanvas(canvas);
-
-      // --- State Management ---
-      let interactionMode = 'root'; // 'root' or 'pan'
-      let zoom = 1.0;
-      let pan = [0.0, 0.0];
-      let rootPosition = [0.0, 0.0];
-      let isDragging = false;
-      let lastMousePos = { x: 0, y: 0 };
-
-      // --- Helper Function (This is correct) ---
-      function getShaderMouse(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x_css = event.clientX - rect.left;
-        const y_css = event.clientY - rect.top;
-
-        // Correctly maps CSS pixels to Buffer pixels
-        const x_buffer = x_css * (canvas.width / rect.width);
-        const y_buffer = y_css * (canvas.height / rect.height);
-        
-        // Correctly maps Buffer pixels to Shader UV space
-        const small_resol = Math.min(canvas.width, canvas.height);
-        const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
-        const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
-        
-        // Applies zoom and pan
-        const shaderX = (uv_x * zoom) + pan[0];
-        const shaderY = (uv_y * zoom) + pan[1];
-        return [shaderX, shaderY];
-      }
-
-      // --- Load Shader ---
-      const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
-      try {
-        const response = await fetch(fragUrl, { mode: "same-origin" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const fragShader = await response.text();
-        sandbox.load(fragShader);
-        
-        // --- THIS IS THE FIX ---
-        
-        // 1. Log the size BEFORE resizing. This will probably be 0 or 300.
-        console.log("Canvas CSS size (before timeout):", canvas.clientWidth, "x", canvas.clientHeight);
-
-        // 2. Use setTimeout to wait for the browser to finish layout
-        setTimeout(() => {
-          // 3. Log the size AGAIN. This should now be your *correct* CSS size (e.g., 800x800)
-          console.log("Canvas CSS size (inside timeout):", canvas.clientWidth, "x", canvas.clientHeight);
-          console.log("Device Pixel Ratio:", window.devicePixelRatio);
-
-          // 4. NOW we call resize, when it can read the correct size.
-          sandbox.resize(); 
-
-          // 5. Log the FINAL buffer size. This should be (CSS Size * Pixel Ratio)
-          console.log("Canvas Buffer size (after resize):", canvas.width, "x", canvas.height);
-
-        }, 0); // 0ms is all it takes to push this to the end of the queue
-        
-        // ---------------------
-
-      } catch (err) {
-        console.error("Failed to load shader:", err);
-        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
-        return;
-      }
-
-      // --- Set Initial Uniforms ---
-      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-      sandbox.setUniform("u_zoom", zoom);
-      sandbox.setUniform("u_pan", pan[0], pan[1]);
-      sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-
-      // --- Iterations Slider ---
-      slider.addEventListener("input", () => {
-        const iterations = parseInt(slider.value, 10);
-        sandbox.setUniform("u_iterations", iterations);
-        iterDisplay.textContent = iterations;
-      });
-
-      // --- Interaction Event Listeners (All this logic is correct) ---
-
-      // 1. Right-Click: Toggle Mode
-      canvas.addEventListener("contextmenu", (e) => {
-        e.preventDefault(); 
-        if (interactionMode === 'root') {
-          interactionMode = 'pan';
-          canvas.style.cursor = 'move';
-        } else {
-          interactionMode = 'root';
-          canvas.style.cursor = 'crosshair';
-        }
-      });
-
-      // 2. Mouse Down: Start Panning
-      canvas.addEventListener("mousedown", (e) => {
-        if (interactionMode === 'pan' && e.button === 0) {
-          isDragging = true;
-          lastMousePos = { x: e.clientX, y: e.clientY };
-        }
-      });
-
-      // 3. Mouse Up: Stop Panning
-      window.addEventListener("mouseup", (e) => {
-        if (e.button === 0) {
-          isDragging = false;
-        }
-      });
-
-      // 4. Mouse Move: Pan or Set Root
-      window.addEventListener("mousemove", (e) => {
-        const [shaderX, shaderY] = getShaderMouse(e);
-        
-        if (isDragging && interactionMode === 'pan') {
-          const deltaX_css = e.clientX - lastMousePos.x;
-          const deltaY_css = e.clientY - lastMousePos.y;
+      import GlslCanvas from "https://esm.run/glslCanvas";
+  
+      window.addEventListener("load", async () => {
+        const canvas = document.querySelector(".glslCanvas");
+        const slider = document.getElementById("iterSlider");
+        const iterDisplay = document.getElementById("iterValue");
+        const sandbox = new GlslCanvas(canvas);
+  
+        // --- State Management (Same as before) ---
+        let interactionMode = 'root'; 
+        let zoom = 1.0;
+        let pan = [0.0, 0.0];
+        let rootPosition = [0.0, 0.0];
+        let isDragging = false;
+        let lastMousePos = { x: 0, y: 0 };
+  
+        // --- Helper Function (Same as before) ---
+        function getShaderMouse(event) {
           const rect = canvas.getBoundingClientRect();
+          const x_css = event.clientX - rect.left;
+          const y_css = event.clientY - rect.top;
+          const x_buffer = x_css * (canvas.width / rect.width);
+          const y_buffer = y_css * (canvas.height / rect.height);
           const small_resol = Math.min(canvas.width, canvas.height);
-
-          // This logic is also correct, as it's based on the same ratios
-          const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
-          const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
-
-          pan[0] -= deltaX_shader;
-          pan[1] += deltaY_shader; 
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
-
-          lastMousePos = { x: e.clientX, y: e.clientY };
+          const uv_x = (2.0 * x_buffer - canvas.width) / small_resol;
+          const uv_y = (2.0 * (canvas.height - y_buffer) - canvas.height) / small_resol; 
+          const shaderX = (uv_x * zoom) + pan[0];
+          const shaderY = (uv_y * zoom) + pan[1];
+          return [shaderX, shaderY];
+        }
+  
+        // -----------------------------------------------------------------
+        // --- NEW: MANUAL RESIZE FUNCTION ---
+        // -----------------------------------------------------------------
+        function handleResize() {
+          const cssWidth = canvas.clientWidth;
+          const cssHeight = canvas.clientHeight;
+          const dpr = window.devicePixelRatio || 1; // Get screen pixel density
           
-        } else if (interactionMode === 'root') {
-          rootPosition = [shaderX, shaderY];
-          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+          // Calculate the correct, high-DPI buffer size
+          const bufferWidth = Math.round(cssWidth * dpr);
+          const bufferHeight = Math.round(cssHeight * dpr);
+  
+          // Manually set the canvas buffer size
+          canvas.width = bufferWidth;
+          canvas.height = bufferHeight;
+          
+          // Tell glslCanvas to update its viewport to the size we just set
+          sandbox.resize(); 
+          
+          console.log(`Resized: CSS=${cssWidth}x${cssHeight}, DPR=${dpr}, Buffer=${canvas.width}x${canvas.height}`);
         }
-      });
-
-      // 5. Scroll Wheel: Zoom
-      canvas.addEventListener("wheel", (e) => {
-        e.preventDefault(); 
-        if (interactionMode === 'pan') {
-          const [mouseX_before, mouseY_before] = getShaderMouse(e);
-          const oldZoom = zoom;
-          const zoomAmount = e.deltaY * 0.005; 
-          zoom *= (1.0 + zoomAmount);
-          zoom = Math.max(0.0001, zoom); 
-          sandbox.setUniform("u_zoom", zoom);
-
-          // Zoom to cursor
-          const [mouseX_after, mouseY_after] = getShaderMouse(e);
-          pan[0] += (mouseX_before - mouseX_after);
-          pan[1] += (mouseY_before - mouseY_after);
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
+        // -----------------------------------------------------------------
+  
+        // --- Load Shader ---
+        const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
+        try {
+          const response = await fetch(fragUrl, { mode: "same-origin" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const fragShader = await response.text();
+          sandbox.load(fragShader);
+          
+          // --- FIX ---
+          // Call our new resize function after the browser has
+          // had time to calculate the CSS layout.
+          requestAnimationFrame(handleResize); 
+  
+        } catch (err) {
+          console.error("Failed to load shader:", err);
+          canvas.getContext("2d").fillText("Error loading shader", 20, 20);
+          return;
         }
+  
+        // --- Set Initial Uniforms (Same as before) ---
+        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        sandbox.setUniform("u_zoom", zoom);
+        sandbox.setUniform("u_pan", pan[0], pan[1]);
+        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+  
+        // --- Iterations Slider (Same as before) ---
+        slider.addEventListener("input", () => {
+          const iterations = parseInt(slider.value, 10);
+          sandbox.setUniform("u_iterations", iterations);
+          iterDisplay.textContent = iterations;
+        });
+  
+        // --- Interaction Event Listeners (All same as before) ---
+        // 1. Right-Click
+        canvas.addEventListener("contextmenu", (e) => {
+          e.preventDefault(); 
+          if (interactionMode === 'root') {
+            interactionMode = 'pan';
+            canvas.style.cursor = 'move';
+          } else {
+            interactionMode = 'root';
+            canvas.style.cursor = 'crosshair';
+          }
+        });
+        // 2. Mouse Down
+        canvas.addEventListener("mousedown", (e) => {
+          if (interactionMode === 'pan' && e.button === 0) {
+            isDragging = true;
+            lastMousePos = { x: e.clientX, y: e.clientY };
+          }
+        });
+        // 3. Mouse Up
+        window.addEventListener("mouseup", (e) => {
+          if (e.button === 0) {
+            isDragging = false;
+          }
+        });
+        // 4. Mouse Move
+        window.addEventListener("mousemove", (e) => {
+          const [shaderX, shaderY] = getShaderMouse(e);
+          if (isDragging && interactionMode === 'pan') {
+            const deltaX_css = e.clientX - lastMousePos.x;
+            const deltaY_css = e.clientY - lastMousePos.y;
+            const rect = canvas.getBoundingClientRect();
+            const small_resol = Math.min(canvas.width, canvas.height);
+            const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
+            const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
+            pan[0] -= deltaX_shader;
+            pan[1] += deltaY_shader; 
+            sandbox.setUniform("u_pan", pan[0], pan[1]);
+            lastMousePos = { x: e.clientX, y: e.clientY };
+          } else if (interactionMode === 'root') {
+            rootPosition = [shaderX, shaderY];
+            sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+          }
+        });
+        // 5. Scroll Wheel
+        canvas.addEventListener("wheel", (e) => {
+          e.preventDefault(); 
+          if (interactionMode === 'pan') {
+            const [mouseX_before, mouseY_before] = getShaderMouse(e);
+            const zoomAmount = e.deltaY * 0.005; 
+            zoom *= (1.0 + zoomAmount);
+            zoom = Math.max(0.0001, zoom); 
+            sandbox.setUniform("u_zoom", zoom);
+            const [mouseX_after, mouseY_after] = getShaderMouse(e);
+            pan[0] += (mouseX_before - mouseX_after);
+            pan[1] += (mouseY_before - mouseY_after);
+            sandbox.setUniform("u_pan", pan[0], pan[1]);
+          }
+        });
+  
+        // --- FIX ---
+        // Also call our new resize function when the window is resized
+        window.addEventListener("resize", handleResize);
       });
-
-      // Optional: Add a resize listener to handle window resizing
-      window.addEventListener("resize", () => {
-        sandbox.resize();
-      });
-    });
-  </script>
-
+    </script>
+  
 </body>
 </html>
