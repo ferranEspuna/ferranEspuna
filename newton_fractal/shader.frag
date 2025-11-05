@@ -5,6 +5,8 @@ precision highp float;
 uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_iterations;
+
+// NEW UNIFORMS
 uniform float u_zoom;
 uniform vec2 u_pan;
 uniform vec2 u_root_position;
@@ -38,49 +40,25 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
     return z;
 }
 
-// Compute barycentric coordinates
-vec3 barycentric(vec2 p, vec2 a, vec2 b, vec2 c) {
-    vec2 v0 = b - a;
-    vec2 v1 = c - a;
-    vec2 v2 = p - a;
-
-    float d00 = dot(v0, v0);
-    float d01 = dot(v0, v1);
-    float d11 = dot(v1, v1);
-    float d20 = dot(v2, v0);
-    float d21 = dot(v2, v1);
-
-    float denom = d00 * d11 - d01 * d01 + 1e-6;
-
-    float v = (d11 * d20 - d01 * d21) / denom;
-    float w = (d00 * d21 - d01 * d20) / denom;
-    float u = 1.0 - v - w;
-
-    return vec3(u, v, w);
-}
-
 void main() {
     float small_resol = min(u_resolution.x, u_resolution.y);
+    // MODIFIED UV CALCULATION
     vec2 uv = (2.0 * gl_FragCoord.xy - u_resolution.xy) / small_resol;
-    uv = (uv * u_zoom) + u_pan;
+    uv = (uv * u_zoom) + u_pan; // Apply zoom and pan
 
     vec2 root0 = vec2(-0.4, 0.0);
     vec2 root1 = vec2(0.4, 0.0);
-    vec2 root2 = u_root_position;
+    // MODIFIED ROOT2 CALCULATION
+    vec2 root2 = u_root_position; // Use the uniform directly
 
     vec2 out_comp = newton(uv, root0, root1, root2);
+    float r = exp(-1.5 * length(out_comp - root0));
+    float g = exp(-1.5 * length(out_comp - root1));
+    float b = exp(-1.5 * length(out_comp - root2));
 
-    vec3 bary = barycentric(out_comp, root0, root1, root2);
+    vec3 color = vec3(r, g, b);
 
-    // Exponential decay to replace clamping
-    float k = 3.0; // controls sharpness of decay
-    vec3 color = vec3(
-        exp(-k * (1.0 - bary.x)),
-        exp(-k * (1.0 - bary.y)),
-        exp(-k * (1.0 - bary.z))
-    );
-
-    // Draw root dots
+    // We need to apply zoom to the dot radius so it stays the same size on screen
     float dot_r = 0.02 * u_zoom;
     vec3 zero = vec3(0.0);
     vec3 one = vec3(1.0);
