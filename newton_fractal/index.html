@@ -96,7 +96,7 @@ title: Newton's Fractal
 
   <div class="controls">
     <label for="iterSlider">Iterations:</label>
-    <input type="range" id="iterSlider" min="0" max="30" value="5">
+    <input type="range" id="iterSlider" min="0" max="50" value="10">
     <span id="iterValue">5</span>
     <br>
     <button id="fullscreenBtn">Fullscreen</button>
@@ -280,7 +280,6 @@ title: Newton's Fractal
           const [mouseX_before, mouseY_before] = getShaderMouse(e);
           const zoomAmount = e.deltaY * 0.005; 
           zoom *= (1.0 + zoomAmount);
-          zoom = Math.max(0.0001, zoom); 
           sandbox.setUniform("u_zoom", zoom);
           const [mouseX_after, mouseY_after] = getShaderMouse(e);
           pan[0] += (mouseX_before - mouseX_after);
@@ -344,7 +343,6 @@ title: Newton's Fractal
           const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
           const zoomFactor = prevDist / newDist;
           zoom *= zoomFactor;
-          zoom = Math.max(0.0001, zoom);
       
           const prevMidX = (prevT0.clientX + prevT1.clientX)/2;
           const prevMidY = (prevT0.clientY + prevT1.clientY)/2;
