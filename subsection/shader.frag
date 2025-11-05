@@ -50,7 +50,7 @@ void main() {
 
     vec2 root0 = vec2(-0.4, 0.0);
     vec2 root1 = vec2(0.4, 0.0);
-    vec2 root2 = (2.0 * vec2(u_mouse.x, u_resolution.y - u_mouse.y) - u_resolution.xy) / small_resol;
+    vec2 root2 = (2.0 * u_mouse - u_resolution) / small_resol;
 
     vec2 out_comp = newton(uv, root0, root1, root2);
     float r = exp(-1.5 * length(out_comp - root0));
