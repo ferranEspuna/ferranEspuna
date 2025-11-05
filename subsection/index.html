@@ -1,58 +1,24 @@
----
-layout: default
-title: My New Subsection
----
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Newton's Fractal Shader</title>
+<meta charset="UTF-8">
+<title>Newton's Fractal Shader</title>
 </head>
-    
 <body>
 
-    <nav style="position: absolute; top: 20px; left: 20px;">
-        <a href="../index.html">&larr; Back to ferran.info</a>
-    </nav>
-    
-    <h2>Newton's Fractal</h2>
+<canvas id="glslCanvas" data-fragment-url="shader.frag" width="600" height="600"></canvas>
 
-    <div class="shader-window">
-        <canvas class="glslCanvas" data-fragment-url="shader.frag" width="600" height="600"></canvas>
-    </div>
+<script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/glsl-canvas.umd.js"></script>
+<script>
+window.addEventListener('load', () => {
+    // `GlslCanvas` is available globally from the UMD build
+    const canvas = document.getElementById('glslCanvas');
+    const sandbox = new GlslCanvas(canvas);
 
-    <div class="controls">
-        <label for="iterSlider">Iterations:</label>
-        <input type="range" id="iterSlider" min="0" max="30" value="5">
-        <span id="iterValue">5</span>
-    </div>
-
-    
-    <script type="module">
-        import * as Glsl from "https://cdn.jsdelivr.net/npm/glsl-canvas-js@0.2.9/+esm";
-        
-        window.addEventListener('load', () => {
-          const canvas = document.querySelector('.glslCanvas');
-          const sandbox = new Glsl.default(canvas);
-        
-          const frag = `
-            #ifdef GL_ES
-            precision mediump float;
-            #endif
-            uniform vec2 u_resolution;
-            uniform float u_time;
-            void main() {
-                vec2 st = gl_FragCoord.xy / u_resolution;
-                gl_FragColor = vec4(st.x, st.y, 0.0, 1.0);
-            }
-          `;
-          sandbox.load(frag);
-        });
-    </script>
-
-
-
+    // Optional debugging
+    sandbox.on('error', e => console.error('Shader error:', e));
+});
+</script>
 
 </body>
 </html>
