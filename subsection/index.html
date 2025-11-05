@@ -30,23 +30,25 @@ title: My New Subsection
 
 
    <script src="https://unpkg.com/glsl-canvas-js@0.2.9/dist/umd/glsl-canvas.min.js"></script>
-    
+
     <script>
     window.addEventListener('load', async function() {
         const canvas = document.querySelector('.glslCanvas');
         const slider = document.getElementById('iterSlider');
         const iterDisplay = document.getElementById('iterValue');
     
-        // The global name for the UMD build:
-        const sandbox = new window.GLSL.Canvas(canvas);
+        const sandbox = new window.GlslCanvas(canvas);
     
+        // Load shader
         const fragUrl = canvas.getAttribute('data-fragment-url');
         const response = await fetch(fragUrl);
         const fragShader = await response.text();
         sandbox.load(fragShader);
     
+        // Initialize uniform
         sandbox.setUniform('u_iterations', parseInt(slider.value, 10));
     
+        // Update uniform on input
         slider.addEventListener('input', function() {
             const iterations = parseInt(this.value, 10);
             sandbox.setUniform('u_iterations', iterations);
