@@ -11,7 +11,7 @@ uniform float u_zoom;
 uniform vec2 u_pan;
 uniform vec2 u_root_position;
 
-#define MAX_ITERS 30
+#define MAX_ITERS 50
 
 vec2 cmul(vec2 a, vec2 b) {
     return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
