@@ -55,7 +55,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ## Publications
 
 ### **A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages** — Jorge Palomar et al. (2024)
-Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation, European Language Resource Association and the International Committee on Computational Linguistics.
+Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation, European Language Resource Association and the International Committee on Computational Linguistics. [2024.lrec-main.31](https://aclanthology.org/2024.lrec-main.31/)
 
 ### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025).
 Preprint currently under review for publication. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
