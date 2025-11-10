@@ -58,7 +58,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation, European Language Resource Association and the International Committee on Computational Linguistics.
 
 ### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025).
-Preprint submitted to *Information Processing Letters*. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
+Preprint currently under review for publication. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
 
 ## Skills
 
