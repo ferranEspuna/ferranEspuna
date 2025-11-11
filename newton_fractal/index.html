@@ -149,10 +149,6 @@ title: Newton's Fractal
         • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
         • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
       </p>
-      <p>
-        <strong>Known issues on mobile:</strong><br>
-        • The image may not initially render. Double Tap on the fractal to fix it.
-      </p>
       `;
 
       const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -165,7 +161,7 @@ title: Newton's Fractal
       canvas.style.cursor = isMobile ? "crosshair" : "move";
       let zoom = 1.0;
       let pan = [0.0, 0.0];
-      let rootPosition = [0.0, 0.0];
+      let rootPosition = [0.0, 0.866025];
       let isDragging = false;
       let lastMousePos = { x: 0, y: 0 };
       let ongoingTouches = [];
