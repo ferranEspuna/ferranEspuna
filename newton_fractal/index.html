@@ -402,7 +402,7 @@ title: Newton's Fractal
         window.removeEventListener('mousedown', firstInteractionHandler);
       }
 
-      window.addEventListener('touchstart', firstInteractionHandler, { once: true });
+      canvas.addEventListener('touchstart', firstInteractionHandler, { once: true });
       window.addEventListener('mousedown', firstInteractionHandler, { once: true });
 
     });
