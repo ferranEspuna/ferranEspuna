@@ -113,6 +113,9 @@ title: Newton's Fractal
       const descriptionEl = document.getElementById("description");
       const sandbox = new GlslCanvas(canvas);
 
+      // -------------------
+      // Text
+      // -------------------
       const baseText = `
         <p>
           This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots, shown as black dots.  
@@ -156,20 +159,20 @@ title: Newton's Fractal
       descriptionEl.innerHTML = baseText + (isMobile ? mobileInstructions : desktopInstructions);
 
       // -------------------
-      // State (defaults)
+      // State
       // -------------------
-      let interactionMode = isMobile ? 'root' : 'pan'; // start in pan mode on desktop
+      let interactionMode = isMobile ? 'root' : 'pan'; // desktop: start in pan mode
       canvas.style.cursor = isMobile ? 'crosshair' : 'move';
 
       let zoom = 1.0;
       let pan = [0.0, 0.0];
-      let rootPosition = [0.0, 1.0]; // default at 0 + 1i
+      let rootPosition = [0.0, 1.0]; // default = 0 + 1i
       let isDragging = false;
       let lastMousePos = { x: 0, y: 0 };
-      let ongoingTouches = [];
-      let touchMode = null;
-      let touchStartPos = null;
 
+      // -------------------
+      // Helpers
+      // -------------------
       function getShaderMouse(event) {
         const rect = canvas.getBoundingClientRect();
         const x_css = event.clientX - rect.left;
@@ -198,21 +201,33 @@ title: Newton's Fractal
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const fragShader = await response.text();
         sandbox.load(fragShader);
-        requestAnimationFrame(resizeToCurrentDisplay);
-        sandbox.forceRender && sandbox.forceRender();
+
+        // Initialize after shader is loaded
+        requestAnimationFrame(() => {
+          resizeToCurrentDisplay();
+          sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+          sandbox.setUniform("u_zoom", zoom);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+          if (sandbox.render) sandbox.render();
+        });
       } catch (err) {
         console.error("Failed to load shader:", err);
-        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
+        const ctx = canvas.getContext("2d");
+        ctx.fillText("Error loading shader", 20, 20);
         return;
       }
 
-      // Apply initial uniforms (includes default root)
-      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-      sandbox.setUniform("u_zoom", zoom);
-      sandbox.setUniform("u_pan", pan[0], pan[1]);
-      sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+      // -------------------
+      // Iteration slider
+      // -------------------
       iterDisplay.textContent = slider.value;
-      sandbox.forceRender && sandbox.forceRender();
+      slider.addEventListener("input", () => {
+        const iterations = parseInt(slider.value, 10);
+        sandbox.setUniform("u_iterations", iterations);
+        iterDisplay.textContent = iterations;
+        if (sandbox.render) sandbox.render();
+      });
 
       // -------------------
       // Desktop interactions
@@ -228,7 +243,78 @@ title: Newton's Fractal
         }
       });
 
-      // (rest of your interaction code remains unchanged)
+      canvas.addEventListener("mousedown", (e) => {
+        if (interactionMode === 'pan' && e.button === 0) {
+          isDragging = true;
+          lastMousePos = { x: e.clientX, y: e.clientY };
+        }
+      });
+
+      window.addEventListener("mouseup", (e) => { if (e.button === 0) isDragging = false; });
+
+      canvas.addEventListener("mousemove", (e) => {
+        const [shaderX, shaderY] = getShaderMouse(e);
+        if (isDragging && interactionMode === 'pan') {
+          const deltaX_css = e.clientX - lastMousePos.x;
+          const deltaY_css = e.clientY - lastMousePos.y;
+          const rect = canvas.getBoundingClientRect();
+          const small_resol = Math.min(canvas.width, canvas.height);
+          const deltaX_shader = (deltaX_css * (canvas.width / rect.width) * 2.0 / small_resol) * zoom;
+          const deltaY_shader = (deltaY_css * (canvas.height / rect.height) * 2.0 / small_resol) * zoom;
+          pan[0] -= deltaX_shader;
+          pan[1] += deltaY_shader;
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+          lastMousePos = { x: e.clientX, y: e.clientY };
+          if (sandbox.render) sandbox.render();
+        } else if (interactionMode === 'root') {
+          rootPosition = [shaderX, shaderY];
+          sandbox.setUniform("u_root_position", shaderX, shaderY);
+          if (sandbox.render) sandbox.render();
+        }
+      });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault(); 
+        if (interactionMode === 'pan') {
+          const [mouseX_before, mouseY_before] = getShaderMouse(e);
+          const zoomAmount = e.deltaY * 0.005; 
+          zoom *= (1.0 + zoomAmount);
+          sandbox.setUniform("u_zoom", zoom);
+          const [mouseX_after, mouseY_after] = getShaderMouse(e);
+          pan[0] += (mouseX_before - mouseX_after);
+          pan[1] += (mouseY_before - mouseY_after);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+          if (sandbox.render) sandbox.render();
+        }
+      });
+
+      // -------------------
+      // Fullscreen
+      // -------------------
+      function reapplyState() {
+        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        sandbox.setUniform("u_zoom", zoom);
+        sandbox.setUniform("u_pan", pan[0], pan[1]);
+        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        requestAnimationFrame(() => sandbox.render && sandbox.render());
+      }
+
+      async function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          await canvas.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      }
+      
+      fullscreenBtn.addEventListener("click", toggleFullscreen);
+      
+      document.addEventListener("fullscreenchange", () => {
+        fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+        setTimeout(() => { resizeToCurrentDisplay(); reapplyState(); }, 150);
+      });
+
+      window.addEventListener("resize", resizeToCurrentDisplay);
     });
   </script>
 </body>
