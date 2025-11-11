@@ -282,7 +282,7 @@ title: Newton's Fractal
         e.preventDefault(); 
         if (interactionMode === 'pan') {
           const [mouseX_before, mouseY_before] = getShaderMouse(e);
-          const zoomAmount = e.deltaY * 0.005; 
+          const zoomAmount = e.deltaY * 0.001; 
           zoom *= (1.0 + zoomAmount);
           sandbox.setUniform("u_zoom", zoom);
           const [mouseX_after, mouseY_after] = getShaderMouse(e);
