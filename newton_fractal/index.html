@@ -235,66 +235,82 @@ title: Newton's Fractal
         });
       }
 
-      // ----- Mobile touch -----
-      if (isMobile) {
-        canvas.addEventListener("touchstart", (e) => {
-          if (e.touches.length === 1) {
-            isDragging = true;
-            lastTouchMid = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-          } else if (e.touches.length === 2) {
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            lastTouchDist = Math.hypot(dx, dy);
-            lastTouchMid = {
-              x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-              y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
-            };
-          }
-        });
-
-        canvas.addEventListener("touchmove", (e) => {
-          e.preventDefault();
-          if (e.touches.length === 1 && isDragging) {
-            const [sx, sy] = getShaderCoords(e.touches[0].clientX, e.touches[0].clientY);
-            rootPosition = [sx, sy];
-            sandbox.setUniform("u_root_position", sx, sy);
-            if (sandbox.render) sandbox.render();
-          } else if (e.touches.length === 2) {
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const newDist = Math.hypot(dx, dy);
-            const mid = {
-              x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-              y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
-            };
-            if (lastTouchDist) {
-              const zoomFactor = lastTouchDist / newDist;
-              zoom *= zoomFactor;
-              sandbox.setUniform("u_zoom", zoom);
-              const [beforeX, beforeY] = getShaderCoords(lastTouchMid.x, lastTouchMid.y);
-              const [afterX, afterY] = getShaderCoords(mid.x, mid.y);
-              pan[0] += beforeX - afterX;
-              pan[1] += beforeY - afterY;
-              sandbox.setUniform("u_pan", pan[0], pan[1]);
-              if (sandbox.render) sandbox.render();
-            }
-            lastTouchDist = newDist;
-            lastTouchMid = mid;
-          }
-        });
-
-        canvas.addEventListener("touchend", () => {
-          isDragging = false;
-          lastTouchDist = null;
-          lastTouchMid = null;
-        });
-
-        // fix blank render
-        canvas.addEventListener("dblclick", () => {
-          if (sandbox.render) sandbox.render();
-        });
+      // -------------------
+      // Mobile interactions (updated)
+      // -------------------
+      let lastTapTime = 0;
+      const doubleTapThreshold = 300; // ms
+      const rootTouchRadius = 0.1; // proximity threshold in shader coordinates
+      
+      function distance2D(a, b) {
+        return Math.hypot(a[0] - b[0], a[1] - b[1]);
       }
-
+      
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        ongoingTouches = [...e.touches];
+      
+        if (ongoingTouches.length === 1) {
+          const [x, y] = getTouchPos(ongoingTouches[0]);
+          const now = Date.now();
+          const timeSinceLastTap = now - lastTapTime;
+      
+          const dynamicRadius = rootTouchRadius * zoom; // scale with zoom
+      
+          if (timeSinceLastTap < doubleTapThreshold) {
+            touchMode = 'root'; // double-tap + drag
+          } else if (distance2D([x, y], rootPosition) < dynamicRadius) {
+            touchMode = 'root'; // touch near root, radius depends on zoom
+          } else {
+            touchMode = null;
+          }
+      
+          touchStartPos = { x: ongoingTouches[0].clientX, y: ongoingTouches[0].clientY };
+          lastTapTime = now;
+        } else if (ongoingTouches.length === 2) {
+          touchMode = 'pan';
+        }
+      });
+            
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (e.touches.length === 2) touchMode = 'pan';
+      
+        if (touchMode === 'root' && e.touches.length === 1) {
+          const [x, y] = getTouchPos(e.touches[0]);
+          rootPosition = [x, y];
+          sandbox.setUniform("u_root_position", x, y);
+        } else if (touchMode === 'pan' && e.touches.length === 2) {
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+          const prevT0 = ongoingTouches[0];
+          const prevT1 = ongoingTouches[1];
+      
+          const prevDist = Math.hypot(prevT0.clientX - prevT1.clientX, prevT0.clientY - prevT1.clientY);
+          const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+          const zoomFactor = prevDist / newDist;
+          zoom *= zoomFactor;
+      
+          const prevMidX = (prevT0.clientX + prevT1.clientX)/2;
+          const prevMidY = (prevT0.clientY + prevT1.clientY)/2;
+          const newMidX = (t0.clientX + t1.clientX)/2;
+          const newMidY = (t0.clientY + t1.clientY)/2;
+      
+          const rect = canvas.getBoundingClientRect();
+          const small_resol = Math.min(rect.width, rect.height);
+          const deltaX_shader = ((newMidX - prevMidX) * 2.0 / small_resol) * zoom;
+          const deltaY_shader = ((newMidY - prevMidY) * 2.0 / small_resol) * zoom;
+      
+          pan[0] -= deltaX_shader;
+          pan[1] += deltaY_shader;
+      
+          sandbox.setUniform("u_zoom", zoom);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+        }
+      
+        ongoingTouches = [...e.touches];
+      });
+      
       // ----- Fullscreen -----
       async function toggleFullscreen() {
         if (!document.fullscreenElement) {
