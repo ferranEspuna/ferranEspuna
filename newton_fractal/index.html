@@ -227,13 +227,7 @@ title: Newton's Fractal
         ctx.fillText("Error loading shader", 20, 20);
         return;
       }
-        sandbox.forceRender && sandbox.forceRender(); // initial render
-      } catch (err) {
-        console.error("Failed to load shader:", err);
-        canvas.getContext("2d").fillText("Error loading shader", 20, 20);
-        return;
-      }
-
+      
       sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
       sandbox.setUniform("u_zoom", zoom);
       sandbox.setUniform("u_pan", pan[0], pan[1]);
