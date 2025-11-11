@@ -396,15 +396,6 @@ title: Newton's Fractal
       // -------------------
       function ensureCanvasRenders() { sandbox.forceRender && sandbox.forceRender(); }
 
-      function firstInteractionHandler() {
-        ensureCanvasRenders();
-        window.removeEventListener('touchstart', firstInteractionHandler);
-        window.removeEventListener('mousedown', firstInteractionHandler);
-      }
-
-      canvas.addEventListener('touchstart', firstInteractionHandler, { once: true });
-      window.addEventListener('mousedown', firstInteractionHandler, { once: true });
-
     });
   </script>
 </body>
