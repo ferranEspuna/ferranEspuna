@@ -161,7 +161,8 @@ title: Newton's Fractal
       // -------------------
       // State
       // -------------------
-      let interactionMode = 'root'; 
+      let interactionMode = isMobile ? "root" : "pan";
+      canvas.style.cursor = isMobile ? "crosshair" : "move";
       let zoom = 1.0;
       let pan = [0.0, 0.0];
       let rootPosition = [0.0, 0.0];
@@ -211,7 +212,21 @@ title: Newton's Fractal
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const fragShader = await response.text();
         sandbox.load(fragShader);
-        requestAnimationFrame(handleResize);
+        // Initialize after shader is loaded
+        requestAnimationFrame(() => {
+          resizeToCurrentDisplay();
+          sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+          sandbox.setUniform("u_zoom", zoom);
+          sandbox.setUniform("u_pan", pan[0], pan[1]);
+          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+          if (sandbox.render) sandbox.render();
+        });
+      } catch (err) {
+        console.error("Failed to load shader:", err);
+        const ctx = canvas.getContext("2d");
+        ctx.fillText("Error loading shader", 20, 20);
+        return;
+      }
         sandbox.forceRender && sandbox.forceRender(); // initial render
       } catch (err) {
         console.error("Failed to load shader:", err);
