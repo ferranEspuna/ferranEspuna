@@ -254,7 +254,7 @@ title: Newton's Fractal
 
       window.addEventListener("mouseup", (e) => { if (e.button === 0) isDragging = false; });
 
-      window.addEventListener("mousemove", (e) => {
+      canvas.addEventListener("mousemove", (e) => {
         const [shaderX, shaderY] = getShaderMouse(e);
         if (isDragging && interactionMode === 'pan') {
           const deltaX_css = e.clientX - lastMousePos.x;
