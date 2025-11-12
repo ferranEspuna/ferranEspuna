@@ -42,7 +42,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 
 ### Master’s degree in Advanced Mathematics and Mathematical Engineering | UPC
 **June 2025**
-
+- GPA: 9.45/10.0
 - Courses: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics, Graph Theory, Computational Complexity, Seminar on Algebra, Geometry and Discrete Mathematics.
 - Master's Thesis: Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
   
