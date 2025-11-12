@@ -43,7 +43,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ### Master’s degree in Advanced Mathematics and Mathematical Engineering | UPC
 **June 2025**
 
-- Courses so far: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics and Graph Theory.
+- Courses: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics, Graph Theory, Computational Complexity, Seminar on Algebra, Geometry and Discrete Mathematics.
 - Master's Thesis: Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
   
 ### Double Degree in Mathematics and Computer Science | UB
@@ -57,7 +57,7 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ### **A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages** — Jorge Palomar et al. (2024)
 Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation, European Language Resource Association and the International Committee on Computational Linguistics. [2024.lrec-main.31](https://aclanthology.org/2024.lrec-main.31/)
 
-### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025).
+### **Finding Partite Hypergraphs Efficiently** — Ferran Espuña (2025)
 Preprint currently under review for publication. [arXiv:2508.10641 [math.CO]](https://arxiv.org/abs/2508.10641)
 
 ## Skills
