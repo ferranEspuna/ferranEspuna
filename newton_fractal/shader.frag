@@ -27,6 +27,23 @@ float circle(vec2 uv, vec2 c, float r) {
     return 1.0 - smoothstep(r * 0.85, r, d);
 }
 
+float line(vec2 uv, vec2 a, vec2 b, float thick){
+	vec2 ab = b - a;
+	vec2 ax = uv - a;
+	if (dot(ab, ax) < 0.0){
+		return 0.0;
+	}
+	if (dot(ab, ax) > dot(ab, ab)){
+		return 0.0;
+	}
+
+	float perc = dot(ab, ax) / dot(ab, ab);
+	vec2 closest = a + perc * ab;
+	float dist = length(uv - closest);
+
+	return 1.0 - smoothstep(thick * 0.85, thick, dist);
+}
+
 vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
     for (int i = 0; i < MAX_ITERS; ++i) {
         if (float(i) >= u_iterations) break;
@@ -65,6 +82,7 @@ void main() {
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
     color = mix(color, one, circle(uv, root2, dot_r));
+	color = mix(color, one, line(uv, vec2(-1.0, -1.0), vec2(1.0, 1.0), 0.01 * u_zoom));
 
     gl_FragColor = vec4(color, 1.0);
 }
