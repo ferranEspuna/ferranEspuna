@@ -97,7 +97,7 @@ title: Newton's Fractal
   <div class="controls">
     <label for="iterSlider">Iterations:</label>
     <input type="range" id="iterSlider" min="0" max="100" value="10">
-    <span id="iterValue">5</span>
+    <span id="iterValue">10</span>
     <br>
     <input type="checkbox" id="showPathToggle" style="margin-top: 0.5em;">
     <label for="showPathToggle">Show Path</label>
@@ -215,8 +215,6 @@ title: Newton's Fractal
         canvas.width = Math.round(cssWidth * dpr);
         canvas.height = Math.round(cssHeight * dpr);
         sandbox.resize();
-        console.log(canvas.width);
-        console.log(canvas.height);
       }
 
       function handleResize() { resizeToCurrentDisplay(); }
@@ -226,22 +224,26 @@ title: Newton's Fractal
       // -------------------
       const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
       try {
-        const response = await fetch(fragUrl, { mode: "same-origin" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const fragShader = await response.text();
-        sandbox.load(fragShader);
-        // Initialize after shader is loaded
-        requestAnimationFrame(() => {
-          resizeToCurrentDisplay();
-          sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-          sandbox.setUniform("u_zoom", zoom);
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
-          sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-          // NEW UNIFORMS
-          sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
-          sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
-          if (sandbox.render) sandbox.render();
-        });
+      const response = await fetch(fragUrl, { mode: "same-origin" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const fragShader = await response.text();
+      	sandbox.load(fragShader);
+
+	// ---- FIX: robust 2-frame initialization ----
+	requestAnimationFrame(() => {
+  	requestAnimationFrame(() => {
+    	resizeToCurrentDisplay();  // ensure correct framebuffer size
+
+    	sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+    	sandbox.setUniform("u_zoom", zoom);
+    	sandbox.setUniform("u_pan", pan[0], pan[1]);
+    	sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+    	sandbox.setUniform("u_initial_point", pathOrigin[0], pathOrigin[1]);
+    	sandbox.setUniform("u_show_path", pathOriginToggle.checked ? 1 : 0);
+	if (sandbox.forceRender) sandbox.forceRender();
+	});
+	});
+
       } catch (err) {
         console.error("Failed to load shader:", err);
         const ctx = canvas.getContext("2d");
@@ -372,17 +374,28 @@ title: Newton's Fractal
       
           const dynamicRadius = rootTouchRadius * zoom; // scale with zoom
           
-          // MODIFIED: Check against the active target
-          const targetPos = (showPath && controlPathOrigin) ? pathOrigin : rootPosition;
-      
+          // Check proximity to both, path origin takes priority
+          const distToRoot = distance2D([x, y], rootPosition);
+          const distToPath = showPath ? distance2D([x, y], pathOrigin) : Infinity; // Only check path if shown
+
           if (timeSinceLastTap < doubleTapThreshold) {
-            touchMode = 'root'; // double-tap + drag
-          } else if (distance2D([x, y], targetPos) < dynamicRadius) {
-            touchMode = 'root'; // touch near active target
+            // Double-tap-drag: behavior depends on 'controlPathOrigin' toggle
+            if (showPath && controlPathOrigin) {
+              touchMode = 'movePathOrigin';
+            } else {
+              touchMode = 'moveRoot';
+            }
           } else {
-            touchMode = null;
+            // Single-tap-drag: behavior depends on proximity, path origin takes priority
+            if (showPath && distToPath < dynamicRadius) {
+              touchMode = 'movePathOrigin';
+            } else if (distToRoot < dynamicRadius) {
+              touchMode = 'moveRoot';
+            } else {
+              touchMode = null;
+            }
           }
-      
+
           touchStartPos = { x: ongoingTouches[0].clientX, y: ongoingTouches[0].clientY };
           lastTapTime = now;
         } else if (ongoingTouches.length === 2) {
@@ -394,16 +407,14 @@ title: Newton's Fractal
         e.preventDefault();
         if (e.touches.length === 2) touchMode = 'pan';
       
-        // MODIFIED LOGIC
-        if (touchMode === 'root' && e.touches.length === 1) {
+        if (touchMode === 'movePathOrigin' && e.touches.length === 1) {
           const [x, y] = getTouchPos(e.touches[0]);
-          if (showPath && controlPathOrigin) {
-            pathOrigin = [x, y];
-            sandbox.setUniform("u_path_origin", x, y);
-          } else {
-            rootPosition = [x, y];
-            sandbox.setUniform("u_root_position", x, y);
-          }
+          pathOrigin = [x, y];
+          sandbox.setUniform("u_path_origin", x, y);
+        } else if (touchMode === 'moveRoot' && e.touches.length === 1) {
+          const [x, y] = getTouchPos(e.touches[0]);
+          rootPosition = [x, y];
+          sandbox.setUniform("u_root_position", x, y);
         } else if (touchMode === 'pan' && e.touches.length === 2) {
           const t0 = e.touches[0];
           const t1 = e.touches[1];
@@ -412,8 +423,11 @@ title: Newton's Fractal
       
           const prevDist = Math.hypot(prevT0.clientX - prevT1.clientX, prevT0.clientY - prevT1.clientY);
           const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
-          const zoomFactor = prevDist / newDist;
-          zoom *= zoomFactor;
+          // avoid division by zero
+          if (prevDist > 0 && newDist > 0) {
+            const zoomFactor = prevDist / newDist;
+            zoom *= zoomFactor;
+          }
       
           const prevMidX = (prevT0.clientX + prevT1.clientX)/2;
           const prevMidY = (prevT0.clientY + prevT1.clientY)/2;
@@ -475,3 +489,4 @@ title: Newton's Fractal
   </script>
 </body>
 </html>
+
