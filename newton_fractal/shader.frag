@@ -68,7 +68,7 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
 float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom) {
     
     vec2 z0 = u_path_origin; // Use uniform for start point
-	float final = circle(z, z0, 0.01 * zoom);
+	float final = circle(z, z0, 0.015 * zoom);
 	vec2 new_z0;
 
 	for (int i = 0; i < MAX_ITERS; ++i) {
@@ -80,7 +80,7 @@ float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom) {
         vec2 der = cmul(a, b) + cmul(b, c) + cmul(c, a);
 		new_z0 = z0 - cmul(f, cinv(der));
 		final = max(final, 0.7 * segment(z, z0, new_z0, 0.005 * zoom));
-		final = max(final, circle(z, new_z0, 0.015 * zoom));
+		final = max(final, circle(z, new_z0, 0.01 * zoom));
 		z0 = new_z0;
     }
     return final;
@@ -111,12 +111,11 @@ void main() {
     vec3 one = vec3(1.0);
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
-    color = mix(color, 0.8 * one, circle(uv, root2, dot_r));
+    color = mix(color, 0.6 * one, circle(uv, root2, dot_r));
     
     // MODIFIED: Use new uniforms to toggle path and origin drawing
     float path_val = newton_path(uv, root0, root1, root2, u_zoom);
     color = mix(color, one, path_val * u_show_path);
-    color = mix(color, one, circle(uv, u_path_origin, dot_r) * u_show_path);
 
     gl_FragColor = vec4(color, 1.0);
 }
