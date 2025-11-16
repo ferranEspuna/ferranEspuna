@@ -27,8 +27,12 @@ float circle(vec2 uv, vec2 c, float r) {
     return 1.0 - smoothstep(r * 0.85, r, d);
 }
 
-float line(vec2 uv, vec2 a, vec2 b, float thick){
+float segment(vec2 uv, vec2 a, vec2 b, float thick){
 	vec2 ab = b - a;
+	float dab = dot(ab, ab);
+	if (10.0 * dab < thick){
+		return 0.0;
+	}
 	vec2 ax = uv - a;
 	if (dot(ab, ax) < 0.0){
 		return 0.0;
@@ -57,6 +61,27 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
     return z;
 }
 
+float newton_path(vec2 z, vec2 z0, vec2 root0, vec2 root1, vec2 root2, float zoom) {
+    
+	float final = circle(z, z0, 0.01 * zoom);
+	vec2 new_z0;
+
+	for (int i = 0; i < MAX_ITERS; ++i) {
+        if (float(i) >= u_iterations) break;
+        vec2 a = z0 - root0;
+        vec2 b = z0 - root1;
+        vec2 c = z0 - root2;
+        vec2 f = cmul(cmul(a, b), c);
+        vec2 der = cmul(a, b) + cmul(b, c) + cmul(c, a);
+        new_z0 = z0 - cmul(f, cinv(der));
+		final = max(final, 0.7 * segment(z, z0, new_z0, 0.005 * zoom));
+		final = max(final, circle(z, new_z0, 0.015 * zoom));
+		z0 = new_z0;
+    }
+    return final;
+}
+
+
 void main() {
     float small_resol = min(u_resolution.x, u_resolution.y);
     // MODIFIED UV CALCULATION
@@ -82,7 +107,7 @@ void main() {
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
     color = mix(color, one, circle(uv, root2, dot_r));
-	color = mix(color, one, line(uv, vec2(-1.0, -1.0), vec2(1.0, 1.0), 0.01 * u_zoom));
+	color = mix(color, one, newton_path(uv, vec2(0.0, 1.0), root0, root1, root2, u_zoom));
 
     gl_FragColor = vec4(color, 1.0);
 }
