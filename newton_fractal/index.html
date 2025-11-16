@@ -99,6 +99,14 @@ title: Newton's Fractal
     <input type="range" id="iterSlider" min="0" max="100" value="10">
     <span id="iterValue">5</span>
     <br>
+    <input type="checkbox" id="showPathToggle" style="margin-top: 0.5em;">
+    <label for="showPathToggle">Show Path</label>
+    
+    <span id="pathOriginControl" style="display: none; margin-left: 1em;">
+      <input type="checkbox" id="pathOriginToggle">
+      <label for="pathOriginToggle">Control Path Origin</label>
+    </span>
+    <br>
     <button id="fullscreenBtn">Fullscreen</button>
   </div>
 
@@ -111,6 +119,11 @@ title: Newton's Fractal
       const iterDisplay = document.getElementById("iterValue");
       const fullscreenBtn = document.getElementById("fullscreenBtn");
       const descriptionEl = document.getElementById("description");
+      // NEW DOM ELEMENTS
+      const showPathToggle = document.getElementById("showPathToggle");
+      const pathOriginControl = document.getElementById("pathOriginControl");
+      const pathOriginToggle = document.getElementById("pathOriginToggle");
+      
       const sandbox = new GlslCanvas(canvas);
 
       // -------------------
@@ -133,8 +146,9 @@ title: Newton's Fractal
         • Two of the roots are fixed in place (black dots).<br>
         • <strong>Right-click</strong> on the image to toggle between <em>Root Placement Mode</em> and <em>Panning Mode</em>.<br>
         • <em>Panning mode:</em> <strong>Click & drag</strong> to pan the view, <strong>scroll</strong> to zoom around the mouse.<br>
-        • <em>Root Placement Mode:</em> <strong>Move the mouse</strong> to move the third root (white dot).<br>
+        • <em>Root Placement Mode:</em> <strong>Move the mouse</strong> to move the third root (gray dot) or the path origin (if enabled).<br>
         • Use the <strong>Iterations</strong> slider to control the number of Newton iterations.<br>
+        • Use the <strong>toggles</strong> to show an iteration path and switch control to its origin point (big white dot).<br>
         • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
       </p>
       `;
@@ -143,10 +157,11 @@ title: Newton's Fractal
       <p>
         <strong>How to interact (mobile):</strong><br>
         • Two of the roots are fixed in place (black dots).<br>
-        • <strong>Move the third root (white dot):</strong> Drag a single finger <em>on top of current third root</em> or <em>double-tap + drag</em> anywhere.<br>
+        • <strong>Move the third root (gray dot) / path origin:</strong> Drag a single finger <em>on top of the active gray dot</em> or <em>double-tap + drag</em> anywhere.<br>
         • <strong>Pan:</strong> Drag with two fingers.<br>
         • <strong>Zoom:</strong> Pinch with two fingers.<br>
         • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
+        • Use the <strong>toggles</strong> to show an iteration path and switch control to its origin point (big white dot).<br>
         • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
       </p>
       `;
@@ -162,6 +177,11 @@ title: Newton's Fractal
       let zoom = 1.0;
       let pan = [0.0, 0.0];
       let rootPosition = [0.0, 0.866025];
+      // NEW STATE
+      let showPath = false;
+      let controlPathOrigin = false;
+      let pathOrigin = [0.0, 1.0]; // Default path start
+      
       let isDragging = false;
       let lastMousePos = { x: 0, y: 0 };
       let ongoingTouches = [];
@@ -217,6 +237,9 @@ title: Newton's Fractal
           sandbox.setUniform("u_zoom", zoom);
           sandbox.setUniform("u_pan", pan[0], pan[1]);
           sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+          // NEW UNIFORMS
+          sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+          sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
           if (sandbox.render) sandbox.render();
         });
       } catch (err) {
@@ -230,12 +253,39 @@ title: Newton's Fractal
       sandbox.setUniform("u_zoom", zoom);
       sandbox.setUniform("u_pan", pan[0], pan[1]);
       sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+      // NEW UNIFORMS
+      sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+      sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
       iterDisplay.textContent = slider.value;
 
       slider.addEventListener("input", () => {
         const iterations = parseInt(slider.value, 10);
         sandbox.setUniform("u_iterations", iterations);
         iterDisplay.textContent = iterations;
+      });
+      
+      // -------------------
+      // NEW TOGGLE LISTENERS
+      // -------------------
+      showPathToggle.addEventListener("change", () => {
+        showPath = showPathToggle.checked;
+        sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+        
+        if (showPath) {
+          pathOriginControl.style.display = "inline"; // Show the second toggle
+        } else {
+          pathOriginControl.style.display = "none"; // Hide it
+          // Also uncheck and reset the controlPathOrigin state
+          if (controlPathOrigin) {
+            controlPathOrigin = false;
+            pathOriginToggle.checked = false;
+          }
+        }
+      });
+
+      pathOriginToggle.addEventListener("change", () => {
+        controlPathOrigin = pathOriginToggle.checked;
+        // No uniform change, just state
       });
 
       // -------------------
@@ -275,8 +325,14 @@ title: Newton's Fractal
           sandbox.setUniform("u_pan", pan[0], pan[1]);
           lastMousePos = { x: e.clientX, y: e.clientY };
         } else if (interactionMode === 'root') {
-          rootPosition = [shaderX, shaderY];
-          sandbox.setUniform("u_root_position", shaderX, shaderY);
+          // MODIFIED LOGIC
+          if (showPath && controlPathOrigin) {
+            pathOrigin = [shaderX, shaderY];
+            sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
+          } else {
+            rootPosition = [shaderX, shaderY];
+            sandbox.setUniform("u_root_position", shaderX, shaderY);
+          }
         }
       });
 
@@ -315,11 +371,14 @@ title: Newton's Fractal
           const timeSinceLastTap = now - lastTapTime;
       
           const dynamicRadius = rootTouchRadius * zoom; // scale with zoom
+          
+          // MODIFIED: Check against the active target
+          const targetPos = (showPath && controlPathOrigin) ? pathOrigin : rootPosition;
       
           if (timeSinceLastTap < doubleTapThreshold) {
             touchMode = 'root'; // double-tap + drag
-          } else if (distance2D([x, y], rootPosition) < dynamicRadius) {
-            touchMode = 'root'; // touch near root, radius depends on zoom
+          } else if (distance2D([x, y], targetPos) < dynamicRadius) {
+            touchMode = 'root'; // touch near active target
           } else {
             touchMode = null;
           }
@@ -335,10 +394,16 @@ title: Newton's Fractal
         e.preventDefault();
         if (e.touches.length === 2) touchMode = 'pan';
       
+        // MODIFIED LOGIC
         if (touchMode === 'root' && e.touches.length === 1) {
           const [x, y] = getTouchPos(e.touches[0]);
-          rootPosition = [x, y];
-          sandbox.setUniform("u_root_position", x, y);
+          if (showPath && controlPathOrigin) {
+            pathOrigin = [x, y];
+            sandbox.setUniform("u_path_origin", x, y);
+          } else {
+            rootPosition = [x, y];
+            sandbox.setUniform("u_root_position", x, y);
+          }
         } else if (touchMode === 'pan' && e.touches.length === 2) {
           const t0 = e.touches[0];
           const t1 = e.touches[1];
@@ -378,6 +443,9 @@ title: Newton's Fractal
         sandbox.setUniform("u_zoom", zoom);
         sandbox.setUniform("u_pan", pan[0], pan[1]);
         sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        // NEW UNIFORMS
+        sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+        sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
         requestAnimationFrame(() => sandbox.forceRender && sandbox.forceRender());
       }
       
