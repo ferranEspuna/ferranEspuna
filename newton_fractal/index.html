@@ -210,43 +210,42 @@ title: Newton's Fractal
       // -------------------
       const baseText = `
         <p>
-          This visualization shows the <strong>Newton fractal</strong> for a cubic polynomial with three roots, shown as black dots.  
-          Each pixel represents an initial complex number that is iteratively updated using Newton’s method to find a root.  
-          The color indicates which root the iteration converges to: red, green, and blue correspond to closeness to each of the three roots.  
-          Intermediate colors appear where points end up close to more than one root, while very dark regions represent points far from all roots.  
-          As the number of iterations increases, most points are drawn toward one of the three roots, dividing the plane into three <strong>basins of attraction</strong>.  
-          These basins of attraction are typically disconnected, and the boundaries between them exhibit a highly chaotic, fractal behaviour.
+          This visualization renders the <strong>Newton fractal</strong> for a cubic polynomial with three roots (marked as two black dots and one gray dot that you can control the position of).
+          Each pixel represents a starting point on the complex plane. We apply Newton's method to these points to find one of the polynomial's roots.
+          The pixel's color indicates which root the method converges to: red, green, and blue correspond to the three roots.
+          Intermediate or dark colors appear where points take longer to converge or fail to converge entirely.
+          With enough iterations, the plane divides into three <strong>basins of attraction</strong>.
+          While the interiors of these basins are smooth, the boundaries are fractals: complex, chaotic regions where the smallest shift in starting position can lead to a completely different outcome.
         </p>
         <p>
-          Use the <strong>Show Path</strong> toggle to visualize the trajectory of a single point. 
-          When <strong>Track Center</strong> is enabled, the path starts at the centroid of the roots. 
-          <em>Mathematical curiosity:</em> It can be proven that if the Newton's method process has an attracting cycle (a loop where points fail to converge to a root), the centroid of the roots is guaranteed to fall into its basin of attraction.
+          <em>Mathematical Insight:</em> While Newton's method is efficient, it is not foolproof. It can get trapped in an <strong>attracting cycle</strong>, where the value oscillates endlessly without ever reaching a root.
+          For cubic polynomials, the <strong>centroid</strong> of the roots acts as a "canary in the coal mine". If an attracting cycle exists, the centroid is mathematically guaranteed to be pulled into it.
+          The <strong>Parameter Space</strong> visualization (right) uses this fact. Here, each pixel represents a possible position for the third root (the movable gray dot).
+          The color shows the fate of the centroid for that specific configuration. By exploring this space, you can find the "problematic" polynomials where Newton's method fails.
         </p>
       `;
 
       const desktopInstructions = `
       <p>
-        <strong>How to interact (desktop):</strong><br>
-        • Two of the roots are fixed in place (black dots).<br>
-        • <strong>Right-click</strong> on the image to toggle between <em>Root Placement Mode</em> and <em>Panning Mode</em>.<br>
-        • <em>Panning mode:</em> <strong>Click & drag</strong> to pan the view, <strong>scroll</strong> to zoom around the mouse.<br>
-        • <em>Root Placement Mode:</em> <strong>Move the mouse</strong> to move the third root (gray dot) or the path origin (if enabled).<br>
-        • Use the <strong>Iterations</strong> slider to control the number of Newton iterations.<br>
-        • Use the <strong>toggles</strong> to show an iteration path and switch control to its origin point (big white dot).<br>
-        • Click <strong>Fullscreen</strong> to view the fractal in immersive mode.
+        <strong>Controls (Desktop):</strong><br>
+        • <strong>Navigate:</strong> Right-click to toggle between <em>Move Mode</em> and <em>Pan/Zoom Mode</em>.<br>
+        &nbsp;&nbsp;- <em>Pan/Zoom Mode:</em> Click & drag to pan, scroll to zoom.<br>
+        &nbsp;&nbsp;- <em>Move Mode:</em> Move your mouse to position the third root (gray dot) or the path origin.<br>
+        • <strong>Visualization:</strong> Use the slider to adjust the number of iterations.<br>
+        • <strong>Analysis:</strong><br>
+        &nbsp;&nbsp;- <em>Show Path:</em> Visualizes the individual steps of Newton's method for a single point (white dot).<br>
+        &nbsp;&nbsp;- <em>Track Center:</em> Locks the path's starting point to the centroid of the roots (critical for analyzing cycles).<br>
+        • <strong>Fullscreen:</strong> Available for both views.
       </p>
       `;
 
       const mobileInstructions = `
       <p>
-        <strong>How to interact (mobile):</strong><br>
-        • Two of the roots are fixed in place (black dots).<br>
-        • <strong>Move the third root (gray dot) / path origin:</strong> Drag a single finger <em>on top of the active gray dot</em> or <em>double-tap + drag</em> anywhere.<br>
-        • <strong>Pan:</strong> Drag with two fingers.<br>
-        • <strong>Zoom:</strong> Pinch with two fingers.<br>
-        • Use the <strong>iterations</strong> slider to control the number of Newton iterations.<br>
-        • Use the <strong>toggles</strong> to show an iteration path and switch control to its origin point (big white dot).<br>
-        • Tap <strong>Fullscreen</strong> to view the fractal in immersive mode.
+        <strong>Controls (Mobile):</strong><br>
+        • <strong>Move Root/Point:</strong> Drag the gray or white dots with one finger. (Double-tap and drag anywhere if precise selection is difficult).<br>
+        • <strong>Navigate:</strong> Pan with two fingers, pinch to zoom.<br>
+        • <strong>Analysis:</strong> Use the toggles to show the iteration path or track the centroid.<br>
+        • <strong>Fullscreen:</strong> Tap the button for an immersive view.
       </p>
       `;
 
