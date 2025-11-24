@@ -13,6 +13,7 @@ uniform vec2 u_root_position;
 // ADDED FOR PATH TOGGLE/CONTROL
 uniform float u_show_path;
 uniform vec2 u_path_origin;
+uniform float u_screen_ratio; // New uniform
 
 #define MAX_ITERS 100
 
@@ -65,10 +66,11 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
 }
 
 // MODIFIED: Takes u_path_origin directly instead of z0 argument
-float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom) {
+float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom, float ratio) {
     
     vec2 z0 = u_path_origin; // Use uniform for start point
-	float final = circle(z, z0, 0.015 * zoom);
+    // Scale path elements by ratio too
+	float final = circle(z, z0, 0.01 * zoom / ratio);
 	vec2 new_z0;
 
 	for (int i = 0; i < MAX_ITERS; ++i) {
@@ -79,11 +81,18 @@ float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom) {
         vec2 f = cmul(cmul(a, b), c);
         vec2 der = cmul(a, b) + cmul(b, c) + cmul(c, a);
 		new_z0 = z0 - cmul(f, cinv(der));
-		final = max(final, 0.7 * segment(z, z0, new_z0, 0.005 * zoom));
-		final = max(final, circle(z, new_z0, 0.01 * zoom));
+		final = max(final, 0.7 * segment(z, z0, new_z0, 0.005 * zoom / ratio));
+		final = max(final, circle(z, new_z0, 0.01 * zoom / ratio));
 		z0 = new_z0;
     }
     return final;
+}
+
+vec3 color(vec2 uv, vec2 root0, vec2 root1, vec2 root2) {
+    float r = exp(-1.5 * length(uv - root0) / min(length(uv - root1), 1.0) / min(length(uv - root2), 1.0));
+    float g = exp(-1.5 * length(uv - root1) / min(length(uv - root0), 1.0) / min(length(uv - root2), 1.0));
+    float b = exp(-1.5 * length(uv - root2) / min(length(uv - root0), 1.0) / min(length(uv - root1), 1.0));
+    return vec3(r, g, b);
 }
 
 
@@ -100,13 +109,11 @@ void main() {
     // Use the uniform directly
 
     vec2 out_comp = newton(uv, root0, root1, root2);
-    float r = exp(-1.5 * length(out_comp - root0));
-    float g = exp(-1.5 * length(out_comp - root1));
-    float b = exp(-1.5 * length(out_comp - root2));
+    vec3 color = color(out_comp, root0, root1, root2);
 
-    vec3 color = vec3(r, g, b);
     // We need to apply zoom to the dot radius so it stays the same size on screen
-    float dot_r = 0.02 * u_zoom;
+    // And divide by u_screen_ratio to keep it fixed relative to physical screen
+    float dot_r = 0.015 * u_zoom / u_screen_ratio;
     vec3 zero = vec3(0.0);
     vec3 one = vec3(1.0);
     color = mix(color, zero, circle(uv, root0, dot_r));
@@ -114,7 +121,7 @@ void main() {
     color = mix(color, 0.6 * one, circle(uv, root2, dot_r));
     
     // MODIFIED: Use new uniforms to toggle path and origin drawing
-    float path_val = newton_path(uv, root0, root1, root2, u_zoom);
+    float path_val = newton_path(uv, root0, root1, root2, u_zoom, u_screen_ratio);
     color = mix(color, one, path_val * u_show_path);
 
     gl_FragColor = vec4(color, 1.0);
