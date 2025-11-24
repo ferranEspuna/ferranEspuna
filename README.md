@@ -1,13 +1,14 @@
 # Ferran Espuña: Deep Learning Research Engineer, Mathematician and Computer Scientist
 
 ## About Me
-I have a double Bachelor's Degree in mathematics and computer science, and a Master's Degree in Advanced Mathematics. I am currently working in artificial intelligence research. I excel at proposing novel solutions to challenging problems, and have the technical skills to execute them and overcome obstacles independently, while coordingating as part of a larger team.
+I have a double Bachelor's Degree in mathematics and computer science, and a Master's Degree in Advanced Mathematics. I am currently working in artificial intelligence research. I excel at proposing novel solutions to challenging problems, and have the technical skills to execute them and overcome obstacles independently, while coordinating as part of a larger team.
 
 ## Contact Info
 
 - **Email**: [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com)
 - **Location**: Barcelona, Spain
 - **Phone**: +34 600 24 69 87
+- **GitHub**: [ferranEspuna](https://github.com/ferranEspuna)
 
 ## Professional Experience
 
@@ -41,15 +42,16 @@ Contributed to the European research project ChipScope aimed at creating a high-
 ## Education
 
 ### Master’s degree in Advanced Mathematics and Mathematical Engineering | UPC
-**June 2025**
+**2025**
 - GPA: 9.45/10.0
 - Courses: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics, Graph Theory, Computational Complexity, Seminar on Algebra, Geometry and Discrete Mathematics.
 - Master's Thesis: Finding Partite Hypergraphs Efficiently. In it, I apply elementary results in extremal graph theory to create a polynomial-time algorithm that finds large k-partite subgraphs of k-graphs, generating a construction that asymptotically matches the best known bounds for existence.
   
 ### Double Degree in Mathematics and Computer Science | UB
-**February 2023**
+**2023**
 
 - GPA: 9.0/10
+- Extraordinary Bacherlor's Degree Award
 - Achieved honors in courses like Linear Algebra, Algebraic Equations, Complex and Real Analysis, Differential Equations, Advanced Algorithms, and my Bachelor's Thesis, among many others.
 
 ## Publications
@@ -62,12 +64,11 @@ Preprint currently under review for publication. [arXiv:2508.10641 [math.CO]](ht
 
 ## Skills
 
-- **Programming Languages and Technologies**:
-  - Python (NumPy, Pandas, TensorFlow, PyTorch, NeMo Framework)
-  - Slurm
-  - C/C++
-  - Bash
-  - Java
+- **Technologies and Tools**:
+  - Data Science: Pandas, NumPy
+  - Deep Learning: PyTorch, NeMo FW, HF Transformers, Megatron, Deepspeed, WandB
+  - HPC & Ops: Linux, Bash, Slurm, Git, Docker, Singularity
+  - Programming Languages: Python, Java, C/C++
 - **Languages**:
   - Spanish (native)
   - Catalan (native)
@@ -83,4 +84,3 @@ Below are some selected side-projects that reflect my interest in mathematics, p
 
 - **Stanford University**: Machine Learning Specialization
 - **IELTS Academic**: 8.5/9 overall band score
-- **Driver’s License**: B permit in Spain
