@@ -113,6 +113,24 @@ title: Newton's Fractal
       /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
       width: 100% !important;
       height: 100% !important;
+      aspect-ratio: auto !important;
+    }
+
+    /* Also target the canvas when its parent wrapper is fullscreen */
+    .canvas-wrapper:fullscreen canvas {
+      width: 100% !important;
+      height: 100% !important;
+      aspect-ratio: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+    }
+
+    .canvas-wrapper:-webkit-full-screen canvas {
+      width: 100% !important;
+      height: 100% !important;
+      aspect-ratio: auto !important;
+      max-width: none !important;
+      max-height: none !important;
     }
   </style>
 </head>
