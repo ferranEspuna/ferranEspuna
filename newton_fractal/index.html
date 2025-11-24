@@ -113,21 +113,6 @@ title: Newton's Fractal
       /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
       width: 100% !important;
       height: 100% !important;
-      aspect-ratio: auto !important;
-      /* Allow filling the screen */
-    }
-
-    /* Also target the canvas when its parent is fullscreen */
-    .canvas-wrapper:fullscreen canvas {
-      width: 100% !important;
-      height: 100% !important;
-      aspect-ratio: auto !important;
-    }
-
-    .canvas-wrapper:-webkit-full-screen canvas {
-      width: 100% !important;
-      height: 100% !important;
-      aspect-ratio: auto !important;
     }
   </style>
 </head>
@@ -319,35 +304,44 @@ title: Newton's Fractal
       function handleResize() { resizeToCurrentDisplay(); }
 
       // -------------------
-      // Load shader
+      // Load both shaders
       // -------------------
       const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
+      const paramFragUrl = new URL(paramCanvas.getAttribute("data-fragment-url"), window.location.href);
+
       try {
+        // Load main shader
         const response = await fetch(fragUrl, { mode: "same-origin" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const fragShader = await response.text();
         sandbox.load(fragShader);
 
-        // ---- FIX: robust 2-frame initialization ----
+        // Load parameter space shader
+        const paramResponse = await fetch(paramFragUrl, { mode: "same-origin" });
+        if (!paramResponse.ok) throw new Error(`HTTP ${paramResponse.status}`);
+        const paramFragShader = await paramResponse.text();
+        paramSandbox.load(paramFragShader);
+
+        // ---- FIX: robust 2-frame initialization for BOTH shaders ----
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            resizeToCurrentDisplay();  // ensure correct framebuffer size
+            resizeToCurrentDisplay();  // ensure correct framebuffer size for both canvases
 
+            // Initialize main sandbox
             sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
             sandbox.setUniform("u_zoom", zoom);
             sandbox.setUniform("u_pan", pan[0], pan[1]);
             sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-            sandbox.setUniform("u_initial_point", pathOrigin[0], pathOrigin[1]);
-            sandbox.setUniform("u_show_path", pathOriginToggle.checked ? 1 : 0);
-            if (sandbox.forceRender) sandbox.forceRender();
+            sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+            sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
 
-            // Init param sandbox
+            // Initialize param sandbox
             paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
             paramSandbox.setUniform("u_zoom", zoom);
             paramSandbox.setUniform("u_pan", pan[0], pan[1]);
             paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
 
-            // Set initial screen ratio
+            // Set screen ratio for both
             const dpr = window.devicePixelRatio || 1;
             const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
             const canvasMin = Math.min(canvas.width, canvas.height);
@@ -355,78 +349,18 @@ title: Newton's Fractal
             sandbox.setUniform("u_screen_ratio", screenRatio);
             paramSandbox.setUniform("u_screen_ratio", screenRatio);
 
+            // Force render both
+            if (sandbox.forceRender) sandbox.forceRender();
             if (paramSandbox.forceRender) paramSandbox.forceRender();
           });
         });
 
       } catch (err) {
-        console.error("Failed to load shader:", err);
+        console.error("Failed to load shaders:", err);
         const ctx = canvas.getContext("2d");
         ctx.fillText("Error loading shader", 20, 20);
         return;
       }
-
-      // Load parameter space shader
-      const paramFragUrl = new URL(paramCanvas.getAttribute("data-fragment-url"), window.location.href);
-      try {
-        const response = await fetch(paramFragUrl, { mode: "same-origin" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const fragShader = await response.text();
-        paramSandbox.load(fragShader);
-      } catch (err) {
-        console.error("Failed to load param shader:", err);
-      }
-
-      // Ensure param sandbox is initialized even if loaded later
-      // We do this by re-applying state after a short delay or when loaded
-      // But since we await fetch, it should be loaded. 
-      // Let's add a specific robust init for paramSandbox similar to the main one
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Re-trigger resize and state update for param sandbox specifically
-          const cssWidth2 = paramCanvas.clientWidth;
-          const cssHeight2 = paramCanvas.clientHeight;
-          const dpr = window.devicePixelRatio || 1;
-          paramCanvas.width = Math.round(cssWidth2 * dpr);
-          paramCanvas.height = Math.round(cssHeight2 * dpr);
-          paramSandbox.resize();
-
-          paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-          paramSandbox.setUniform("u_zoom", zoom);
-          paramSandbox.setUniform("u_pan", pan[0], pan[1]);
-          paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
-
-          const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-          const canvasMin = Math.min(canvas.width, canvas.height);
-          const screenRatio = canvasMin / screenMin;
-          paramSandbox.setUniform("u_screen_ratio", screenRatio);
-
-          if (paramSandbox.forceRender) paramSandbox.forceRender();
-        });
-      });
-
-      sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-      sandbox.setUniform("u_zoom", zoom);
-      sandbox.setUniform("u_pan", pan[0], pan[1]);
-      sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-      // NEW UNIFORMS
-      sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
-      sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
-
-      // Init param sandbox (outside async load just in case)
-      paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-      paramSandbox.setUniform("u_zoom", zoom);
-      paramSandbox.setUniform("u_pan", pan[0], pan[1]);
-      paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
-
-      // Initial screen ratio (outside async)
-      // This block is now redundant as resizeToCurrentDisplay is called on init and handles this.
-      // const dpr = window.devicePixelRatio || 1;
-      // const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-      // const canvasMin = Math.min(canvas.width, canvas.height);
-      // const screenRatio = canvasMin / screenMin;
-      // sandbox.setUniform("u_screen_ratio", screenRatio);
-      // paramSandbox.setUniform("u_screen_ratio", screenRatio);
 
       iterDisplay.textContent = slider.value;
 
