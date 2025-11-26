@@ -70,9 +70,7 @@ void main() {
     color = mix(color, zero, circle(uv, root1, dot_r));
     
 
-    float d_curr = length(uv - u_current_root2);
-    float ring = smoothstep(dot_r * 1.2, dot_r, d_curr) - smoothstep(dot_r * 0.8, dot_r * 0.6, d_curr);
-    color = mix(color, one, max(0.0, ring));
+    color = mix(color, 0.6 * one, circle(uv, u_current_root2, dot_r));
 
     gl_FragColor = vec4(color, 1.0);
 }

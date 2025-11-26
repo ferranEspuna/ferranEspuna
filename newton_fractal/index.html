@@ -145,6 +145,12 @@ title: Newton's Fractal
 
   <div class="description" id="description"></div>
 
+  <div class="controls" style="margin-bottom: 1em;">
+    <label for="iterSlider">Iterations:</label>
+    <input type="range" id="iterSlider" min="0" max="100" value="10">
+    <span id="iterValue">10</span>
+  </div>
+
   <div class="shader-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
     <div class="shader-window" style="flex: 1; min-width: 300px;">
       <h3>Phase Space</h3>
@@ -152,35 +158,34 @@ title: Newton's Fractal
         <button id="fullscreenBtnMain" class="fullscreen-btn">Fullscreen</button>
         <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="shader.frag"></canvas>
       </div>
+      <div class="controls"
+        style="margin-top: 0.5em; display: flex; flex-wrap: wrap; gap: 0.2em 1em; justify-content: center;">
+        <span style="white-space: nowrap;">
+          <input type="checkbox" id="showPathToggle">
+          <label for="showPathToggle">Show Path</label>
+        </span>
+
+        <span id="pathOriginControl" style="display: none; white-space: nowrap;">
+          <input type="checkbox" id="pathOriginToggle">
+          <label for="pathOriginToggle">Control Path Origin</label>
+        </span>
+        <span id="trackCenterControl" style="display: none; white-space: nowrap;">
+          <input type="checkbox" id="trackCenterToggle">
+          <label for="trackCenterToggle">Track Center</label>
+        </span>
+      </div>
     </div>
     <div class="shader-window" style="flex: 1; min-width: 300px;">
       <h3>Parameter Space</h3>
       <div class="canvas-wrapper" id="wrapperParam">
         <button id="fullscreenBtnParam" class="fullscreen-btn">Fullscreen</button>
+        <button id="resetViewBtnParam" class="fullscreen-btn" style="right: auto; left: 10px;">Reset View</button>
         <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="parameter_space.frag"></canvas>
       </div>
     </div>
   </div>
 
-  <div class="controls">
-    <label for="iterSlider">Iterations:</label>
-    <input type="range" id="iterSlider" min="0" max="100" value="10">
-    <span id="iterValue">10</span>
-    <br>
-    <input type="checkbox" id="showPathToggle" style="margin-top: 0.5em;">
-    <label for="showPathToggle">Show Path</label>
 
-    <span id="pathOriginControl" style="display: none; margin-left: 1em;">
-      <input type="checkbox" id="pathOriginToggle">
-      <label for="pathOriginToggle">Control Path Origin</label>
-    </span>
-    <span id="trackCenterControl" style="display: none; margin-left: 1em;">
-      <input type="checkbox" id="trackCenterToggle">
-      <label for="trackCenterToggle">Track Center</label>
-    </span>
-    </span>
-    <br>
-  </div>
 
   <script type="module">
     import GlslCanvas from "https://esm.run/glslCanvas";
@@ -201,6 +206,7 @@ title: Newton's Fractal
       const pathOriginToggle = document.getElementById("pathOriginToggle");
       const trackCenterControl = document.getElementById("trackCenterControl");
       const trackCenterToggle = document.getElementById("trackCenterToggle");
+      const resetViewBtnParam = document.getElementById("resetViewBtnParam");
 
       const sandbox = new GlslCanvas(canvas);
       const paramSandbox = new GlslCanvas(paramCanvas);
@@ -221,20 +227,22 @@ title: Newton's Fractal
           <em>Mathematical Insight:</em> While Newton's method is efficient, it is not foolproof. It can get trapped in an <strong>attracting cycle</strong>, where the value oscillates endlessly without ever reaching a root.
           For cubic polynomials, the <strong>centroid</strong> of the roots acts as a "canary in the coal mine". If an attracting cycle exists, the centroid is mathematically guaranteed to be pulled into it.
           The <strong>Parameter Space</strong> visualization (right) uses this fact. Here, each pixel represents a possible position for the third root (the movable gray dot).
-          The color shows the fate of the centroid for that specific configuration. By exploring this space, you can find the "problematic" polynomials where Newton's method fails.
+          The color shows the fate of the centroid for that specific configuration. By exploring this space, you can find the "problematic" polynomials where Newton's method fails,
+          represented as dark or intermediate-colored regions. Can you find any familiar patterns in these regions? What lengths of attracting cycles can you find?
         </p>
       `;
 
       const desktopInstructions = `
       <p>
         <strong>Controls (Desktop):</strong><br>
-        • <strong>Navigate:</strong> Right-click to toggle between <em>Move Mode</em> and <em>Pan/Zoom Mode</em>.<br>
+        • <strong>Navigate:</strong> Right-click <em>on a specific canvas</em> to toggle its mode between <em>Move Mode</em> and <em>Pan/Zoom Mode</em>.<br>
         &nbsp;&nbsp;- <em>Pan/Zoom Mode:</em> Click & drag to pan, scroll to zoom.<br>
         &nbsp;&nbsp;- <em>Move Mode:</em> Move your mouse to position the third root (gray dot) or the path origin.<br>
-        • <strong>Visualization:</strong> Use the slider to adjust the number of iterations.<br>
-        • <strong>Analysis:</strong><br>
+        • <strong>Iterations:</strong> Use the slider above to adjust the number of iterations.<br>
+        • <strong>Analysis:</strong> Controls below the Phase Space plot:<br>
         &nbsp;&nbsp;- <em>Show Path:</em> Visualizes the individual steps of Newton's method for a single point (white dot).<br>
-        &nbsp;&nbsp;- <em>Track Center:</em> Locks the path's starting point to the centroid of the roots (critical for analyzing cycles).<br>
+        &nbsp;&nbsp;- <em>Track Center:</em> Locks the path's starting point to the centroid of the roots.<br>
+        • <strong>Sync:</strong> Use the "Reset View" button on the Parameter Space to match the Phase Space view.<br>
         • <strong>Fullscreen:</strong> Available for both views.
       </p>
       `;
@@ -255,10 +263,20 @@ title: Newton's Fractal
       // -------------------
       // State
       // -------------------
-      let interactionMode = isMobile ? "root" : "pan";
+      let interactionModeMain = isMobile ? "root" : "pan";
+      let interactionModeParam = isMobile ? "root" : "pan";
+
       canvas.style.cursor = isMobile ? "crosshair" : "move";
-      let zoom = 1.0;
-      let pan = [0.0, 0.0];
+      paramCanvas.style.cursor = isMobile ? "crosshair" : "move";
+
+      // Independent state for Main Canvas
+      let zoomMain = 1.0;
+      let panMain = [0.0, 0.0];
+
+      // Independent state for Parameter Canvas
+      let zoomParam = 1.0;
+      let panParam = [0.0, 0.0];
+
       let rootPosition = [0.0, 0.866025];
       // NEW STATE
       let showPath = false;
@@ -272,6 +290,16 @@ title: Newton's Fractal
       let touchMode = null;
       let touchStartPos = null;
 
+      // Animation State
+      let animationFrameId = null;
+
+      function cancelAnimation() {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      }
+
       function getShaderMouse(event, targetCanvas) {
         const rect = targetCanvas.getBoundingClientRect();
         const x_css = event.clientX - rect.left;
@@ -279,7 +307,12 @@ title: Newton's Fractal
         const small_resol = Math.min(rect.width, rect.height);
         const uv_x = (2.0 * x_css - rect.width) / small_resol;
         const uv_y = (2.0 * (rect.height - y_css) - rect.height) / small_resol;
-        return [(uv_x * zoom) + pan[0], (uv_y * zoom) + pan[1]];
+
+        const isMain = targetCanvas === canvas;
+        const z = isMain ? zoomMain : zoomParam;
+        const p = isMain ? panMain : panParam;
+
+        return [(uv_x * z) + p[0], (uv_y * z) + p[1]];
       }
 
       function getTouchPos(touch, targetCanvas) {
@@ -289,7 +322,12 @@ title: Newton's Fractal
         const small_resol = Math.min(rect.width, rect.height);
         const uv_x = (2.0 * x_css - rect.width) / small_resol;
         const uv_y = (2.0 * (rect.height - y_css) - rect.height) / small_resol;
-        return [(uv_x * zoom) + pan[0], (uv_y * zoom) + pan[1]];
+
+        const isMain = targetCanvas === canvas;
+        const z = isMain ? zoomMain : zoomParam;
+        const p = isMain ? panMain : panParam;
+
+        return [(uv_x * z) + p[0], (uv_y * z) + p[1]];
       }
 
       function resizeToCurrentDisplay() {
@@ -315,7 +353,10 @@ title: Newton's Fractal
         const screenRatio = canvasMin / screenMin;
 
         sandbox.setUniform("u_screen_ratio", screenRatio);
-        paramSandbox.setUniform("u_screen_ratio", screenRatio);
+
+        const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
+        const paramScreenRatio = paramCanvasMin / screenMin;
+        paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
       }
 
       function handleResize() { resizeToCurrentDisplay(); }
@@ -346,16 +387,16 @@ title: Newton's Fractal
 
             // Initialize main sandbox
             sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-            sandbox.setUniform("u_zoom", zoom);
-            sandbox.setUniform("u_pan", pan[0], pan[1]);
+            sandbox.setUniform("u_zoom", zoomMain);
+            sandbox.setUniform("u_pan", panMain[0], panMain[1]);
             sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
             sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
             sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
 
             // Initialize param sandbox
             paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-            paramSandbox.setUniform("u_zoom", zoom);
-            paramSandbox.setUniform("u_pan", pan[0], pan[1]);
+            paramSandbox.setUniform("u_zoom", zoomParam);
+            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
             paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
 
             // Set screen ratio for both
@@ -364,11 +405,14 @@ title: Newton's Fractal
             const canvasMin = Math.min(canvas.width, canvas.height);
             const screenRatio = canvasMin / screenMin;
             sandbox.setUniform("u_screen_ratio", screenRatio);
-            paramSandbox.setUniform("u_screen_ratio", screenRatio);
+
+            const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
+            const paramScreenRatio = paramCanvasMin / screenMin;
+            paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
 
             // Force render both
-            if (sandbox.forceRender) sandbox.forceRender();
-            if (paramSandbox.forceRender) paramSandbox.forceRender();
+            if (sandbox.render) sandbox.render();
+            if (paramSandbox.render) paramSandbox.render();
           });
         });
 
@@ -438,25 +482,92 @@ title: Newton's Fractal
       });
 
       // -------------------
+      // Reset View Logic
+      // -------------------
+      function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      function animateReset(targetZoom, targetPan) {
+        cancelAnimation();
+
+        const startZoom = zoomParam;
+        const startPan = [...panParam];
+        const startTime = performance.now();
+        const duration = 500; // ms
+
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1.0);
+          const t = easeInOutCubic(progress);
+
+          // Interpolate Pan (Linear)
+          panParam[0] = startPan[0] + (targetPan[0] - startPan[0]) * t;
+          panParam[1] = startPan[1] + (targetPan[1] - startPan[1]) * t;
+
+          // Interpolate Zoom (Logarithmic for natural feel)
+          // log(z) = log(start) + t * (log(target) - log(start))
+          // z = exp(log(start) + ...)
+          const logStart = Math.log(startZoom);
+          const logTarget = Math.log(targetZoom);
+          zoomParam = Math.exp(logStart + (logTarget - logStart) * t);
+
+          paramSandbox.setUniform("u_zoom", zoomParam);
+          paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+          paramSandbox.setUniform("u_zoom", zoomParam);
+          paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+          if (paramSandbox.render) paramSandbox.render();
+
+          if (progress < 1.0) {
+            animationFrameId = requestAnimationFrame(step);
+          } else {
+            animationFrameId = null;
+          }
+        }
+
+        animationFrameId = requestAnimationFrame(step);
+      }
+
+      resetViewBtnParam.addEventListener("click", () => {
+        animateReset(zoomMain, panMain);
+      });
+
+      // -------------------
       // Desktop interactions
       // -------------------
       function handleContextMenu(e) {
         e.preventDefault();
-        if (interactionMode === 'root') {
-          interactionMode = 'pan';
-          canvas.style.cursor = 'move';
-          paramCanvas.style.cursor = 'move';
+        const targetCanvas = e.target;
+        const isMain = targetCanvas === canvas;
+
+        if (isMain) {
+          if (interactionModeMain === 'root') {
+            interactionModeMain = 'pan';
+            canvas.style.cursor = 'move';
+          } else {
+            interactionModeMain = 'root';
+            canvas.style.cursor = 'crosshair';
+          }
         } else {
-          interactionMode = 'root';
-          canvas.style.cursor = 'crosshair';
-          paramCanvas.style.cursor = 'crosshair';
+          if (interactionModeParam === 'root') {
+            interactionModeParam = 'pan';
+            paramCanvas.style.cursor = 'move';
+          } else {
+            interactionModeParam = 'root';
+            paramCanvas.style.cursor = 'crosshair';
+          }
         }
       }
       canvas.addEventListener("contextmenu", handleContextMenu);
       paramCanvas.addEventListener("contextmenu", handleContextMenu);
 
       function handleMouseDown(e) {
-        if (interactionMode === 'pan' && e.button === 0) {
+        cancelAnimation(); // User interaction stops animation
+        const targetCanvas = e.target;
+        const isMain = targetCanvas === canvas;
+        const currentMode = isMain ? interactionModeMain : interactionModeParam;
+
+        if (currentMode === 'pan' && e.button === 0) {
           isDragging = true;
           lastMousePos = { x: e.clientX, y: e.clientY };
         }
@@ -471,25 +582,38 @@ title: Newton's Fractal
         // Only process if target is one of our canvases
         if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
 
+        const isMain = targetCanvas === canvas;
         const [shaderX, shaderY] = getShaderMouse(e, targetCanvas);
-        if (isDragging && interactionMode === 'pan') {
+        const currentMode = isMain ? interactionModeMain : interactionModeParam;
+
+        if (isDragging && currentMode === 'pan') {
           const deltaX_css = e.clientX - lastMousePos.x;
           const deltaY_css = e.clientY - lastMousePos.y;
           const rect = targetCanvas.getBoundingClientRect();
           const small_resol = Math.min(targetCanvas.width, targetCanvas.height);
-          const deltaX_shader = (deltaX_css * (targetCanvas.width / rect.width) * 2.0 / small_resol) * zoom;
-          const deltaY_shader = (deltaY_css * (targetCanvas.height / rect.height) * 2.0 / small_resol) * zoom;
-          pan[0] -= deltaX_shader;
-          pan[1] += deltaY_shader;
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
-          paramSandbox.setUniform("u_pan", pan[0], pan[1]);
+
+          const currentZoom = isMain ? zoomMain : zoomParam;
+          const deltaX_shader = (deltaX_css * (targetCanvas.width / rect.width) * 2.0 / small_resol) * currentZoom;
+          const deltaY_shader = (deltaY_css * (targetCanvas.height / rect.height) * 2.0 / small_resol) * currentZoom;
+
+          if (isMain) {
+            panMain[0] -= deltaX_shader;
+            panMain[1] += deltaY_shader;
+            sandbox.setUniform("u_pan", panMain[0], panMain[1]);
+          } else {
+            panParam[0] -= deltaX_shader;
+            panParam[1] += deltaY_shader;
+            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+          }
+
           lastMousePos = { x: e.clientX, y: e.clientY };
-        } else if (interactionMode === 'root') {
-          // MODIFIED LOGIC
-          if (showPath && controlPathOrigin) {
+        } else if (currentMode === 'root') {
+          // MODIFIED LOGIC: Control Path Origin only applies to Main Canvas
+          if (isMain && showPath && controlPathOrigin) {
             pathOrigin = [shaderX, shaderY];
             sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
           } else {
+            // Move root (applies to both canvases, but logic is same)
             rootPosition = [shaderX, shaderY];
             sandbox.setUniform("u_root_position", shaderX, shaderY);
             paramSandbox.setUniform("u_current_root2", shaderX, shaderY);
@@ -507,19 +631,34 @@ title: Newton's Fractal
 
       function handleWheel(e) {
         e.preventDefault();
+        cancelAnimation(); // User interaction stops animation
         const targetCanvas = e.target;
-        if (interactionMode === 'pan') {
+        const isMain = targetCanvas === canvas;
+        const currentMode = isMain ? interactionModeMain : interactionModeParam;
+
+        if (currentMode === 'pan') {
           const [mouseX_before, mouseY_before] = getShaderMouse(e, targetCanvas);
           const zoomAmount = e.deltaY * 0.0005;
-          zoom *= (1.0 + zoomAmount);
-          sandbox.setUniform("u_zoom", zoom);
-          paramSandbox.setUniform("u_zoom", zoom);
+
+          if (isMain) {
+            zoomMain *= (1.0 + zoomAmount);
+            sandbox.setUniform("u_zoom", zoomMain);
+          } else {
+            zoomParam *= (1.0 + zoomAmount);
+            paramSandbox.setUniform("u_zoom", zoomParam);
+          }
 
           const [mouseX_after, mouseY_after] = getShaderMouse(e, targetCanvas);
-          pan[0] += (mouseX_before - mouseX_after);
-          pan[1] += (mouseY_before - mouseY_after);
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
-          paramSandbox.setUniform("u_pan", pan[0], pan[1]);
+
+          if (isMain) {
+            panMain[0] += (mouseX_before - mouseX_after);
+            panMain[1] += (mouseY_before - mouseY_after);
+            sandbox.setUniform("u_pan", panMain[0], panMain[1]);
+          } else {
+            panParam[0] += (mouseX_before - mouseX_after);
+            panParam[1] += (mouseY_before - mouseY_after);
+            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+          }
         }
       }
       canvas.addEventListener("wheel", handleWheel);
@@ -538,6 +677,7 @@ title: Newton's Fractal
 
       function handleTouchStart(e) {
         e.preventDefault();
+        cancelAnimation(); // User interaction stops animation
         ongoingTouches = [...e.touches];
         const targetCanvas = e.target;
 
@@ -546,15 +686,17 @@ title: Newton's Fractal
           const now = Date.now();
           const timeSinceLastTap = now - lastTapTime;
 
-          const dynamicRadius = rootTouchRadius * zoom; // scale with zoom
+          const isMain = targetCanvas === canvas;
+          const currentZoom = isMain ? zoomMain : zoomParam;
+          const dynamicRadius = rootTouchRadius * currentZoom; // scale with zoom
 
           // Check proximity to both, path origin takes priority
           const distToRoot = distance2D([x, y], rootPosition);
-          const distToPath = showPath ? distance2D([x, y], pathOrigin) : Infinity; // Only check path if shown
+          const distToPath = (showPath && isMain) ? distance2D([x, y], pathOrigin) : Infinity; // Only check path if shown AND on main canvas
 
           if (timeSinceLastTap < doubleTapThreshold) {
             // Double-tap-drag: behavior depends on 'controlPathOrigin' toggle
-            if (showPath && controlPathOrigin) {
+            if (isMain && showPath && controlPathOrigin) {
               touchMode = 'movePathOrigin';
             } else {
               touchMode = 'moveRoot';
@@ -607,10 +749,17 @@ title: Newton's Fractal
 
           const prevDist = Math.hypot(prevT0.clientX - prevT1.clientX, prevT0.clientY - prevT1.clientY);
           const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+
+          const isMain = targetCanvas === canvas;
+
           // avoid division by zero
           if (prevDist > 0 && newDist > 0) {
             const zoomFactor = prevDist / newDist;
-            zoom *= zoomFactor;
+            if (isMain) {
+              zoomMain *= zoomFactor;
+            } else {
+              zoomParam *= zoomFactor;
+            }
           }
 
           const prevMidX = (prevT0.clientX + prevT1.clientX) / 2;
@@ -620,16 +769,22 @@ title: Newton's Fractal
 
           const rect = targetCanvas.getBoundingClientRect();
           const small_resol = Math.min(rect.width, rect.height);
-          const deltaX_shader = ((newMidX - prevMidX) * 2.0 / small_resol) * zoom;
-          const deltaY_shader = ((newMidY - prevMidY) * 2.0 / small_resol) * zoom;
+          const currentZoom = isMain ? zoomMain : zoomParam;
 
-          pan[0] -= deltaX_shader;
-          pan[1] += deltaY_shader;
+          const deltaX_shader = ((newMidX - prevMidX) * 2.0 / small_resol) * currentZoom;
+          const deltaY_shader = ((newMidY - prevMidY) * 2.0 / small_resol) * currentZoom;
 
-          sandbox.setUniform("u_zoom", zoom);
-          sandbox.setUniform("u_pan", pan[0], pan[1]);
-          paramSandbox.setUniform("u_zoom", zoom);
-          paramSandbox.setUniform("u_pan", pan[0], pan[1]);
+          if (isMain) {
+            panMain[0] -= deltaX_shader;
+            panMain[1] += deltaY_shader;
+            sandbox.setUniform("u_zoom", zoomMain);
+            sandbox.setUniform("u_pan", panMain[0], panMain[1]);
+          } else {
+            panParam[0] -= deltaX_shader;
+            panParam[1] += deltaY_shader;
+            paramSandbox.setUniform("u_zoom", zoomParam);
+            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+          }
         }
 
         ongoingTouches = [...e.touches];
@@ -642,17 +797,16 @@ title: Newton's Fractal
       // -------------------
       function reapplyState() {
         sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-        sandbox.setUniform("u_zoom", zoom);
-        sandbox.setUniform("u_pan", pan[0], pan[1]);
+        sandbox.setUniform("u_zoom", zoomMain);
+        sandbox.setUniform("u_pan", panMain[0], panMain[1]);
         sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
         // NEW UNIFORMS
         sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
         sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
-        sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
 
         paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-        paramSandbox.setUniform("u_zoom", zoom);
-        paramSandbox.setUniform("u_pan", pan[0], pan[1]);
+        paramSandbox.setUniform("u_zoom", zoomParam);
+        paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
         paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
 
         // Update screen ratio
@@ -661,11 +815,14 @@ title: Newton's Fractal
         const canvasMin = Math.min(canvas.width, canvas.height);
         const screenRatio = canvasMin / screenMin;
         sandbox.setUniform("u_screen_ratio", screenRatio);
-        paramSandbox.setUniform("u_screen_ratio", screenRatio);
+
+        const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
+        const paramScreenRatio = paramCanvasMin / screenMin;
+        paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
 
         requestAnimationFrame(() => {
-          if (sandbox.forceRender) sandbox.forceRender();
-          if (paramSandbox.forceRender) paramSandbox.forceRender();
+          if (sandbox.render) sandbox.render();
+          if (paramSandbox.render) paramSandbox.render();
         });
       }
 
@@ -705,8 +862,8 @@ title: Newton's Fractal
       // Fix for mobile blank canvas
       // -------------------
       function ensureCanvasRenders() {
-        if (sandbox.forceRender) sandbox.forceRender();
-        if (paramSandbox.forceRender) paramSandbox.forceRender();
+        if (sandbox.render) sandbox.render();
+        if (paramSandbox.render) paramSandbox.render();
       }
 
     });
