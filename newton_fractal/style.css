@@ -1,120 +1,206 @@
 body {
-  text-align: center;
-  margin: 0;
-  padding: 2em;
-  overflow-y: auto;
-  /* allow scrolling */
-  overflow-x: hidden;
+    text-align: center;
+    margin: 0;
+    padding: 2em;
+    overflow-y: auto;
+    /* allow scrolling */
+    overflow-x: hidden;
 }
 
 nav {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
 }
 
 .shader-window {
-  max-width: 800px;
-  margin: 0 auto;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 canvas {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 0.5em;
-  cursor: crosshair;
-  touch-action: none;
-  /* needed for multi-touch */
+    display: block;
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 0.5em;
+    cursor: crosshair;
+    touch-action: none;
+    /* needed for multi-touch */
 }
 
 .controls {
-  margin-top: 1em;
+    margin-top: 1em;
 }
 
 .description {
-  max-width: 800px;
-  margin: 1em auto 2em auto;
-  font-size: 0.95em;
-  line-height: 1.5em;
-  text-align: left;
+    max-width: 800px;
+    margin: 1em auto 2em auto;
+    font-size: 0.95em;
+    line-height: 1.5em;
+    text-align: left;
 }
 
 .description code {
-  padding: 0.15em 0.3em;
-  border-radius: 0.25em;
+    padding: 0.15em 0.3em;
+    border-radius: 0.25em;
 }
 
 button {
-  padding: 0.4em 0.8em;
-  border-radius: 0.3em;
-  cursor: pointer;
-  margin-top: 0.5em;
-  font-size: 0.9em;
-  transition: background 0.2s;
+    padding: 0.4em 0.8em;
+    border-radius: 0.3em;
+    cursor: pointer;
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    transition: background 0.2s;
 }
 
 .canvas-wrapper {
-  position: relative;
-  width: 100%;
-  /* aspect-ratio: 1/1; Remove this to let content dictate, or keep? Canvas has it. */
+    position: relative;
+    width: 100%;
+    /* aspect-ratio: 1/1; Remove this to let content dictate, or keep? Canvas has it. */
 }
 
 .canvas-wrapper:fullscreen {
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .canvas-wrapper:-webkit-full-screen {
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .fullscreen-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 20;
-  opacity: 0.7;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    font-weight: bold;
 }
 
 .fullscreen-btn:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 1);
+    opacity: 1;
+    background: rgba(255, 255, 255, 1);
 }
 
 canvas:fullscreen {
-  /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
-  width: 100% !important;
-  height: 100% !important;
-  aspect-ratio: auto !important;
+    /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
 }
 
 /* Also target the canvas when its parent wrapper is fullscreen */
 .canvas-wrapper:fullscreen canvas {
-  width: 100% !important;
-  height: 100% !important;
-  aspect-ratio: auto !important;
-  max-width: none !important;
-  max-height: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    max-width: none !important;
+    max-height: none !important;
 }
 
 .canvas-wrapper:-webkit-full-screen canvas {
-  width: 100% !important;
-  height: 100% !important;
-  aspect-ratio: auto !important;
-  max-width: none !important;
-  max-height: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* POPUP MODE STYLES */
+/* POPUP MODE STYLES */
+body.popup-mode {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+body.popup-mode nav,
+body.popup-mode h1,
+body.popup-mode .description,
+body.popup-mode .controls,
+body.popup-mode h3,
+body.popup-mode #popoutBtnMain,
+body.popup-mode #popoutBtnParam {
+    display: none !important;
+}
+
+body.popup-mode .shader-container {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: none !important;
+}
+
+body.popup-mode .shader-window {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 100% !important;
+}
+
+body.popup-mode .canvas-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.popup-mode canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    aspect-ratio: auto !important;
+    display: block;
+    z-index: 100;
+}
+
+body.popup-mode .fullscreen-btn {
+    position: fixed !important;
+    z-index: 200;
+    /* Ensure button is above canvas */
+}
+
+/* Specific hiding rules */
+body.popup-mode-main #windowParam {
+    display: none !important;
+}
+
+body.popup-mode-param #windowMain {
+    display: none !important;
 }

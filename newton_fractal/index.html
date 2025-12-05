@@ -30,10 +30,11 @@ title: Newton's Fractal
   </div>
 
   <div class="shader-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-    <div class="shader-window" style="flex: 1; min-width: 300px;">
+    <div class="shader-window" id="windowMain" style="flex: 1; min-width: 300px;">
       <h3>Phase Space</h3>
       <div class="canvas-wrapper" id="wrapperMain">
         <button id="fullscreenBtnMain" class="fullscreen-btn">Fullscreen</button>
+        <button id="popoutBtnMain" class="fullscreen-btn" style="right: auto; left: 10px;">Pop Out</button>
         <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="shader.frag"></canvas>
       </div>
       <div class="controls"
@@ -53,11 +54,11 @@ title: Newton's Fractal
         </span>
       </div>
     </div>
-    <div class="shader-window" style="flex: 1; min-width: 300px;">
+    <div class="shader-window" id="windowParam" style="flex: 1; min-width: 300px;">
       <h3>Parameter Space</h3>
       <div class="canvas-wrapper" id="wrapperParam">
         <button id="fullscreenBtnParam" class="fullscreen-btn">Fullscreen</button>
-        <button id="resetViewBtnParam" class="fullscreen-btn" style="right: auto; left: 10px;">Reset View</button>
+        <button id="popoutBtnParam" class="fullscreen-btn" style="right: auto; left: 10px;">Pop Out</button>
         <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="parameter_space.frag"></canvas>
       </div>
     </div>

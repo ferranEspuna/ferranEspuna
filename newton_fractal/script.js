@@ -16,10 +16,31 @@ window.addEventListener("load", async () => {
     const pathOriginToggle = document.getElementById("pathOriginToggle");
     const trackCenterControl = document.getElementById("trackCenterControl");
     const trackCenterToggle = document.getElementById("trackCenterToggle");
-    const resetViewBtnParam = document.getElementById("resetViewBtnParam");
+    const popoutBtnMain = document.getElementById("popoutBtnMain");
+    const popoutBtnParam = document.getElementById("popoutBtnParam");
 
     const sandbox = new GlslCanvas(canvas);
     const paramSandbox = new GlslCanvas(paramCanvas);
+
+    // -------------------
+    // Broadcast Channel for Sync
+    // -------------------
+    const channel = new BroadcastChannel('fractal_sync');
+
+    // -------------------
+    // Popup Mode Detection
+    // -------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const popupMode = urlParams.get('popup'); // 'main' or 'param'
+
+    if (popupMode) {
+        document.body.classList.add('popup-mode');
+        if (popupMode === 'main') {
+            document.body.classList.add('popup-mode-main');
+        } else if (popupMode === 'param') {
+            document.body.classList.add('popup-mode-param');
+        }
+    }
 
     // -------------------
     // Conditional instructions
@@ -52,7 +73,7 @@ window.addEventListener("load", async () => {
     • <strong>Analysis:</strong> Controls below the Phase Space plot:<br>
     &nbsp;&nbsp;- <em>Show Path:</em> Visualizes the individual steps of Newton's method for a single point (white dot).<br>
     &nbsp;&nbsp;- <em>Track Center:</em> Locks the path's starting point to the centroid of the roots.<br>
-    • <strong>Sync:</strong> Use the "Reset View" button on the Parameter Space to match the Phase Space view.<br>
+    • <strong>Pop Out:</strong> Open shaders in separate windows for multi-screen analysis (synchronized).<br>
     • <strong>Fullscreen:</strong> Available for both views.
   </p>
   `;
@@ -63,6 +84,7 @@ window.addEventListener("load", async () => {
     • <strong>Move Root/Point:</strong> Drag the gray or white dots with one finger. (Double-tap and drag anywhere if precise selection is difficult).<br>
     • <strong>Navigate:</strong> Pan with two fingers, pinch to zoom.<br>
     • <strong>Analysis:</strong> Use the toggles to show the iteration path or track the centroid.<br>
+    • <strong>Pop Out:</strong> Open shaders in new tabs.<br>
     • <strong>Fullscreen:</strong> Tap the button for an immersive view.
   </p>
   `;
@@ -100,16 +122,6 @@ window.addEventListener("load", async () => {
     let touchMode = null;
     let touchStartPos = null;
 
-    // Animation State
-    let animationFrameId = null;
-
-    function cancelAnimation() {
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
-    }
-
     function getShaderMouse(event, targetCanvas) {
         const rect = targetCanvas.getBoundingClientRect();
         const x_css = event.clientX - rect.left;
@@ -141,35 +153,122 @@ window.addEventListener("load", async () => {
     }
 
     function resizeToCurrentDisplay() {
-        const cssWidth = canvas.clientWidth;
-        const cssHeight = canvas.clientHeight;
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = Math.round(cssWidth * dpr);
-        canvas.height = Math.round(cssHeight * dpr);
-        sandbox.resize();
-
-        // Resize param canvas
-        const cssWidth2 = paramCanvas.clientWidth;
-        const cssHeight2 = paramCanvas.clientHeight;
-        paramCanvas.width = Math.round(cssWidth2 * dpr);
-        paramCanvas.height = Math.round(cssHeight2 * dpr);
-        paramCanvas.width = Math.round(cssWidth2 * dpr);
-        paramCanvas.height = Math.round(cssHeight2 * dpr);
-        paramSandbox.resize();
-
-        // Calculate screen ratio
         const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-        const canvasMin = Math.min(canvas.width, canvas.height);
-        const screenRatio = canvasMin / screenMin;
 
-        sandbox.setUniform("u_screen_ratio", screenRatio);
+        // Resize Main Canvas if visible
+        if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+            const cssWidth = canvas.clientWidth;
+            const cssHeight = canvas.clientHeight;
+            canvas.width = Math.round(cssWidth * dpr);
+            canvas.height = Math.round(cssHeight * dpr);
+            sandbox.resize();
 
-        const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
-        const paramScreenRatio = paramCanvasMin / screenMin;
-        paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
+            const canvasMin = Math.min(canvas.width, canvas.height);
+            const screenRatio = canvasMin / screenMin;
+            sandbox.setUniform("u_screen_ratio", screenRatio);
+        }
+
+        // Resize Param Canvas if visible
+        if (paramCanvas.clientWidth > 0 && paramCanvas.clientHeight > 0) {
+            const cssWidth2 = paramCanvas.clientWidth;
+            const cssHeight2 = paramCanvas.clientHeight;
+            paramCanvas.width = Math.round(cssWidth2 * dpr);
+            paramCanvas.height = Math.round(cssHeight2 * dpr);
+            paramSandbox.resize();
+
+            const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
+            const paramScreenRatio = paramCanvasMin / screenMin;
+            paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
+        }
     }
 
     function handleResize() { resizeToCurrentDisplay(); }
+
+    // -------------------
+    // State Broadcasting
+    // -------------------
+    function broadcastState(type, data) {
+        channel.postMessage({ type, data });
+    }
+
+    function updateUniforms() {
+        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        sandbox.setUniform("u_zoom", zoomMain);
+        sandbox.setUniform("u_pan", panMain[0], panMain[1]);
+        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
+        sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
+        sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
+
+        paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        paramSandbox.setUniform("u_zoom", zoomParam);
+        paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
+        paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
+
+        if (sandbox.render) sandbox.render();
+        if (paramSandbox.render) paramSandbox.render();
+    }
+
+    channel.onmessage = (event) => {
+        const { type, data } = event.data;
+        let needsUpdate = false;
+
+        if (type === 'state') {
+            zoomMain = data.zoomMain;
+            panMain = data.panMain;
+            zoomParam = data.zoomParam;
+            panParam = data.panParam;
+            rootPosition = data.rootPosition;
+            showPath = data.showPath;
+            controlPathOrigin = data.controlPathOrigin;
+            trackCenter = data.trackCenter;
+            pathOrigin = data.pathOrigin;
+            slider.value = data.iterations;
+            iterDisplay.textContent = data.iterations;
+
+            // Update UI controls to match state
+            showPathToggle.checked = showPath;
+            pathOriginToggle.checked = controlPathOrigin;
+            trackCenterToggle.checked = trackCenter;
+
+            if (showPath) {
+                pathOriginControl.style.display = "inline";
+                trackCenterControl.style.display = "inline";
+            } else {
+                pathOriginControl.style.display = "none";
+                trackCenterControl.style.display = "none";
+            }
+
+            if (trackCenter) {
+                pathOriginToggle.disabled = true;
+            } else {
+                pathOriginToggle.disabled = false;
+            }
+
+            needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            updateUniforms();
+        }
+    };
+
+    function syncState() {
+        const state = {
+            zoomMain,
+            panMain,
+            zoomParam,
+            panParam,
+            rootPosition,
+            showPath,
+            controlPathOrigin,
+            trackCenter,
+            pathOrigin,
+            iterations: parseInt(slider.value, 10)
+        };
+        broadcastState('state', state);
+        updateUniforms();
+    }
 
     // -------------------
     // Load both shaders
@@ -194,35 +293,19 @@ window.addEventListener("load", async () => {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 resizeToCurrentDisplay();  // ensure correct framebuffer size for both canvases
-
-                // Initialize main sandbox
-                sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-                sandbox.setUniform("u_zoom", zoomMain);
-                sandbox.setUniform("u_pan", panMain[0], panMain[1]);
-                sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-                sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
-                sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
-
-                // Initialize param sandbox
-                paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-                paramSandbox.setUniform("u_zoom", zoomParam);
-                paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
-                paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
-
-                // Set screen ratio for both
-                const dpr = window.devicePixelRatio || 1;
-                const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-                const canvasMin = Math.min(canvas.width, canvas.height);
-                const screenRatio = canvasMin / screenMin;
-                sandbox.setUniform("u_screen_ratio", screenRatio);
-
-                const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
-                const paramScreenRatio = paramCanvasMin / screenMin;
-                paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
-
+                updateUniforms();
                 // Force render both
                 if (sandbox.render) sandbox.render();
                 if (paramSandbox.render) paramSandbox.render();
+
+                // If we are a popup, request state from opener/others
+                if (popupMode) {
+                    // We can't easily request state, but we can broadcast our presence or just wait for an update.
+                    // Actually, the main window might not know we exist.
+                    // Best bet: The opener should have sent us state? Or we just wait for user interaction.
+                    // Alternatively, we can broadcast a "hello" message and others reply with state.
+                    broadcastState('hello', {});
+                }
             });
         });
 
@@ -233,13 +316,20 @@ window.addEventListener("load", async () => {
         return;
     }
 
+    // Listen for hello to sync state to new windows
+    channel.addEventListener('message', (event) => {
+        if (event.data.type === 'hello' && !popupMode) {
+            // If I am the main window (or any window with state), send it.
+            // Ideally only one window responds.
+            syncState();
+        }
+    });
+
     iterDisplay.textContent = slider.value;
 
     slider.addEventListener("input", () => {
-        const iterations = parseInt(slider.value, 10);
-        sandbox.setUniform("u_iterations", iterations);
-        paramSandbox.setUniform("u_iterations", iterations);
-        iterDisplay.textContent = iterations;
+        iterDisplay.textContent = slider.value;
+        syncState();
     });
 
     // -------------------
@@ -247,7 +337,6 @@ window.addEventListener("load", async () => {
     // -------------------
     showPathToggle.addEventListener("change", () => {
         showPath = showPathToggle.checked;
-        sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
 
         if (showPath) {
             pathOriginControl.style.display = "inline"; // Show the second toggle
@@ -267,11 +356,12 @@ window.addEventListener("load", async () => {
                 pathOriginToggle.disabled = false;
             }
         }
+        syncState();
     });
 
     pathOriginToggle.addEventListener("change", () => {
         controlPathOrigin = pathOriginToggle.checked;
-        // No uniform change, just state
+        syncState();
     });
 
     trackCenterToggle.addEventListener("change", () => {
@@ -284,62 +374,11 @@ window.addEventListener("load", async () => {
 
             // Snap to center immediately
             pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-            sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
         } else {
             // Re-enable manual control option
             pathOriginToggle.disabled = false;
         }
-    });
-
-    // -------------------
-    // Reset View Logic
-    // -------------------
-    function easeInOutCubic(t) {
-        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function animateReset(targetZoom, targetPan) {
-        cancelAnimation();
-
-        const startZoom = zoomParam;
-        const startPan = [...panParam];
-        const startTime = performance.now();
-        const duration = 500; // ms
-
-        function step(now) {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1.0);
-            const t = easeInOutCubic(progress);
-
-            // Interpolate Pan (Linear)
-            panParam[0] = startPan[0] + (targetPan[0] - startPan[0]) * t;
-            panParam[1] = startPan[1] + (targetPan[1] - startPan[1]) * t;
-
-            // Interpolate Zoom (Logarithmic for natural feel)
-            // log(z) = log(start) + t * (log(target) - log(start))
-            // z = exp(log(start) + ...)
-            const logStart = Math.log(startZoom);
-            const logTarget = Math.log(targetZoom);
-            zoomParam = Math.exp(logStart + (logTarget - logStart) * t);
-
-            paramSandbox.setUniform("u_zoom", zoomParam);
-            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
-            paramSandbox.setUniform("u_zoom", zoomParam);
-            paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
-            if (paramSandbox.render) paramSandbox.render();
-
-            if (progress < 1.0) {
-                animationFrameId = requestAnimationFrame(step);
-            } else {
-                animationFrameId = null;
-            }
-        }
-
-        animationFrameId = requestAnimationFrame(step);
-    }
-
-    resetViewBtnParam.addEventListener("click", () => {
-        animateReset(zoomMain, panMain);
+        syncState();
     });
 
     // -------------------
@@ -372,7 +411,6 @@ window.addEventListener("load", async () => {
     paramCanvas.addEventListener("contextmenu", handleContextMenu);
 
     function handleMouseDown(e) {
-        cancelAnimation(); // User interaction stops animation
         const targetCanvas = e.target;
         const isMain = targetCanvas === canvas;
         const currentMode = isMain ? interactionModeMain : interactionModeParam;
@@ -385,7 +423,13 @@ window.addEventListener("load", async () => {
     canvas.addEventListener("mousedown", handleMouseDown);
     paramCanvas.addEventListener("mousedown", handleMouseDown);
 
-    window.addEventListener("mouseup", (e) => { if (e.button === 0) isDragging = false; });
+    window.addEventListener("mouseup", (e) => {
+        if (e.button === 0) {
+            isDragging = false;
+            // Sync state on mouse up to ensure final position is shared
+            syncState();
+        }
+    });
 
     function handleMouseMove(e) {
         const targetCanvas = e.target;
@@ -409,31 +453,33 @@ window.addEventListener("load", async () => {
             if (isMain) {
                 panMain[0] -= deltaX_shader;
                 panMain[1] += deltaY_shader;
-                sandbox.setUniform("u_pan", panMain[0], panMain[1]);
             } else {
                 panParam[0] -= deltaX_shader;
                 panParam[1] += deltaY_shader;
-                paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
             }
+
+            updateUniforms(); // Local update for smoothness
+            // We could throttle sync here if needed, but for now let's rely on mouseup for final sync
+            // or maybe sync every frame? Syncing every frame might be too much for BroadcastChannel.
+            // Let's try syncing every frame for now, if it lags we can throttle.
+            syncState();
 
             lastMousePos = { x: e.clientX, y: e.clientY };
         } else if (currentMode === 'root') {
             // MODIFIED LOGIC: Control Path Origin only applies to Main Canvas
             if (isMain && showPath && controlPathOrigin) {
                 pathOrigin = [shaderX, shaderY];
-                sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
             } else {
                 // Move root (applies to both canvases, but logic is same)
                 rootPosition = [shaderX, shaderY];
-                sandbox.setUniform("u_root_position", shaderX, shaderY);
-                paramSandbox.setUniform("u_current_root2", shaderX, shaderY);
 
                 // Update path origin if tracking
                 if (trackCenter) {
                     pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-                    sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
                 }
             }
+            updateUniforms();
+            syncState();
         }
     }
     canvas.addEventListener("mousemove", handleMouseMove);
@@ -441,7 +487,6 @@ window.addEventListener("load", async () => {
 
     function handleWheel(e) {
         e.preventDefault();
-        cancelAnimation(); // User interaction stops animation
         const targetCanvas = e.target;
         const isMain = targetCanvas === canvas;
         const currentMode = isMain ? interactionModeMain : interactionModeParam;
@@ -452,10 +497,8 @@ window.addEventListener("load", async () => {
 
             if (isMain) {
                 zoomMain *= (1.0 + zoomAmount);
-                sandbox.setUniform("u_zoom", zoomMain);
             } else {
                 zoomParam *= (1.0 + zoomAmount);
-                paramSandbox.setUniform("u_zoom", zoomParam);
             }
 
             const [mouseX_after, mouseY_after] = getShaderMouse(e, targetCanvas);
@@ -463,12 +506,13 @@ window.addEventListener("load", async () => {
             if (isMain) {
                 panMain[0] += (mouseX_before - mouseX_after);
                 panMain[1] += (mouseY_before - mouseY_after);
-                sandbox.setUniform("u_pan", panMain[0], panMain[1]);
             } else {
                 panParam[0] += (mouseX_before - mouseX_after);
                 panParam[1] += (mouseY_before - mouseY_after);
-                paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
             }
+
+            updateUniforms();
+            syncState();
         }
     }
     canvas.addEventListener("wheel", handleWheel);
@@ -487,7 +531,6 @@ window.addEventListener("load", async () => {
 
     function handleTouchStart(e) {
         e.preventDefault();
-        cancelAnimation(); // User interaction stops animation
         ongoingTouches = [...e.touches];
         const targetCanvas = e.target;
 
@@ -539,17 +582,13 @@ window.addEventListener("load", async () => {
         if (touchMode === 'movePathOrigin' && e.touches.length === 1) {
             const [x, y] = getTouchPos(e.touches[0], targetCanvas);
             pathOrigin = [x, y];
-            sandbox.setUniform("u_path_origin", x, y);
         } else if (touchMode === 'moveRoot' && e.touches.length === 1) {
             const [x, y] = getTouchPos(e.touches[0], targetCanvas);
             rootPosition = [x, y];
-            sandbox.setUniform("u_root_position", x, y);
-            paramSandbox.setUniform("u_current_root2", x, y);
 
             // Update path origin if tracking
             if (trackCenter) {
                 pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-                sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
             }
         } else if (touchMode === 'pan' && e.touches.length === 2) {
             const t0 = e.touches[0];
@@ -587,15 +626,14 @@ window.addEventListener("load", async () => {
             if (isMain) {
                 panMain[0] -= deltaX_shader;
                 panMain[1] += deltaY_shader;
-                sandbox.setUniform("u_zoom", zoomMain);
-                sandbox.setUniform("u_pan", panMain[0], panMain[1]);
             } else {
                 panParam[0] -= deltaX_shader;
                 panParam[1] += deltaY_shader;
-                paramSandbox.setUniform("u_zoom", zoomParam);
-                paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
             }
         }
+
+        updateUniforms();
+        syncState();
 
         ongoingTouches = [...e.touches];
     }
@@ -606,30 +644,7 @@ window.addEventListener("load", async () => {
     // Fullscreen
     // -------------------
     function reapplyState() {
-        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-        sandbox.setUniform("u_zoom", zoomMain);
-        sandbox.setUniform("u_pan", panMain[0], panMain[1]);
-        sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
-        // NEW UNIFORMS
-        sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
-        sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
-
-        paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
-        paramSandbox.setUniform("u_zoom", zoomParam);
-        paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
-        paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
-
-        // Update screen ratio
-        const dpr = window.devicePixelRatio || 1;
-        const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-        const canvasMin = Math.min(canvas.width, canvas.height);
-        const screenRatio = canvasMin / screenMin;
-        sandbox.setUniform("u_screen_ratio", screenRatio);
-
-        const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
-        const paramScreenRatio = paramCanvasMin / screenMin;
-        paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
-
+        updateUniforms();
         requestAnimationFrame(() => {
             if (sandbox.render) sandbox.render();
             if (paramSandbox.render) paramSandbox.render();
@@ -665,6 +680,20 @@ window.addEventListener("load", async () => {
         }
         setTimeout(() => { resizeToCurrentDisplay(); reapplyState(); }, 150);
     });
+
+    // -------------------
+    // Popout Logic
+    // -------------------
+    function openPopup(mode) {
+        const width = 600;
+        const height = 600;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+        window.open(`index.html?popup=${mode}`, `_blank_${mode}`, `width=${width},height=${height},left=${left},top=${top}`);
+    }
+
+    if (popoutBtnMain) popoutBtnMain.addEventListener("click", () => openPopup('main'));
+    if (popoutBtnParam) popoutBtnParam.addEventListener("click", () => openPopup('param'));
 
     window.addEventListener("resize", handleResize);
 
