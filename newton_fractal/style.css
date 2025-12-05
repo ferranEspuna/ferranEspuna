@@ -1,0 +1,120 @@
+body {
+  text-align: center;
+  margin: 0;
+  padding: 2em;
+  overflow-y: auto;
+  /* allow scrolling */
+  overflow-x: hidden;
+}
+
+nav {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.shader-window {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 0.5em;
+  cursor: crosshair;
+  touch-action: none;
+  /* needed for multi-touch */
+}
+
+.controls {
+  margin-top: 1em;
+}
+
+.description {
+  max-width: 800px;
+  margin: 1em auto 2em auto;
+  font-size: 0.95em;
+  line-height: 1.5em;
+  text-align: left;
+}
+
+.description code {
+  padding: 0.15em 0.3em;
+  border-radius: 0.25em;
+}
+
+button {
+  padding: 0.4em 0.8em;
+  border-radius: 0.3em;
+  cursor: pointer;
+  margin-top: 0.5em;
+  font-size: 0.9em;
+  transition: background 0.2s;
+}
+
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  /* aspect-ratio: 1/1; Remove this to let content dictate, or keep? Canvas has it. */
+}
+
+.canvas-wrapper:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas-wrapper:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  font-weight: bold;
+}
+
+.fullscreen-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 1);
+}
+
+canvas:fullscreen {
+  /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+}
+
+/* Also target the canvas when its parent wrapper is fullscreen */
+.canvas-wrapper:fullscreen canvas {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.canvas-wrapper:-webkit-full-screen canvas {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+}
