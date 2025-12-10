@@ -15,6 +15,11 @@ uniform float u_show_path;
 uniform vec2 u_path_origin;
 uniform float u_screen_ratio; // New uniform
 
+// CUSTOM COLORS
+uniform vec3 u_color0;
+uniform vec3 u_color1;
+uniform vec3 u_color2;
+
 #define MAX_ITERS 100
 
 vec2 cmul(vec2 a, vec2 b) {
@@ -89,10 +94,11 @@ float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom, float 
 }
 
 vec3 color(vec2 uv, vec2 root0, vec2 root1, vec2 root2) {
-    float r = exp(-1.5 * length(uv - root0) / min(length(uv - root1), 1.0) / min(length(uv - root2), 1.0));
-    float g = exp(-1.5 * length(uv - root1) / min(length(uv - root0), 1.0) / min(length(uv - root2), 1.0));
-    float b = exp(-1.5 * length(uv - root2) / min(length(uv - root0), 1.0) / min(length(uv - root1), 1.0));
-    return vec3(r, g, b);
+    float w0 = exp(-1.5 * length(uv - root0) / min(length(uv - root1), 1.0) / min(length(uv - root2), 1.0));
+    float w1 = exp(-1.5 * length(uv - root1) / min(length(uv - root0), 1.0) / min(length(uv - root2), 1.0));
+    float w2 = exp(-1.5 * length(uv - root2) / min(length(uv - root0), 1.0) / min(length(uv - root1), 1.0));
+    
+    return w0 * u_color0 + w1 * u_color1 + w2 * u_color2;
 }
 
 

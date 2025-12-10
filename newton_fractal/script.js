@@ -18,6 +18,9 @@ window.addEventListener("load", async () => {
     const trackCenterToggle = document.getElementById("trackCenterToggle");
     const popoutBtnMain = document.getElementById("popoutBtnMain");
     const popoutBtnParam = document.getElementById("popoutBtnParam");
+    const color0Input = document.getElementById("color0");
+    const color1Input = document.getElementById("color1");
+    const color2Input = document.getElementById("color2");
 
     const sandbox = new GlslCanvas(canvas);
     const paramSandbox = new GlslCanvas(paramCanvas);
@@ -49,7 +52,7 @@ window.addEventListener("load", async () => {
     <p>
       This visualization renders the <strong>Newton fractal</strong> for a cubic polynomial with three roots (marked as two black dots and one gray dot that you can control the position of).
       Each pixel represents a starting point on the complex plane. We apply Newton's method to these points to find one of the polynomial's roots.
-      The pixel's color indicates which root the method converges to: red, green, and blue correspond to the three roots.
+      The pixel's color indicates which root the method converges to. By default, red, green, and blue correspond to the three roots.
       Intermediate or dark colors appear where points take longer to converge or fail to converge entirely.
       With enough iterations, the plane divides into three <strong>basins of attraction</strong>.
       While the interiors of these basins are smooth, the boundaries are fractals: complex, chaotic regions where the smallest shift in starting position can lead to a completely different outcome.
@@ -115,6 +118,22 @@ window.addEventListener("load", async () => {
     let controlPathOrigin = false;
     let trackCenter = false;
     let pathOrigin = [0.5, 0.5]; // Default path start
+    let rootColors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
+
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16) / 255.0,
+            parseInt(result[2], 16) / 255.0,
+            parseInt(result[3], 16) / 255.0
+        ] : [0, 0, 0];
+    }
 
     let isDragging = false;
     let lastMousePos = { x: 0, y: 0 };
@@ -205,6 +224,15 @@ window.addEventListener("load", async () => {
         paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
         paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
 
+        // Colors
+        sandbox.setUniform("u_color0", rootColors[0][0], rootColors[0][1], rootColors[0][2]);
+        sandbox.setUniform("u_color1", rootColors[1][0], rootColors[1][1], rootColors[1][2]);
+        sandbox.setUniform("u_color2", rootColors[2][0], rootColors[2][1], rootColors[2][2]);
+
+        paramSandbox.setUniform("u_color0", rootColors[0][0], rootColors[0][1], rootColors[0][2]);
+        paramSandbox.setUniform("u_color1", rootColors[1][0], rootColors[1][1], rootColors[1][2]);
+        paramSandbox.setUniform("u_color2", rootColors[2][0], rootColors[2][1], rootColors[2][2]);
+
         if (sandbox.render) sandbox.render();
         if (paramSandbox.render) paramSandbox.render();
     }
@@ -225,6 +253,15 @@ window.addEventListener("load", async () => {
             pathOrigin = data.pathOrigin;
             slider.value = data.iterations;
             iterDisplay.textContent = data.iterations;
+            rootColors = data.rootColors || [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
+
+            // Sync inputs
+            function rgbToHex(rgb) {
+                return "#" + ((1 << 24) + (Math.round(rgb[0] * 255) << 16) + (Math.round(rgb[1] * 255) << 8) + Math.round(rgb[2] * 255)).toString(16).slice(1);
+            }
+            if (color0Input) color0Input.value = rgbToHex(rootColors[0]);
+            if (color1Input) color1Input.value = rgbToHex(rootColors[1]);
+            if (color2Input) color2Input.value = rgbToHex(rootColors[2]);
 
             // Update UI controls to match state
             showPathToggle.checked = showPath;
@@ -264,7 +301,9 @@ window.addEventListener("load", async () => {
             controlPathOrigin,
             trackCenter,
             pathOrigin,
-            iterations: parseInt(slider.value, 10)
+            pathOrigin,
+            iterations: parseInt(slider.value, 10),
+            rootColors
         };
         broadcastState('state', state);
         updateUniforms();
@@ -380,6 +419,16 @@ window.addEventListener("load", async () => {
         }
         syncState();
     });
+
+    // Color Listeners
+    function updateColor(index, hex) {
+        rootColors[index] = hexToRgb(hex);
+        syncState();
+    }
+
+    if (color0Input) color0Input.addEventListener("input", (e) => updateColor(0, e.target.value));
+    if (color1Input) color1Input.addEventListener("input", (e) => updateColor(1, e.target.value));
+    if (color2Input) color2Input.addEventListener("input", (e) => updateColor(2, e.target.value));
 
     // -------------------
     // Desktop interactions
