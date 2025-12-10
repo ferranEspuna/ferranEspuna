@@ -87,13 +87,18 @@ window.addEventListener("load", async () => {
     • <strong>Move Root/Point:</strong> Drag the gray or white dots with one finger. (Double-tap and drag anywhere if precise selection is difficult).<br>
     • <strong>Navigate:</strong> Pan with two fingers, pinch to zoom.<br>
     • <strong>Analysis:</strong> Use the toggles to show the iteration path or track the centroid.<br>
-    • <strong>Pop Out:</strong> Open shaders in new tabs.<br>
     • <strong>Fullscreen:</strong> Tap the button for an immersive view.
   </p>
   `;
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     descriptionEl.innerHTML = baseText + (isMobile ? mobileInstructions : desktopInstructions);
+
+    // Hide Pop Out buttons on mobile
+    if (isMobile) {
+        if (popoutBtnMain) popoutBtnMain.style.display = 'none';
+        if (popoutBtnParam) popoutBtnParam.style.display = 'none';
+    }
 
     // -------------------
     // State
