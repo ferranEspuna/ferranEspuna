@@ -118,12 +118,35 @@ window.addEventListener("load", async () => {
     let panParam = [0.0, 0.0];
 
     let rootPosition = [0.0, 0.866025];
-    // NEW STATE
-    let showPath = false;
-    let controlPathOrigin = false;
-    let trackCenter = false;
+    // NEW STATE - Initialize from DOM to handle browser restore
+    let showPath = showPathToggle ? showPathToggle.checked : false;
+    let controlPathOrigin = pathOriginToggle ? pathOriginToggle.checked : false;
+    let trackCenter = trackCenterToggle ? trackCenterToggle.checked : false;
     let pathOrigin = [0.5, 0.5]; // Default path start
-    let rootColors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
+
+    // Helper to get hex from input or default
+    const getColor = (el, defaultHex) => el ? el.value : defaultHex;
+
+    // Initialize colors from DOM
+    let rootColors = [
+        hexToRgb(getColor(color0Input, "#ff0000")),
+        hexToRgb(getColor(color1Input, "#00ff00")),
+        hexToRgb(getColor(color2Input, "#0000ff"))
+    ];
+
+    // Initial visibility check based on restored state
+    if (showPath) {
+        if (pathOriginControl) pathOriginControl.style.display = "inline";
+        if (trackCenterControl) trackCenterControl.style.display = "inline";
+    } else {
+        if (pathOriginControl) pathOriginControl.style.display = "none";
+        if (trackCenterControl) trackCenterControl.style.display = "none";
+    }
+
+    if (trackCenter) {
+        if (pathOriginToggle) pathOriginToggle.disabled = true;
+    }
+
 
     function hexToRgb(hex) {
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
