@@ -1,1 +1,18 @@
 // testing
+
+/* Remove top padding from the main content area to reduce gap */
+.page-content {
+    padding-top: 0 !important;
+}
+
+/* Remove top margin and decorative line from the first header on the page */
+.page-content h1:first-of-type,
+.page-content h2:first-of-type {
+    margin-top: 0 !important;
+}
+
+.page-content h1:first-of-type::before,
+.page-content h2:first-of-type::before {
+    display: none !important;
+    content: none !important;
+}
