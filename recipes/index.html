@@ -1,0 +1,42 @@
+---
+layout: default
+title: Recipes
+---
+
+<h1>Recipes</h1>
+
+<input type="text" id="recipeSearch" onkeyup="filterRecipes()" placeholder="Search for recipes.." title="Type in a name"
+    style="width: 100%; padding: 12px 20px; margin: 8px 0; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px;">
+
+<ul id="recipeList" style="list-style-type: none; padding: 0;">
+    {% for page in site.pages %}
+    {% if page.url contains '/recipes/' %}
+    {% unless page.url == '/recipes/' or page.url == '/recipes/index.html' %}
+    <li
+        style="margin-top: 10px; background-color: #f6f6f6; padding: 10px; text-decoration: none; font-size: 18px; color: black; display: block;">
+        <a href="{{ page.url | relative_url }}" style="text-decoration: none; color: black; display: block;">{{
+            page.title | default: page.url }}</a>
+    </li>
+    {% endunless %}
+    {% endif %}
+    {% endfor %}
+</ul>
+
+<script>
+    function filterRecipes() {
+        var input, filter, ul, li, a, i, txtValue;
+        input = document.getElementById("recipeSearch");
+        filter = input.value.toUpperCase();
+        ul = document.getElementById("recipeList");
+        li = ul.getElementsByTagName("li");
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("a")[0];
+            txtValue = a.textContent || a.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+    }
+</script>
