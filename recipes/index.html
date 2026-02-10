@@ -3,18 +3,56 @@ layout: default
 title: Recipes
 ---
 
+
+<style>
+    .recipe-search {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid var(--border-color-03, #ccc);
+        border-radius: 4px;
+        background-color: var(--background-color, white);
+        color: var(--text-color, black);
+    }
+
+    .recipe-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .recipe-list-item {
+        margin-top: 10px;
+        background-color: var(--code-background-color, #f6f6f6);
+        padding: 10px;
+        display: block;
+        border-radius: 4px;
+    }
+
+    .recipe-link {
+        text-decoration: none;
+        font-size: 18px;
+        color: var(--link-base-color, #2a7ae2);
+        display: block;
+    }
+
+    .recipe-link:hover {
+        color: var(--link-hover-color, #2a7ae2);
+        text-decoration: underline;
+    }
+</style>
+
 <h1>Recipes</h1>
 
-<input type="text" id="recipeSearch" onkeyup="filterRecipes()" placeholder="Search for recipes.." title="Type in a name"
-    style="width: 100%; padding: 12px 20px; margin: 8px 0; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px;">
+<input type="text" id="recipeSearch" class="recipe-search" onkeyup="filterRecipes()" placeholder="Search for recipes.."
+    title="Type in a name">
 
-<ul id="recipeList" style="list-style-type: none; padding: 0;">
+<ul id="recipeList" class="recipe-list">
     {% for page in site.pages %}
     {% if page.url contains '/recipes/' %}
     {% unless page.url == '/recipes/' or page.url == '/recipes/index.html' %}
-    <li
-        style="margin-top: 10px; background-color: #f6f6f6; padding: 10px; text-decoration: none; font-size: 18px; color: black; display: block;">
-        <a href="{{ page.url | relative_url }}" style="text-decoration: none; color: black; display: block;">{{
+    <li class="recipe-list-item">
+        <a href="{{ page.url | relative_url }}" class="recipe-link">{{
             page.title | default: page.url }}</a>
     </li>
     {% endunless %}
