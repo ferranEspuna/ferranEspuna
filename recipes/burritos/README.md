@@ -23,7 +23,7 @@ Debería dar para 18 burritos.
 - [ ] Yogur griego light - 200 g
 - [ ] Tortillas grandes de maíz - 18
 
-## INSTRUCCIONES
+## Instrucciones
 - Sellar la carne
 - Sofreír 2 de las cebollas y el ajo con el aceite
 - Añadir los chiles sin semillas y el caldo de pollo, aprovechando para desglasar la sartén de la carne con el caldo. Hervir 5 minutos a fuego lento para hidratar los chiles
