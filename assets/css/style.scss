@@ -88,3 +88,16 @@ $table-border-color:    var(--table-border-color,$table-border-color);
     --table-border-color:     #{$table-border-color};
   }
 }
+
+/* Make task list checkboxes clickable and show pointer cursor */
+.task-list-item input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Optional: Strike-through for checked items if desired */
+/* 
+.task-list-item.checked {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+*/

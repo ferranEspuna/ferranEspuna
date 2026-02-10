@@ -1,0 +1,43 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select all checkboxes rendered by Jekyll/kramdown in task lists
+        const checkboxes = document.querySelectorAll('.task-list-item input[type="checkbox"]');
+
+        // Get a unique key for the current page to persist state
+        const pageKey = window.location.pathname;
+
+        checkboxes.forEach((checkbox, index) => {
+            // Create a unique ID for storage: page path + checkbox index
+            const storageKey = `checkbox-state-${pageKey}-${index}`;
+
+            // 1. Enable the checkbox
+            checkbox.removeAttribute('disabled');
+
+            // 2. Load persisted state
+            const persistedState = localStorage.getItem(storageKey);
+            if (persistedState === 'true') {
+                checkbox.checked = true;
+            } else if (persistedState === 'false') {
+                checkbox.checked = false;
+            }
+            // If no persisted state, leave as rendered (default)
+
+            // 3. Add change listener to save state
+            checkbox.addEventListener('change', function () {
+                localStorage.setItem(storageKey, checkbox.checked);
+
+                // Optional: Update the parent list item class for styling (e.g. crossing out text)
+                if (checkbox.checked) {
+                    checkbox.parentElement.classList.add('checked');
+                } else {
+                    checkbox.parentElement.classList.remove('checked');
+                }
+            });
+
+            // Initial styling update
+            if (checkbox.checked) {
+                checkbox.parentElement.classList.add('checked');
+            }
+        });
+    });
+</script>
