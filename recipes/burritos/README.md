@@ -11,11 +11,11 @@ Debería dar para 18 burritos.
 - [ ] Caldo de carne - 1 L
 - [ ] Salsa mexicana - 300 ml
 - [ ] Vinagre de manzana - 100 ml
-- [ ] Sal - 1 Cucharada
-- [ ] Comino - 1 Cucharada sopera
+- [ ] Sal - 1.5 Cucharadas soperas
+- [ ] Comino - 1.5 Cucharadas soperas
 - [ ] Oregano - 1 Cucharada sopera
-- [ ] Pimienta - 1 Cucharada sopera
-- [ ] Pimentón - 1 cucharadita
+- [ ] Pimienta - 1.5 Cucharadas soperas
+- [ ] Pimentón - 1.5 cucharaditas
 - [ ] Ternera a tacos para guisar - 1700 g
 - [ ] Carrillada de cerdo - 500 g
 - [ ] Laurel - 3 hojas
