@@ -27,9 +27,9 @@ Debería dar para 18 burritos.
 ## Instrucciones
 - Sellar la carne
 - Sofreír 2 de las cebollas y el ajo con el aceite
-- Añadir los chiles sin semillas y el caldo de pollo, aprovechando para desglasar la sartén de la carne con el caldo. Hervir 5 minutos a fuego lento para hidratar los chiles
+- Añadir los chiles sin semillas y el caldo, aprovechando para desglasar la sartén de la carne con el caldo. Hervir entre 5 y 10 minutos a fuego lento para hidratar los chiles
 - Añadir la salsa mexicana, el vinagre de manzana, las especias, y triturar
-- Añadir la carne y las hojas de laurel. Hervir tapado a fuego lento de 7 a 8 horas, hasta que la carne se deshaga sola al remover
+- Añadir la carne y las hojas de laurel. Hervir tapado con el fuego al mínimo de 7 a 8 horas, hasta que la carne se deshaga sola al remover
 - Añadir el yogur griego, el arroz hervido, la mozzarella rallada, y las otras 2 cebollas y el pimiento picados. Mezclar bien y refrigerar 2 horas
 - Con la masa obtenida, rellenar las tortillas a partes iguales y dorar un poco en la sartén
 
