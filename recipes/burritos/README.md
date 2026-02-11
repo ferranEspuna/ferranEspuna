@@ -6,7 +6,7 @@ Debería dar para 18 burritos.
 - [ ] Ajo - 20 dientes
 - [ ] Cebollas - 1 kg
 - [ ] Aceite - 2 Cucharadas soperas
-- [ ] Pimiento - 450 g
+- [ ] Pimientos - 450 g
 - [ ] Pimientos secos - 70 g
 - [ ] Caldo de carne - 1 L
 - [ ] Salsa mexicana (o tomate triturado) - 300 ml
