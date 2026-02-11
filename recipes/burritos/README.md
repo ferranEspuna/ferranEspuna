@@ -7,9 +7,9 @@ Debería dar para 18 burritos.
 - [ ] Cebollas - 1 kg
 - [ ] Aceite - 2 Cucharadas soperas
 - [ ] Pimiento - 450 g
-- [ ] Chiles secos - 70 g
+- [ ] Pimientos secos - 70 g
 - [ ] Caldo de carne - 1 L
-- [ ] Salsa mexicana - 300 ml
+- [ ] Salsa mexicana (o tomate triturado) - 300 ml
 - [ ] Vinagre de manzana - 100 ml
 - [ ] Sal - 1.5 Cucharadas soperas
 - [ ] Comino - 1.5 Cucharadas soperas
@@ -20,7 +20,7 @@ Debería dar para 18 burritos.
 - [ ] Carrillada de cerdo - 500 g
 - [ ] Laurel - 3 hojas
 - [ ] Arroz - 600 g en seco
-- [ ] Mozzarella - 600 g
+- [ ] Mozzarella rallada - 600 g
 - [ ] Yogur griego light - 250 g
 - [ ] Tortillas grandes (60 g) de trigo - 18
 
