@@ -35,6 +35,6 @@ Debería dar para 18 burritos.
 
 ## Información nutricional aproximada (por burrito)
 - Energía - 610 kCal
-- Proteínas -  33 g
-- Grasas - 32 g
-- Carbohidratos - 27 g
+- Proteínas -  42 g
+- Grasas - 18 g
+- Carbohidratos - 68 g
