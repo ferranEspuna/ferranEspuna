@@ -239,13 +239,63 @@ window.addEventListener("load", async () => {
         channel.postMessage({ type, data });
     }
 
+    // MATH HELPERS
+    function cmul(a, b) { return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]; }
+    function cadd(a, b) { return [a[0] + b[0], a[1] + b[1]]; }
+    function csub(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
+    function cinv(z) {
+        let mag = Math.max(z[0] * z[0] + z[1] * z[1], 1e-6);
+        return [z[0] / mag, -z[1] / mag];
+    }
+
     function updateUniforms() {
         sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
         sandbox.setUniform("u_zoom", zoomMain);
         sandbox.setUniform("u_pan", panMain[0], panMain[1]);
         sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
         sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
-        sandbox.setUniform("u_path_origin", pathOrigin[0], pathOrigin[1]);
+
+        if (showPath) {
+            let root0 = [-0.4, 0.0];
+            let root1 = [0.4, 0.0];
+            let root2 = rootPosition;
+            let iters = parseInt(slider.value, 10);
+            let path = [];
+            let z = [pathOrigin[0], pathOrigin[1]];
+            path.push(z[0], z[1]);
+            for (let i = 0; i < iters && i < 100; i++) {
+                let a = csub(z, root0);
+                let b = csub(z, root1);
+                let c = csub(z, root2);
+                let ab = cmul(a, b);
+                let bc = cmul(b, c);
+                let ca = cmul(c, a);
+                let f = cmul(ab, c);
+                let der = cadd(cadd(ab, bc), ca);
+                let step = cmul(f, cinv(der));
+                z = csub(z, step);
+                path.push(z[0], z[1]);
+            }
+            sandbox.setUniform("u_path_length", Math.floor(path.length / 2));
+
+            // Bypass glslCanvas parameter parsing regex to inject uniform arrays directly via raw WebGL API
+            if (sandbox.gl && sandbox.program) {
+                let gl = sandbox.gl;
+                let program = sandbox.program;
+                let loc = gl.getUniformLocation(program, "u_path");
+                if (!loc) loc = gl.getUniformLocation(program, "u_path[0]");
+                if (loc) {
+                    gl.useProgram(program);
+                    gl.uniform2fv(loc, new Float32Array(path));
+                }
+            } else {
+                for (let i = 0; i < Math.floor(path.length / 2); i++) {
+                    sandbox.setUniform("u_path[" + i + "]", path[2 * i], path[2 * i + 1]);
+                }
+            }
+        } else {
+            sandbox.setUniform("u_path_length", 0.0);
+        }
 
         paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
         paramSandbox.setUniform("u_zoom", zoomParam);

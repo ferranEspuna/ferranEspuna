@@ -10,17 +10,18 @@ uniform float u_iterations;
 uniform float u_zoom;
 uniform vec2 u_pan;
 uniform vec2 u_root_position;
+#define MAX_ITERS 100
+
 // ADDED FOR PATH TOGGLE/CONTROL
 uniform float u_show_path;
-uniform vec2 u_path_origin;
+uniform float u_path_length;
+uniform vec2 u_path[MAX_ITERS];
 uniform float u_screen_ratio; // New uniform
 
 // CUSTOM COLORS
 uniform vec3 u_color0;
 uniform vec3 u_color1;
 uniform vec3 u_color2;
-
-#define MAX_ITERS 100
 
 vec2 cmul(vec2 a, vec2 b) {
     return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
@@ -70,25 +71,19 @@ vec2 newton(vec2 z, vec2 root0, vec2 root1, vec2 root2) {
     return z;
 }
 
-// MODIFIED: Takes u_path_origin directly instead of z0 argument
-float newton_path(vec2 z, vec2 root0, vec2 root1, vec2 root2, float zoom, float ratio) {
+// MODIFIED: Uses precalculated path points from javascript
+float draw_path(vec2 z, float zoom, float ratio) {
+    if (u_show_path < 0.5 || u_path_length < 1.5) return 0.0;
     
-    vec2 z0 = u_path_origin; // Use uniform for start point
-    // Scale path elements by ratio too
-	float final = circle(z, z0, 0.01 * zoom / ratio);
-	vec2 new_z0;
+	float final = circle(z, u_path[0], 0.01 * zoom / ratio);
 
 	for (int i = 0; i < MAX_ITERS; ++i) {
-        if (float(i) >= u_iterations) break;
-        vec2 a = z0 - root0;
-        vec2 b = z0 - root1;
-        vec2 c = z0 - root2;
-        vec2 f = cmul(cmul(a, b), c);
-        vec2 der = cmul(a, b) + cmul(b, c) + cmul(c, a);
-		new_z0 = z0 - cmul(f, cinv(der));
+        if (float(i) >= u_path_length - 1.0) break;
+        vec2 z0 = u_path[i];
+        vec2 new_z0 = u_path[i+1];
+        
 		final = max(final, 0.7 * segment(z, z0, new_z0, 0.005 * zoom / ratio));
 		final = max(final, circle(z, new_z0, 0.01 * zoom / ratio));
-		z0 = new_z0;
     }
     return final;
 }
@@ -127,8 +122,10 @@ void main() {
     color = mix(color, 0.6 * one, circle(uv, root2, dot_r));
     
     // MODIFIED: Use new uniforms to toggle path and origin drawing
-    float path_val = newton_path(uv, root0, root1, root2, u_zoom, u_screen_ratio);
-    color = mix(color, one, path_val * u_show_path);
+    if (u_show_path > 0.5) {
+        float path_val = draw_path(uv, u_zoom, u_screen_ratio);
+        color = mix(color, one, path_val);
+    }
 
     gl_FragColor = vec4(color, 1.0);
 }
