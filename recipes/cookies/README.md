@@ -17,7 +17,7 @@
 - Añadir la harina, el bicarbonato y la sal. Mezclar hasta que la masa sea uniforme.
 - Incorporar los chips de chocolate.
 - Cubrir la masa con film y refrigerar al menos 30 minutos.
-- Precalentar el horno a 175 °C y preparar una bandeja con papel de horno.
+- Precalentar el horno a 175 °C y preparar una bandeja de rejilla con papel de horno.
 - Formar bolas de masa y colocarlas en la bandeja.
-- Hornear unos 12 minutos en la rejilla central.
+- Hornear unos 15 minutos en el centro del horno.
 - Sacar cuando el centro aún parezca poco hecho. Dejar reposar 5 minutos en la bandeja; se terminarán de asentar al enfriarse.
