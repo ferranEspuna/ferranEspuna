@@ -12,15 +12,14 @@ Debería dar para 18 burritos.
 - [ ] Salsa mexicana (o tomate triturado) - 300 ml
 - [ ] Vinagre de manzana - 100 ml
 - [ ] Sal - 1.5 Cucharadas soperas
-- [ ] Comino - 1.5 Cucharadas soperas
+- [ ] Comino - 2 Cucharadas soperas
 - [ ] Oregano - 1 Cucharada sopera
 - [ ] Pimienta - 1.5 Cucharadas soperas
-- [ ] Pimentón - 1.5 cucharaditas
-- [ ] Ternera a tacos para guisar - 1700 g
-- [ ] Carrillada de cerdo - 500 g
+- [ ] Pimentón - 2 cucharaditas
+- [ ] Ternera a tacos para guisar - 2kg
 - [ ] Laurel - 3 hojas
-- [ ] Arroz - 600 g en seco
-- [ ] Mozzarella rallada - 600 g
+- [ ] Arroz - 300 g en seco
+- [ ] Mozzarella rallada - 500 g
 - [ ] Yogur griego light - 250 g
 - [ ] Tortillas grandes (60 g) de trigo - 18
 
