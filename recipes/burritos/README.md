@@ -31,9 +31,3 @@ Debería dar para 18 burritos.
 - Añadir la carne y las hojas de laurel. Hervir tapado con el fuego al mínimo de 7 a 8 horas, hasta que la carne se deshaga sola al remover
 - Añadir el yogur griego, el arroz hervido, la mozzarella rallada, y las otras 2 cebollas y el pimiento picados. Mezclar bien y refrigerar 2 horas
 - Con la masa obtenida, rellenar las tortillas a partes iguales y dorar un poco en la sartén
-
-## Información nutricional aproximada (por burrito)
-- Energía - 610 kCal
-- Proteínas -  42 g
-- Grasas - 18 g
-- Carbohidratos - 68 g
