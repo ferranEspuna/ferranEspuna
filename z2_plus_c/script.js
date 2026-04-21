@@ -37,21 +37,24 @@ window.addEventListener("load", async () => {
 
     const baseText = `
     <p>
-      <strong>Color scheme (both panels):</strong> hue encodes a <strong>smoothed escape-time</strong> — how quickly the relevant orbit’s magnitude crosses the escape threshold (larger |z| ⇒ more colorful / brighter in the palette). Pixels that stay below that threshold for all iterations are drawn in a nearly black “filled” color. The parameter plane always shows the <strong>critical orbit</strong> (here z₀ = 0), matching the default seed for the white orbit on the left.
+      <strong>Background (both panels):</strong> hue encodes <strong>smoothed escape time</strong> — how quickly the tested orbit’s magnitude crosses the escape threshold (brighter / more saturated ⇒ faster escape). Very dark regions mean no escape within the iteration budget. The parameter plane always uses the <strong>critical orbit</strong> with seed z₀ = 0 (same default as the white orbit on the dynamical plane when “Lock to critical” is on).
     </p>
     <p>
-      The family <strong>f<sub>c</sub>(z) = z<sup>2</sup> + c</strong>: the dynamical plane fixes c and varies z₀ per pixel; the parameter plane varies c with z₀ = 0. The <strong>gold dot</strong> is c in both planes (same complex coordinates). Turn on <strong>Show orbit</strong> to trace an orbit from a chosen z₀ (default the critical point 0).
+      <strong>Family</strong> f<sub>c</sub>(z) = z<sup>2</sup> + c: the dynamical plane fixes c and varies the pixel’s starting z₀; the parameter plane varies c with z₀ = 0.
     </p>
     <p>
-      <em>Navigation:</em> Right-click the <strong>parameter</strong> canvas to toggle pan/zoom vs choosing c. Right-click the <strong>dynamical</strong> canvas toggles pan vs placing the orbit start, when that option is enabled.
+      <strong>Markers on the dynamical plane</strong> (drawn on top of the white orbit so they stay visible if the path crosses them): <strong>white</strong> = forward orbit when “Show orbit” is on; <strong>magenta</strong> = the two <strong>fixed points</strong> z = (1 ± √(1 − 4c)) / 2 (they merge when c = ¼); <strong>teal</strong> = the (finite) <strong>critical point</strong> z = 0 of the map z ↦ z² + c; <strong>gold</strong> = the parameter c plotted at the same complex coordinates as c (so you see c next to the Julia set). The parameter plane shows only the <strong>gold</strong> marker for c.
+    </p>
+    <p>
+      <em>Navigation:</em> By default both canvases are in <strong>edit</strong> mode (move the pointer to set c). Right-click either canvas to toggle that view between <strong>edit</strong> and <strong>pan/zoom</strong>. On the dynamical plane, the checkbox <strong>Place orbit start</strong> (with “Show orbit” on and critical lock off) chooses whether you move the orbit seed or c; there is no mode cycle on right-click.
     </p>
   `;
 
     const desktopInstructions = `
   <p>
     <strong>Controls (Desktop):</strong><br>
-    • <strong>Dynamical plane:</strong> Drag to pan, scroll to zoom; with “Place orbit start”, right-click to switch pan vs click-move for z₀.<br>
-    • <strong>Parameter plane:</strong> Right-click for pan/zoom vs choosing c.<br>
+    • <strong>Dynamical plane:</strong> Edit mode: moves c or the orbit start per checkbox; right-click toggles pan/zoom. Scroll always zooms.<br>
+    • <strong>Parameter plane:</strong> Default: move mouse to set c; right-click to pan. Scroll zooms.<br>
     • <strong>Iterations:</strong> Slider (affects both escape coloring and orbit length).<br>
     • <strong>Pop out / Fullscreen:</strong> As labeled.
   </p>
@@ -60,8 +63,8 @@ window.addEventListener("load", async () => {
     const mobileInstructions = `
   <p>
     <strong>Controls (Mobile):</strong><br>
-    • <strong>Dynamical plane:</strong> Two-finger pan and pinch; with orbit placement on, drag near the white start or double-tap to move z₀.<br>
-    • <strong>Parameter plane:</strong> Drag near the gold dot to move c; two-finger pan/zoom otherwise.<br>
+    • <strong>Dynamical plane:</strong> Edit vs pan as on desktop; one finger moves c or z₀ per checkbox; two-finger pan/pinch.<br>
+    • <strong>Parameter plane:</strong> One finger moves c by default; two-finger pan/zoom.<br>
   </p>
   `;
 
@@ -73,11 +76,22 @@ window.addEventListener("load", async () => {
         if (popoutBtnParam) popoutBtnParam.style.display = "none";
     }
 
-    let interactionModeMain = "pan";
-    let interactionModeParam = isMobile ? "param" : "pan";
+    let interactionModeMain = "edit";
+    let interactionModeParam = "param";
 
-    canvas.style.cursor = "move";
-    paramCanvas.style.cursor = isMobile ? "crosshair" : "move";
+    function normalizeMainInteractionMode(m) {
+        if (m === "pan") return "pan";
+        return "edit";
+    }
+
+    function applyMainCursor() {
+        canvas.style.cursor = interactionModeMain === "pan" ? "move" : "crosshair";
+    }
+    function applyParamCursor() {
+        paramCanvas.style.cursor = interactionModeParam === "pan" ? "move" : "crosshair";
+    }
+    applyMainCursor();
+    applyParamCursor();
 
     let zoomMain = 1.0;
     let panMain = [0.0, 0.0];
@@ -97,7 +111,6 @@ window.addEventListener("load", async () => {
     let lastTapTime = 0;
     const doubleTapThreshold = 300;
     const paramTouchRadius = 0.12;
-    const orbitTouchRadius = 0.1;
 
     function cadd(a, b) {
         return [a[0] + b[0], a[1] + b[1]];
@@ -146,10 +159,6 @@ window.addEventListener("load", async () => {
                 orbitOriginToggle.checked = false;
                 controlOrbitOrigin = false;
             }
-        }
-        if (!eligibleOrbitPick() && interactionModeMain === "orbit") {
-            interactionModeMain = "pan";
-            canvas.style.cursor = "move";
         }
     }
     refreshOrbitUi();
@@ -264,15 +273,15 @@ window.addEventListener("load", async () => {
         controlOrbitOrigin = data.controlOrbitOrigin;
         trackCritical = data.trackCritical;
         orbitStart = data.orbitStart;
-        interactionModeMain = data.interactionModeMain || "pan";
-        interactionModeParam = data.interactionModeParam || (isMobile ? "param" : "pan");
+        interactionModeMain = normalizeMainInteractionMode(data.interactionModeMain);
+        interactionModeParam = data.interactionModeParam || "param";
 
         if (showOrbitToggle) showOrbitToggle.checked = showOrbit;
         if (orbitOriginToggle) orbitOriginToggle.checked = controlOrbitOrigin;
         if (trackCriticalToggle) trackCriticalToggle.checked = trackCritical;
         refreshOrbitUi();
-        canvas.style.cursor = interactionModeMain === "pan" ? "move" : "crosshair";
-        paramCanvas.style.cursor = interactionModeParam === "pan" ? "move" : "crosshair";
+        applyMainCursor();
+        applyParamCursor();
         updateUniforms();
     };
 
@@ -337,10 +346,6 @@ window.addEventListener("load", async () => {
     if (orbitOriginToggle) {
         orbitOriginToggle.addEventListener("change", () => {
             controlOrbitOrigin = orbitOriginToggle.checked;
-            if (!controlOrbitOrigin && interactionModeMain === "orbit") {
-                interactionModeMain = "pan";
-                canvas.style.cursor = "move";
-            }
             syncState();
         });
     }
@@ -351,8 +356,7 @@ window.addEventListener("load", async () => {
                 orbitStart = [CRITICAL[0], CRITICAL[1]];
                 controlOrbitOrigin = false;
                 if (orbitOriginToggle) orbitOriginToggle.checked = false;
-                interactionModeMain = "pan";
-                canvas.style.cursor = "move";
+                applyMainCursor();
             }
             refreshOrbitUi();
             syncState();
@@ -363,15 +367,14 @@ window.addEventListener("load", async () => {
         if (e.target !== canvas && e.target !== paramCanvas) return;
         e.preventDefault();
         if (e.target === canvas) {
-            if (eligibleOrbitPick()) {
-                interactionModeMain = interactionModeMain === "orbit" ? "pan" : "orbit";
-                canvas.style.cursor = interactionModeMain === "pan" ? "move" : "crosshair";
-                syncState();
-            }
+            interactionModeMain = interactionModeMain === "pan" ? "edit" : "pan";
+            applyMainCursor();
+            syncState();
             return;
         }
         interactionModeParam = interactionModeParam === "param" ? "pan" : "param";
-        paramCanvas.style.cursor = interactionModeParam === "pan" ? "move" : "crosshair";
+        applyParamCursor();
+        syncState();
     }
     canvas.addEventListener("contextmenu", handleContextMenu);
     paramCanvas.addEventListener("contextmenu", handleContextMenu);
@@ -404,8 +407,12 @@ window.addEventListener("load", async () => {
         const isMain = targetCanvas === canvas;
         const [shaderX, shaderY] = getShaderMouse(e, targetCanvas);
 
-        if (isMain && interactionModeMain === "orbit" && eligibleOrbitPick()) {
-            orbitStart = [shaderX, shaderY];
+        if (isMain && interactionModeMain === "edit") {
+            if (eligibleOrbitPick()) {
+                orbitStart = [shaderX, shaderY];
+            } else {
+                paramValue = [shaderX, shaderY];
+            }
             updateUniforms();
             syncState();
             return;
@@ -443,7 +450,6 @@ window.addEventListener("load", async () => {
         const targetCanvas = e.target;
         if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
         const isMain = targetCanvas === canvas;
-        if (!isMain && interactionModeParam !== "pan") return;
 
         const [mx0, my0] = getShaderMouse(e, targetCanvas);
         const zoomAmount = e.deltaY * 0.0005;
@@ -479,13 +485,10 @@ window.addEventListener("load", async () => {
             const isMain = targetCanvas === canvas;
             const currentZoom = isMain ? zoomMain : zoomParam;
             const rParam = paramTouchRadius * currentZoom;
-            const rOrbit = orbitTouchRadius * currentZoom;
-            const z0 = effectiveOrbitStart();
 
             if (isMain) {
-                const distOrbit = distance2D([x, y], z0);
-                if (showOrbit && eligibleOrbitPick() && (now - lastTapTime < doubleTapThreshold || distOrbit < rOrbit)) {
-                    touchMode = "moveOrbit";
+                if (interactionModeMain === "edit") {
+                    touchMode = eligibleOrbitPick() ? "moveOrbit" : "moveParam";
                 } else {
                     touchMode = "pan";
                 }
@@ -511,7 +514,10 @@ window.addEventListener("load", async () => {
 
         if (e.touches.length === 2) touchMode = "pan";
 
-        if (touchMode === "moveOrbit" && e.touches.length === 1 && targetCanvas === canvas && eligibleOrbitPick()) {
+        if (touchMode === "moveParam" && e.touches.length === 1 && targetCanvas === canvas) {
+            const [x, y] = getTouchPos(e.touches[0], targetCanvas);
+            paramValue = [x, y];
+        } else if (touchMode === "moveOrbit" && e.touches.length === 1 && targetCanvas === canvas && eligibleOrbitPick()) {
             const [x, y] = getTouchPos(e.touches[0], targetCanvas);
             orbitStart = [x, y];
         } else if (touchMode === "param" && e.touches.length === 1 && targetCanvas === paramCanvas) {

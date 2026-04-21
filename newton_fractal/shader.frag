@@ -117,15 +117,19 @@ void main() {
     float dot_r = 0.015 * u_zoom / u_screen_ratio;
     vec3 zero = vec3(0.0);
     vec3 one = vec3(1.0);
-    color = mix(color, zero, circle(uv, root0, dot_r));
-    color = mix(color, zero, circle(uv, root1, dot_r));
-    color = mix(color, 0.6 * one, circle(uv, root2, dot_r));
-    
-    // MODIFIED: Use new uniforms to toggle path and origin drawing
     if (u_show_path > 0.5) {
         float path_val = draw_path(uv, u_zoom, u_screen_ratio);
         color = mix(color, one, path_val);
     }
+
+    color = mix(color, zero, circle(uv, root0, dot_r));
+    color = mix(color, zero, circle(uv, root1, dot_r));
+    color = mix(color, 0.6 * one, circle(uv, root2, dot_r));
+
+    vec2 centroid = (root0 + root1 + root2) / 3.0;
+    float crit_r = 0.013 * u_zoom / u_screen_ratio;
+    vec3 critColor = vec3(0.15, 0.88, 0.82);
+    color = mix(color, critColor, circle(uv, centroid, crit_r));
 
     gl_FragColor = vec4(color, 1.0);
 }

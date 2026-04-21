@@ -74,9 +74,13 @@ void main() {
     
     color = mix(color, zero, circle(uv, root0, dot_r));
     color = mix(color, zero, circle(uv, root1, dot_r));
-    
 
     color = mix(color, 0.6 * one, circle(uv, u_current_root2, dot_r));
+
+    vec2 centroid = (root0 + root1 + u_current_root2) / 3.0;
+    float crit_r = 0.013 * u_zoom / u_screen_ratio;
+    vec3 critColor = vec3(0.15, 0.88, 0.82);
+    color = mix(color, critColor, circle(uv, centroid, crit_r));
 
     gl_FragColor = vec4(color, 1.0);
 }

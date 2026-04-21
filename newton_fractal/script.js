@@ -50,19 +50,16 @@ window.addEventListener("load", async () => {
     // -------------------
     const baseText = `
     <p>
-      This visualization renders the <strong>Newton fractal</strong> for a cubic polynomial with three roots (marked as two black dots and one gray dot that you can control the position of).
-      Each pixel represents a starting point on the complex plane. We apply Newton's method to these points to find one of the polynomial's roots.
-      The pixel's color indicates which root the method converges to. By default, red, green, and blue correspond to the three roots.
-      Intermediate or dark colors appear where points take longer to converge or fail to converge entirely.
-      With enough iterations, the plane divides into three <strong>basins of attraction</strong>.
-      While the interiors of these basins are smooth, the boundaries are fractals: complex, chaotic regions where the smallest shift in starting position can lead to a completely different outcome.
+      This visualization renders the <strong>Newton fractal</strong> for a cubic polynomial with three roots. Each pixel is a starting point z₀; we iterate Newton’s method toward a root. Basin colors (customizable) show which root the orbit converges to; intermediate or dark shades mean slower convergence or failure to settle on a root within the iteration budget.
     </p>
     <p>
-      <em>Mathematical Insight:</em> While Newton's method is efficient, it is not foolproof. It can get trapped in an <strong>attracting cycle</strong>, where the value oscillates endlessly without ever reaching a root.
-      For cubic polynomials, the <strong>centroid</strong> of the roots acts as a "canary in the coal mine". If an attracting cycle exists, the centroid is mathematically guaranteed to be pulled into it.
-      The <strong>Parameter Space</strong> visualization (right) uses this fact. Here, each pixel represents a possible position for the third root (the movable gray dot).
-      The color shows the fate of the centroid for that specific configuration. By exploring this space, you can find the "problematic" polynomials where Newton's method fails,
-      represented as dark or intermediate-colored regions. Can you find any familiar patterns in these regions? What lengths of attracting cycles can you find?
+      <strong>Markers — phase space (left):</strong> <strong>white</strong> = Newton steps from one orbit when “Show Path” is on (drawn first so other markers stay visible on top); <strong>black</strong> = the two fixed roots at ±0.4; <strong>light gray</strong> = the movable third root; <strong>teal</strong> = the <strong>centroid</strong> (r₁ + r₂ + r₃)/3 of the three roots. For a monic cubic, that point is where p″(z) = 0; it is an additional <strong>critical point</strong> of the Newton map N(z) = z − p(z)/p′(z) besides the roots themselves (which are attracting fixed points of N).
+    </p>
+    <p>
+      <strong>Markers — parameter space (right):</strong> each pixel is a choice of the <strong>third root</strong>; the two black dots are the fixed first roots (same as on the left). <strong>Light gray</strong> marks the current third root used on the left. <strong>Teal</strong> marks the centroid for that same triple of roots — the seed used when coloring each pixel. There is no white path on this panel.
+    </p>
+    <p>
+      <em>Mathematical note:</em> Newton’s method can fall into <strong>attracting cycles</strong>. For cubics, the centroid is a natural probe orbit: the parameter view colors each third-root choice by where Newton sends the centroid. Dark or mottled regions often correspond to non-convergence or long transients.
     </p>
   `;
 

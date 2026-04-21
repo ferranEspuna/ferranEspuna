@@ -19,6 +19,28 @@ vec2 csquare(vec2 z) {
     return vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
 }
 
+// Principal sqrt; non-negative imaginary part on negative real axis (y = 0, x < 0)
+vec2 csqrt(vec2 z) {
+    float x = z.x;
+    float y = z.y;
+    float r = length(z);
+    if (r < 1e-14) return vec2(0.0);
+    if (abs(y) < 1e-8 && x < 0.0) {
+        return vec2(0.0, sqrt(-x));
+    }
+    float re = sqrt(0.5 * (r + x));
+    float im = sign(y) * sqrt(max(0.0, 0.5 * (r - x)));
+    return vec2(re, im);
+}
+
+// Fixed points of z^2 + c: z = (1 ± sqrt(1 - 4c)) / 2
+void quadratic_fixed_points(vec2 c, out vec2 fp0, out vec2 fp1) {
+    vec2 disc = vec2(1.0, 0.0) - 4.0 * c;
+    vec2 s = csqrt(disc);
+    fp0 = 0.5 * (vec2(1.0, 0.0) + s);
+    fp1 = 0.5 * (vec2(1.0, 0.0) - s);
+}
+
 float julia_escape(vec2 z0, vec2 c) {
     vec2 z = z0;
     for (int i = 0; i < MAX_ITERS; i++) {
@@ -80,14 +102,26 @@ void main() {
         col = palette(esc);
     }
 
-    float prm_r = 0.018 * u_zoom / u_screen_ratio;
-    vec3 paramColor = vec3(0.95, 0.72, 0.12);
-    col = mix(col, paramColor, circle(uv, u_param, prm_r));
-
     if (u_show_path > 0.5) {
         float pathVal = draw_path(uv, u_zoom, u_screen_ratio);
         col = mix(col, vec3(1.0), pathVal);
     }
+
+    float fp_r = 0.014 * u_zoom / u_screen_ratio;
+    vec3 fpColor = vec3(0.88, 0.28, 0.92);
+    vec2 qfp0, qfp1;
+    quadratic_fixed_points(u_param, qfp0, qfp1);
+    col = mix(col, fpColor, circle(uv, qfp0, fp_r));
+    col = mix(col, fpColor, circle(uv, qfp1, fp_r));
+
+    float crit_r = 0.013 * u_zoom / u_screen_ratio;
+    vec3 critColor = vec3(0.15, 0.88, 0.82);
+    vec2 critical_z2c = vec2(0.0, 0.0);
+    col = mix(col, critColor, circle(uv, critical_z2c, crit_r));
+
+    float prm_r = 0.018 * u_zoom / u_screen_ratio;
+    vec3 paramColor = vec3(0.95, 0.72, 0.12);
+    col = mix(col, paramColor, circle(uv, u_param, prm_r));
 
     gl_FragColor = vec4(col, 1.0);
 }
