@@ -101,3 +101,8 @@ $table-border-color:    var(--table-border-color,$table-border-color);
   opacity: 0.7;
 }
 
+/* Override Minima header styles to remove unwanted lines/gaps */
+.site-header {
+  border-top: none;
+  border-bottom: none;
+}

@@ -1,0 +1,68 @@
+---
+layout: default
+title: "az(1 − z)"
+---
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <nav>
+    <a href="../">&larr; About Me</a>
+  </nav>
+
+  <h1>Logistic family: az(1 − z)</h1>
+
+  <div class="description" id="description"></div>
+
+  <div class="controls global-toolbar" style="margin-bottom: 1em;">
+    <label for="iterSlider">Iterations:</label>
+    <input type="range" id="iterSlider" min="1" max="256" value="80">
+    <span id="iterValue">80</span>
+  </div>
+
+  <div class="shader-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+    <div class="shader-window" id="windowMain" style="flex: 1; min-width: 300px;">
+      <h3>Dynamical plane (z)</h3>
+      <div class="canvas-wrapper" id="wrapperMain">
+        <button id="fullscreenBtnMain" class="fullscreen-btn" type="button">Fullscreen</button>
+        <button id="popoutBtnMain" class="fullscreen-btn" style="right: auto; left: 10px;" type="button">Pop Out</button>
+        <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="phase.frag"></canvas>
+      </div>
+      <div class="controls orbit-controls" style="margin-top: 0.5em; display: flex; flex-wrap: wrap; gap: 0.2em 1em; justify-content: center;">
+        <span style="white-space: nowrap;">
+          <input type="checkbox" id="showOrbitToggle">
+          <label for="showOrbitToggle">Show orbit</label>
+        </span>
+        <span id="orbitOriginControl" style="display: none; white-space: nowrap;">
+          <input type="checkbox" id="orbitOriginToggle">
+          <label for="orbitOriginToggle">Place orbit start (mouse)</label>
+        </span>
+        <span id="trackCriticalControl" style="display: none; white-space: nowrap;">
+          <input type="checkbox" id="trackCriticalToggle" checked>
+          <label for="trackCriticalToggle">Lock to critical z₀ = ½</label>
+        </span>
+      </div>
+    </div>
+    <div class="shader-window" id="windowParam" style="flex: 1; min-width: 300px;">
+      <h3>Parameter plane (a)</h3>
+      <div class="canvas-wrapper" id="wrapperParam">
+        <button id="fullscreenBtnParam" class="fullscreen-btn" type="button">Fullscreen</button>
+        <button id="popoutBtnParam" class="fullscreen-btn" style="right: auto; left: 10px;" type="button">Pop Out</button>
+        <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="parameter.frag"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
