@@ -5,15 +5,11 @@
 
 Barcelona, Spain · [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
 
----
-
 ## About
 
 I am a first-year PhD student in mathematics at Universidad Autónoma de Madrid and ICMAT, advised by Pablo Candela. My research lies in arithmetic combinatorics, with particular interest in higher-order Fourier analysis, additive structures, inverse theorems, and connections with harmonic analysis and ergodic theory.
 
 Before starting my PhD, I worked as a research engineer at the Barcelona Supercomputing Center, where I contributed to large language models, multilingual pretraining corpora, and high-performance AI systems.
-
----
 
 ## Research Interests
 
@@ -24,8 +20,6 @@ Before starting my PhD, I worked as a research engineer at the Barcelona Superco
 - Harmonic analysis
 - Extremal and probabilistic combinatorics
 
----
-
 ## Education
 
 ### PhD in Mathematics  
@@ -33,8 +27,6 @@ Before starting my PhD, I worked as a research engineer at the Barcelona Superco
 **Advisor:** Pablo Candela
 
 Research focused on arithmetic combinatorics and higher-order Fourier methods, including Gowers norms, inverse theorems, nilspaces, and additive patterns.
-
----
 
 ### Master’s Degree in Advanced Mathematics and Mathematical Engineering  
 **Universitat Politècnica de Catalunya (UPC)** | 2025  
@@ -45,14 +37,10 @@ Relevant coursework in algebra, number theory, combinatorics, graph theory, comp
 **Master’s Thesis:** *Finding Partite Hypergraphs Efficiently*  
 Developed a deterministic polynomial-time algorithm for finding large complete balanced \(k\)-partite subgraphs in dense \(k\)-uniform hypergraphs, matching asymptotic extremal bounds.
 
----
-
 ### Double Bachelor’s Degree in Mathematics and Computer Science  
 **Universitat de Barcelona (UB)** | 2023  
 **GPA:** 9.0/10  
 Extraordinary Bachelor’s Degree Award
-
----
 
 ## Publications
 
@@ -63,8 +51,6 @@ Extraordinary Bachelor’s Degree Award
 **Palomar, J. et al.** *A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages.*  
 Proceedings of COLING-LREC 2024.  
 [Paper](https://aclanthology.org/2024.lrec-main.31/)
-
----
 
 ## Research & Professional Experience
 
@@ -79,21 +65,15 @@ Research engineer in the Language Technologies unit working on large-scale langu
 - Researched evaluation methodologies for open-ended language generation
 - Investigated state space models, sparse autoencoders, and multimodal architectures
 
----
-
 ### Computer Vision Center — Research Intern  
 **2022**
 
 Worked on the application of topological data analysis techniques to study neural network generalization.
 
----
-
 ### ChipScope Research Group (UB) — Image Processing  
 **2022**
 
 Contributed to a European chip-scale microscopy project involving computational imaging pipelines, wave backpropagation, and system interface design.
-
----
 
 ## Technical Background
 
@@ -109,15 +89,11 @@ Python, C/C++, Java, Bash
 ### Languages
 Spanish (native), Catalan (native), English (C2)
 
----
-
 ## Selected Projects
 
 ### Newton’s Fractal Shader
 Interactive GLSL fragment shader visualising Newton fractals for cubic polynomials.  
 [View project](https://ferran.info/newton_fractal)
-
----
 
 ## Additional Information
 
