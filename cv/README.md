@@ -3,13 +3,9 @@
 Barcelona, Spain  
 [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
 
----
-
 ## Research Interests
 
 Arithmetic combinatorics; higher-order Fourier analysis; additive combinatorics; harmonic analysis; ergodic theory; extremal combinatorics.
-
----
 
 ## Current Position
 
@@ -20,8 +16,6 @@ Arithmetic combinatorics; higher-order Fourier analysis; additive combinatorics;
 Supervisor: Pablo Candela
 
 Research area: arithmetic combinatorics, with emphasis on higher-order Fourier analysis, Gowers norms, inverse theorems, nilspaces, and additive structures.
-
----
 
 ## Education
 
@@ -34,15 +28,12 @@ Master’s thesis: *Finding Partite Hypergraphs Efficiently*.
 
 Relevant coursework: Commutative Algebra, Number Theory, Coding Theory, Cryptography, Combinatorics, Graph Theory, Computational Complexity.
 
----
-
 ### B.Sc. + B.Sc. Double Degree in Mathematics and Computer Science  
 **Universitat de Barcelona (UB)**  
 2023  
 GPA: 9.0/10  
 Extraordinary Bachelor’s Degree Award.
 
----
 
 ## Publications
 
@@ -51,8 +42,6 @@ Extraordinary Bachelor’s Degree Award.
 
 Palomar, Jorge, et al. “A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages.” *Proceedings of COLING-LREC 2024*.  
 [Paper](https://aclanthology.org/2024.lrec-main.31/)
-
----
 
 ## Research Experience
 
@@ -68,8 +57,6 @@ Selected contributions:
 - Contribution to the [Salamandra](https://huggingface.co/collections/BSC-LT/salamandra-66fc171485944df79469043a) multilingual language model family
 - Research on open-ended generation evaluation, state space models, sparse autoencoders, and multimodal architectures
 
----
-
 ### Research Intern  
 **Computer Vision Center (CVC)**  
 2022
@@ -78,15 +65,11 @@ Project on topological data analysis methods for the study of neural network gen
 
 Supervisors: Sergio Escalera, Carles Casacuberta, Rubén Ballester.
 
----
-
 ### Research Assistant, Image Processing  
 **ChipScope Research Group, Universitat de Barcelona**  
 2022
 
 European project on chip-scale microscopy. Work included computational imaging pipelines, alignment algorithms, and wave backpropagation.
-
----
 
 ## Technical Skills
 
@@ -98,15 +81,11 @@ European project on chip-scale microscopy. Work included computational imaging p
 
 **Languages:** Spanish (native), Catalan (native), English (C2).
 
----
-
 ## Awards and Distinctions
 
 - Extraordinary Bachelor’s Degree Award, Universitat de Barcelona
 - Stanford University, Machine Learning Specialization
 - IELTS Academic: 8.5/9
-
----
 
 ## Selected Project
 
