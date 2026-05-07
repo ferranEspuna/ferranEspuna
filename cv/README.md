@@ -1,6 +1,6 @@
 # Ferran Espuña
 
-Barcelona, Spain  
+Madrid, Spain  
 [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
 
 ## Research Interests
@@ -89,5 +89,9 @@ European project on chip-scale microscopy. Work included computational imaging p
 
 ## Selected Project
 
-**Newton’s Fractal Shader.** Interactive GLSL visualisation of Newton fractals for cubic polynomials.  
-[Project page](https://ferran.info/newton_fractal)
+**Complex fractal shaders.**
+Interactive GLSL fragment shader visualising fractals emerging from complex dynamical systems.
+- [Newton's Fractal](https://ferran.info/newton_fractal/)
+- [Logistic Family](https://ferran.info/az_one_minus_z/)
+- [Mandelbrot Set](https://ferran.info/z2_plus_c/)
+
