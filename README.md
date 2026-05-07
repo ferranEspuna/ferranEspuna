@@ -3,7 +3,7 @@
 *PhD Student in Mathematics at UAM–ICMAT*  
 *Arithmetic Combinatorics · Higher-Order Fourier Analysis · Former AI Research Engineer*
 
-Barcelona, Spain · [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
+Madrid, Spain · [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
 
 ## About
 
@@ -89,11 +89,13 @@ Python, C/C++, Java, Bash
 ### Languages
 Spanish (native), Catalan (native), English (C2)
 
-## Selected Projects
+## Selected Project
 
-### Newton’s Fractal Shader
-Interactive GLSL fragment shader visualising Newton fractals for cubic polynomials.  
-[View project](https://ferran.info/newton_fractal)
+### Complex Fractal Shaders
+Interactive GLSL fragment shader visualising fractals emerging from complex dynamical systems.
+[Newton's Fractal](https://ferran.info/newton_fractal/)
+[Logistic Family](https://ferran.info/az_one_minus_z/)
+[Mandelbrot Set](https://ferran.info/z2_plus_c/)
 
 ## Additional Information
 
