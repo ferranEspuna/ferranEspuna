@@ -93,9 +93,9 @@ Spanish (native), Catalan (native), English (C2)
 
 ### Complex Fractal Shaders
 Interactive GLSL fragment shader visualising fractals emerging from complex dynamical systems.
-[Newton's Fractal](https://ferran.info/newton_fractal/)
-[Logistic Family](https://ferran.info/az_one_minus_z/)
-[Mandelbrot Set](https://ferran.info/z2_plus_c/)
+- [Newton's Fractal](https://ferran.info/newton_fractal/)
+- [Logistic Family](https://ferran.info/az_one_minus_z/)
+- [Mandelbrot Set](https://ferran.info/z2_plus_c/)
 
 ## Additional Information
 
