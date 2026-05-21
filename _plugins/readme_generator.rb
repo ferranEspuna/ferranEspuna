@@ -9,7 +9,7 @@ module ReadmeGenerator
       readmes = {
         "README.md" => {
           "permalink" => "/",
-          "layout" => "default",
+          "layout" => "home",
           "title" => "Home"
         },
         "cv/README.md" => {
