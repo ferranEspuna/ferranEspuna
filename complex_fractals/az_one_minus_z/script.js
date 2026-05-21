@@ -1,7 +1,7 @@
 import GlslCanvas from "https://esm.run/glslCanvas";
 
-const BROADCAST_CHANNEL = "z2_plus_c_sync";
-const CRITICAL = [0.0, 0.0];
+const BROADCAST_CHANNEL = "az_one_minus_z_sync";
+const CRITICAL = [0.5, 0.0];
 const MAX_PATH_POINTS = 256;
 
 window.addEventListener("load", async () => {
@@ -37,16 +37,13 @@ window.addEventListener("load", async () => {
 
     const baseText = `
     <p>
-      <strong>Background (both panels):</strong> hue encodes <strong>smoothed escape time</strong> — how quickly the tested orbit’s magnitude crosses the escape threshold (brighter / more saturated ⇒ faster escape). Very dark regions mean no escape within the iteration budget. The parameter plane always uses the <strong>critical orbit</strong> with seed z₀ = 0 (same default as the white orbit on the dynamical plane when “Lock to critical” is on).
+      <strong>Background (both panels):</strong> hue encodes <strong>smoothed escape time</strong> under z<sub>n+1</sub> = a z<sub>n</sub>(1 − z<sub>n</sub>) (brighter ⇒ faster escape). Very dark pixels stay below the escape threshold for all iterations. The parameter plane uses the <strong>critical orbit</strong> from z₀ = ½ — the same default seed as the white orbit on the dynamical plane when “Lock to critical” is on.
     </p>
     <p>
-      <strong>Family</strong> f<sub>c</sub>(z) = z<sup>2</sup> + c: the dynamical plane fixes c and varies the pixel’s starting z₀; the parameter plane varies c with z₀ = 0.
+      <strong>Markers on the dynamical plane</strong> (on top of the white orbit): <strong>white</strong> = forward orbit when “Show orbit” is on; <strong>magenta</strong> = <strong>fixed points</strong> z = 0 and z = 1 − 1/a; <strong>teal</strong> = the (finite) <strong>critical point</strong> z = ½ where f′(z) = 0 for f(z) = az(1 − z); <strong>gold</strong> = the parameter a at the same coordinates in the z-plane. The parameter plane shows only the <strong>gold</strong> marker for a.
     </p>
     <p>
-      <strong>Markers on the dynamical plane</strong> (drawn on top of the white orbit so they stay visible if the path crosses them): <strong>white</strong> = forward orbit when “Show orbit” is on; <strong>magenta</strong> = the two <strong>fixed points</strong> z = (1 ± √(1 − 4c)) / 2 (they merge when c = ¼); <strong>teal</strong> = the (finite) <strong>critical point</strong> z = 0 of the map z ↦ z² + c; <strong>gold</strong> = the parameter c plotted at the same complex coordinates as c (so you see c next to the Julia set). The parameter plane shows only the <strong>gold</strong> marker for c.
-    </p>
-    <p>
-      <em>Navigation (same pattern as the Newton fractal page):</em> Each canvas has <strong>Move mode</strong> (pointer sets quantities in the plane) or <strong>Pan/Zoom mode</strong> (drag to pan, scroll to zoom only in this mode). <strong>Right-click</strong> a canvas to toggle that canvas between the two. On the dynamical plane, <strong>Place orbit start</strong> (with “Show orbit” on and critical lock off) selects whether Move mode drags the orbit seed or c; the checkbox controls which, not the right-click.
+      <em>Navigation (same pattern as the Newton fractal page):</em> Each canvas has <strong>Move mode</strong> (pointer sets quantities in the plane) or <strong>Pan/Zoom mode</strong> (drag to pan, scroll to zoom only in this mode). <strong>Right-click</strong> a canvas to toggle that canvas between the two. On the dynamical plane, <strong>Place orbit start</strong> (with “Show orbit” on and critical lock off) selects whether Move mode drags the orbit seed or a; the checkbox controls which, not the right-click.
     </p>
   `;
 
@@ -55,7 +52,7 @@ window.addEventListener("load", async () => {
     <strong>Controls (Desktop):</strong> Same as Newton fractal.<br>
     • <strong>Navigate:</strong> Right-click a canvas to toggle <em>Move</em> vs <em>Pan/Zoom</em> on that canvas only. Desktop starts in Pan/Zoom on both.<br>
     • <strong>Pan/Zoom:</strong> Drag to pan, scroll to zoom.<br>
-    • <strong>Move:</strong> Move the mouse to set c, or the orbit start on the dynamical plane when the orbit checkbox allows it.<br>
+    • <strong>Move:</strong> Move the mouse to set a, or the orbit start on the dynamical plane when the orbit checkbox allows it.<br>
     • <strong>Iterations, Pop out, Fullscreen:</strong> As labeled.
   </p>
   `;
@@ -63,8 +60,8 @@ window.addEventListener("load", async () => {
     const mobileInstructions = `
   <p>
     <strong>Controls (Mobile):</strong> Same as Newton fractal.<br>
-    • <strong>Move c / orbit start:</strong> Drag near the gold dot or (on the dynamical plane) near the white orbit start when shown; or double-tap then drag. Two-finger pan and pinch zoom.<br>
-    • <strong>Parameter plane:</strong> Same proximity / double-tap behavior for the gold c marker.<br>
+    • <strong>Move a / orbit start:</strong> Drag near the gold dot or (on the dynamical plane) near the white orbit start when shown; or double-tap then drag. Two-finger pan and pinch zoom.<br>
+    • <strong>Parameter plane:</strong> Same proximity / double-tap behavior for the gold a marker.<br>
   </p>
   `;
 
@@ -81,7 +78,6 @@ window.addEventListener("load", async () => {
 
     function normalizeInteractionMode(m) {
         if (m === "pan") return "pan";
-        if (m === "root") return "root";
         return "root";
     }
 
@@ -100,7 +96,7 @@ window.addEventListener("load", async () => {
     let panMain = [0.0, 0.0];
     let zoomParam = 1.0;
     let panParam = [0.0, 0.0];
-    let paramValue = [-0.4, 0.6];
+    let paramValue = [2.75, 0.12];
 
     let showOrbit = showOrbitToggle ? showOrbitToggle.checked : false;
     let controlOrbitOrigin = orbitOriginToggle ? orbitOriginToggle.checked : false;
@@ -116,23 +112,22 @@ window.addEventListener("load", async () => {
     const doubleTapThreshold = 300;
     const rootTouchRadius = 0.1;
 
-    function cadd(a, b) {
-        return [a[0] + b[0], a[1] + b[1]];
-    }
     function cmul(a, b) {
         return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]];
     }
 
-    function juliaStep(z, c) {
-        return cadd(cmul(z, z), c);
+    function logisticStep(z, a) {
+        const one = [1.0, 0.0];
+        const omz = [one[0] - z[0], one[1] - z[1]];
+        return cmul(cmul(a, z), omz);
     }
 
-    function buildOrbit(z0, c, maxIter) {
+    function buildOrbit(z0, a, maxIter) {
         const path = [z0[0], z0[1]];
         let z = [z0[0], z0[1]];
         const steps = Math.min(maxIter, MAX_PATH_POINTS - 1);
         for (let i = 0; i < steps; i++) {
-            z = juliaStep(z, c);
+            z = logisticStep(z, a);
             path.push(z[0], z[1]);
             if (!Number.isFinite(z[0]) || !Number.isFinite(z[1])) break;
             if (z[0] * z[0] + z[1] * z[1] > 1e12) break;
@@ -476,10 +471,6 @@ window.addEventListener("load", async () => {
     }
     canvas.addEventListener("wheel", handleWheel);
     paramCanvas.addEventListener("wheel", handleWheel);
-
-    function distance2D(a, b) {
-        return Math.hypot(a[0] - b[0], a[1] - b[1]);
-    }
 
     function handleTouchStart(e) {
         e.preventDefault();

@@ -1,3 +1,9 @@
+---
+layout: page
+title: Curriculum Vitae
+permalink: /cv/
+---
+
 # Ferran Espuña
 
 Madrid, Spain  
@@ -89,9 +95,8 @@ European project on chip-scale microscopy. Work included computational imaging p
 
 ## Selected Project
 
-**Complex fractal shaders.**
+**Complex fractal shaders.**  
 Interactive GLSL fragment shader visualising fractals emerging from complex dynamical systems.
-- [Newton's Fractal](https://ferran.info/newton_fractal/)
-- [Logistic Family](https://ferran.info/az_one_minus_z/)
-- [Mandelbrot Set](https://ferran.info/z2_plus_c/)
-
+- [Newton's Fractal](/complex_fractals/newton_fractal/)
+- [Logistic Family](/complex_fractals/az_one_minus_z/)
+- [Mandelbrot Set](/complex_fractals/z2_plus_c/)

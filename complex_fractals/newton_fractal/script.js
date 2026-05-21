@@ -376,7 +376,6 @@ window.addEventListener("load", async () => {
             controlPathOrigin,
             trackCenter,
             pathOrigin,
-            pathOrigin,
             iterations: parseInt(slider.value, 10),
             rootColors
         };
@@ -412,12 +411,7 @@ window.addEventListener("load", async () => {
                 if (sandbox.render) sandbox.render();
                 if (paramSandbox.render) paramSandbox.render();
 
-                // If we are a popup, request state from opener/others
                 if (popupMode) {
-                    // We can't easily request state, but we can broadcast our presence or just wait for an update.
-                    // Actually, the main window might not know we exist.
-                    // Best bet: The opener should have sent us state? Or we just wait for user interaction.
-                    // Alternatively, we can broadcast a "hello" message and others reply with state.
                     broadcastState('hello', {});
                 }
             });
@@ -433,8 +427,6 @@ window.addEventListener("load", async () => {
     // Listen for hello to sync state to new windows
     channel.addEventListener('message', (event) => {
         if (event.data.type === 'hello' && !popupMode) {
-            // If I am the main window (or any window with state), send it.
-            // Ideally only one window responds.
             syncState();
         }
     });
@@ -550,14 +542,12 @@ window.addEventListener("load", async () => {
     window.addEventListener("mouseup", (e) => {
         if (e.button === 0) {
             isDragging = false;
-            // Sync state on mouse up to ensure final position is shared
             syncState();
         }
     });
 
     function handleMouseMove(e) {
         const targetCanvas = e.target;
-        // Only process if target is one of our canvases
         if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
 
         const isMain = targetCanvas === canvas;
@@ -582,22 +572,16 @@ window.addEventListener("load", async () => {
                 panParam[1] += deltaY_shader;
             }
 
-            updateUniforms(); // Local update for smoothness
-            // We could throttle sync here if needed, but for now let's rely on mouseup for final sync
-            // or maybe sync every frame? Syncing every frame might be too much for BroadcastChannel.
-            // Let's try syncing every frame for now, if it lags we can throttle.
+            updateUniforms();
             syncState();
 
             lastMousePos = { x: e.clientX, y: e.clientY };
         } else if (currentMode === 'root') {
-            // MODIFIED LOGIC: Control Path Origin only applies to Main Canvas
             if (isMain && showPath && controlPathOrigin) {
                 pathOrigin = [shaderX, shaderY];
             } else {
-                // Move root (applies to both canvases, but logic is same)
                 rootPosition = [shaderX, shaderY];
 
-                // Update path origin if tracking
                 if (trackCenter) {
                     pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
                 }
@@ -643,11 +627,11 @@ window.addEventListener("load", async () => {
     paramCanvas.addEventListener("wheel", handleWheel);
 
     // -------------------
-    // Mobile interactions (updated)
+    // Mobile interactions
     // -------------------
     let lastTapTime = 0;
     const doubleTapThreshold = 300; // ms
-    const rootTouchRadius = 0.1; // proximity threshold in shader coordinates
+    const rootTouchRadius = 0.1;
 
     function distance2D(a, b) {
         return Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -665,21 +649,18 @@ window.addEventListener("load", async () => {
 
             const isMain = targetCanvas === canvas;
             const currentZoom = isMain ? zoomMain : zoomParam;
-            const dynamicRadius = rootTouchRadius * currentZoom; // scale with zoom
+            const dynamicRadius = rootTouchRadius * currentZoom;
 
-            // Check proximity to both, path origin takes priority
             const distToRoot = distance2D([x, y], rootPosition);
-            const distToPath = (showPath && isMain) ? distance2D([x, y], pathOrigin) : Infinity; // Only check path if shown AND on main canvas
+            const distToPath = (showPath && isMain) ? distance2D([x, y], pathOrigin) : Infinity;
 
             if (timeSinceLastTap < doubleTapThreshold) {
-                // Double-tap-drag: behavior depends on 'controlPathOrigin' toggle
                 if (isMain && showPath && controlPathOrigin) {
                     touchMode = 'movePathOrigin';
                 } else {
                     touchMode = 'moveRoot';
                 }
             } else {
-                // Single-tap-drag: behavior depends on proximity, path origin takes priority
                 if (showPath && distToPath < dynamicRadius) {
                     touchMode = 'movePathOrigin';
                 } else if (distToRoot < dynamicRadius) {
@@ -710,7 +691,6 @@ window.addEventListener("load", async () => {
             const [x, y] = getTouchPos(e.touches[0], targetCanvas);
             rootPosition = [x, y];
 
-            // Update path origin if tracking
             if (trackCenter) {
                 pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
             }
@@ -725,7 +705,6 @@ window.addEventListener("load", async () => {
 
             const isMain = targetCanvas === canvas;
 
-            // avoid division by zero
             if (prevDist > 0 && newDist > 0) {
                 const zoomFactor = prevDist / newDist;
                 if (isMain) {
@@ -821,12 +800,9 @@ window.addEventListener("load", async () => {
 
     window.addEventListener("resize", handleResize);
 
-    // -------------------
     // Fix for mobile blank canvas
-    // -------------------
     function ensureCanvasRenders() {
         if (sandbox.render) sandbox.render();
         if (paramSandbox.render) paramSandbox.render();
     }
-
 });

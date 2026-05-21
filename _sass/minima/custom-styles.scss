@@ -6,11 +6,259 @@
 }
 
 /* Remove top margin and decorative line from the first header on the page */
+h1:first-of-type,
 .page-content h1:first-of-type {
     margin-top: 0 !important;
 }
 
+h1:first-of-type::before,
 .page-content h1:first-of-type::before {
     display: none !important;
     content: none !important;
+}
+
+/* Unified Subpage Navigation Header */
+.subpage-nav {
+    font-size: 0.95em;
+    font-weight: 500;
+    margin-bottom: 25px;
+    
+    a {
+        color: var(--link-base-color, #2a7ae2);
+        text-decoration: none;
+        transition: color 0.2s ease, border-color 0.2s ease;
+        padding-bottom: 2px;
+        border-bottom: 1px solid transparent;
+        
+        &:hover {
+            color: var(--link-hover-color, #1156b3);
+            border-bottom-color: var(--link-hover-color, #1156b3);
+            text-decoration: none;
+        }
+        
+        &:not(:last-child) {
+            margin-right: 25px;
+        }
+    }
+}
+
+// Responsive positioning of subpage navigation to avoid mobile overlaps
+@media screen and (min-width: 800px) {
+    .subpage-nav {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        margin-bottom: 0;
+        z-index: 100;
+    }
+    
+    // Push the content wrapper down on desktop standard pages to make room for absolute header if needed
+    .page-content-wrapper {
+        margin-top: 40px;
+    }
+}
+
+/* Homepage Navigation Grid & Cards */
+.home-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin: 35px 0;
+}
+
+.home-nav-card {
+    display: block;
+    padding: 22px;
+    background-color: var(--code-background-color, #f6f8fa);
+    border: 1px solid var(--border-color-03, #e1e4e8);
+    border-radius: 8px;
+    text-decoration: none !important;
+    color: var(--text-color, #24292e) !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    
+    h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: var(--link-base-color, #2a7ae2);
+        font-size: 1.25em;
+        transition: color 0.2s ease;
+    }
+    
+    p {
+        margin: 0;
+        font-size: 0.9em;
+        line-height: 1.5;
+        opacity: 0.85;
+    }
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        border-color: var(--link-base-color, #2a7ae2);
+        
+        h3 {
+            color: var(--link-hover-color, #1156b3);
+        }
+    }
+}
+
+/* Recipes Landing Page styling */
+.recipes-page-title {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.recipe-search-container {
+    max-width: 500px;
+    margin: 0 auto 30px auto;
+    position: relative;
+}
+
+.recipe-search {
+    width: 100%;
+    padding: 12px 16px 12px 40px;
+    font-size: 1em;
+    border: 1px solid var(--border-color-03, #d1d5db);
+    border-radius: 24px;
+    background-color: var(--background-color, #ffffff);
+    color: var(--text-color, #1f2937);
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    
+    &:focus {
+        border-color: var(--link-base-color, #2a7ae2);
+        box-shadow: 0 0 0 3px rgba(42, 122, 226, 0.15);
+    }
+}
+
+.recipe-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.recipe-card-item {
+    margin: 0;
+}
+
+.recipe-card-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 20px;
+    background-color: var(--code-background-color, #f9fafb);
+    border: 1px solid var(--border-color-03, #e5e7eb);
+    border-radius: 12px;
+    text-decoration: none !important;
+    color: var(--text-color, #1f2937) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    
+    .recipe-title {
+        margin: 0 0 10px 0;
+        font-size: 1.15em;
+        font-weight: 600;
+        color: var(--link-base-color, #2a7ae2);
+    }
+    
+    .recipe-meta {
+        font-size: 0.85em;
+        opacity: 0.7;
+        margin-top: auto;
+    }
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-color: var(--link-base-color, #2a7ae2);
+    }
+}
+
+/* Individual Recipe Page (Recipe Checklist styling) */
+.recipe-container {
+    max-width: 680px;
+    margin: 20px auto;
+    
+    h1 {
+        text-align: center;
+        font-size: 2.2em;
+        margin-bottom: 25px;
+    }
+    
+    h2 {
+        border-bottom: 2px solid var(--border-color-03, #eaecef);
+        padding-bottom: 8px;
+        margin-top: 35px;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+    }
+    
+    /* Ingredients List (rendered as task list by kramdown) */
+    ul.task-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 30px;
+        
+        li.task-list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background-color: var(--code-background-color, #f6f8fa);
+            border: 1px solid var(--border-color-03, #e1e4e8);
+            border-radius: 6px;
+            transition: background-color 0.2s ease, transform 0.15s ease;
+            cursor: pointer;
+            
+            input[type="checkbox"] {
+                margin: 0 12px 0 0;
+                width: 16px;
+                height: 16px;
+                cursor: pointer;
+                accent-color: var(--brand-color, #2a7ae2);
+                flex-shrink: 0;
+            }
+            
+            &.checked {
+                text-decoration: line-through;
+                opacity: 0.6;
+                background-color: var(--background-color, #ffffff);
+            }
+            
+            &:hover {
+                transform: translateX(2px);
+                background-color: var(--border-color-03, #eaecef);
+            }
+        }
+    }
+    
+    /* Step-by-step instructions */
+    ol {
+        padding-left: 20px;
+        margin-bottom: 30px;
+        
+        li {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            
+            &::marker {
+                font-weight: bold;
+                color: var(--link-base-color, #2a7ae2);
+            }
+        }
+    }
 }
