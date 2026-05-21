@@ -4,11 +4,6 @@ title: Home
 permalink: /
 ---
 
-<nav class="subpage-nav">
-  <a href="/cv/">CV</a>
-  <a href="/recipes/">Recipes</a>
-  <a href="/complex_fractals/">Complex Fractals</a>
-</nav>
 
 <div class="page-content-wrapper" markdown="1">
 
