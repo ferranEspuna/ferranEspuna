@@ -1,8 +1,4 @@
----
-layout: page
-title: Complex Fractals
-permalink: /complex_fractals/
----
+
 
 This section packages interactive, real-time GLSL fragment shaders visualizing chaotic dynamical systems and complex functions. 
 

@@ -1,8 +1,4 @@
----
-layout: page
-title: Quesabirria Burritos
-permalink: /recipes/burritos/
----
+
 
 # Quesabirria Burritos
 Receta adaptada de un [reel de instagram](https://www.instagram.com/reel/C8kNLrWpjZY/?igsh=a2dkbTNpcnQ0eHZu) de [@stealth_health_life](https://www.instagram.com/stealth_health_life?igsh=ejJlNTJxdnowN2Rq).

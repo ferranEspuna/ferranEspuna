@@ -1,1 +1,7 @@
 theme: jekyll-theme-minimal
+exclude:
+  - README.md
+  - cv/README.md
+  - recipes/burritos/README.md
+  - recipes/cookies/README.md
+  - complex_fractals/README.md

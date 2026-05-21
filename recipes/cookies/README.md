@@ -1,8 +1,4 @@
----
-layout: page
-title: Vegan Chocolate Chip Cookies
-permalink: /recipes/cookies/
----
+
 
 # Galletas veganas con pepitas de chocolate
 

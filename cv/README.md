@@ -1,8 +1,4 @@
----
-layout: page
-title: Curriculum Vitae
-permalink: /cv/
----
+
 
 # Ferran Espuña
 

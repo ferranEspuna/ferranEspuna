@@ -1,8 +1,4 @@
----
-layout: default
-title: Home
-permalink: /
----
+
 
 
 <div class="page-content-wrapper" markdown="1">
