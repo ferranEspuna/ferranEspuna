@@ -477,6 +477,10 @@ window.addEventListener("load", async () => {
     canvas.addEventListener("wheel", handleWheel);
     paramCanvas.addEventListener("wheel", handleWheel);
 
+    function distance2D(a, b) {
+        return Math.hypot(a[0] - b[0], a[1] - b[1]);
+    }
+
     function handleTouchStart(e) {
         e.preventDefault();
         ongoingTouches = [...e.touches];
