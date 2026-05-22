@@ -34,15 +34,63 @@ module ReadmeGenerator
         }
       }
 
+      processed_paths = {}
+
+      # First, process explicitly registered readmes if they exist
       readmes.each do |rel_path, meta|
         full_path = File.join(site.source, rel_path)
         next unless File.exist?(full_path)
 
+        processed_paths[full_path] = meta
+      end
+
+      # Walk the source directory and find all README.md files dynamically
+      Dir.glob(File.join(site.source, "**/README.md"), File::FNM_DOTMATCH).each do |full_path|
+        next if processed_paths.key?(full_path)
+
+        # Get relative path to site source
+        rel_path = Pathname.new(full_path).relative_path_from(Pathname.new(site.source)).to_s
+
+        # Ignore if any part of the path starts with '.' or '_' (e.g. .git, _site, _layouts, etc.)
+        next if rel_path.split(File::SEPARATOR).any? { |part| part.start_with?('.') || part.start_with?('_') }
+
+        dir_path = File.dirname(full_path)
+
+        # Skip if there's already an index.html or an active index.md in the directory
+        if File.exist?(File.join(dir_path, "index.html"))
+          next
+        end
+        if File.exist?(File.join(dir_path, "index.md"))
+          index_content = File.read(File.join(dir_path, "index.md"))
+          unless index_content.include?("published: false")
+            next
+          end
+        end
+
+        dir_name = File.dirname(rel_path)
+        if dir_name == "."
+          permalink = "/"
+          title = "Home"
+        else
+          permalink = "/#{dir_name}/"
+          folder_name = File.basename(dir_name)
+          title = folder_name.split('_').map(&:capitalize).join(' ')
+        end
+
+        processed_paths[full_path] = {
+          "permalink" => permalink,
+          "layout" => "page",
+          "title" => title
+        }
+      end
+
+      # Generate pages for all collected configs
+      processed_paths.each do |full_path, meta|
         content = File.read(full_path)
+        rel_path = Pathname.new(full_path).relative_path_from(Pathname.new(site.source)).to_s
         dir_name = File.dirname(rel_path)
         dir_name = "" if dir_name == "."
 
-        # Create a dynamic page without a source file in Jekyll's reader
         page = Jekyll::PageWithoutAFile.new(site, site.source, dir_name, "index.md")
         page.content = content
         page.data['layout'] = meta['layout']
