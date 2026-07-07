@@ -103,6 +103,33 @@ button {
     max-height: none !important;
 }
 
+body.fallback-fullscreen-active {
+    overflow: hidden;
+}
+
+.canvas-wrapper.fallback-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    background: #000;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas-wrapper.fallback-fullscreen canvas {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+}
+
 body.popup-mode {
     padding: 0;
     margin: 0;

@@ -1,5 +1,9 @@
 #ifdef GL_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+#else
+precision mediump float;
+#endif
 #endif
 
 uniform vec2 u_resolution;
@@ -11,9 +15,10 @@ uniform float u_screen_ratio;
 
 uniform float u_show_path;
 uniform float u_path_length;
-uniform vec2 u_path[256];
+uniform vec2 u_path[96];
 
 #define MAX_ITERS 256
+#define MAX_PATH_POINTS 96
 
 vec2 csquare(vec2 z) {
     return vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
@@ -80,13 +85,14 @@ float segment(vec2 uv, vec2 a, vec2 b, float thick) {
 
 float draw_path(vec2 z, float zoom, float ratio) {
     if (u_show_path < 0.5 || u_path_length < 1.5) return 0.0;
-    float final = circle(z, u_path[0], 0.01 * zoom / ratio);
-    for (int i = 0; i < MAX_ITERS; i++) {
+    float safe_ratio = max(ratio, 0.25);
+    float final = circle(z, u_path[0], 0.01 * zoom / safe_ratio);
+    for (int i = 0; i < MAX_PATH_POINTS - 1; i++) {
         if (float(i) >= u_path_length - 1.0) break;
         vec2 z0 = u_path[i];
         vec2 z1 = u_path[i + 1];
-        final = max(final, 0.7 * segment(z, z0, z1, 0.005 * zoom / ratio));
-        final = max(final, circle(z, z1, 0.01 * zoom / ratio));
+        final = max(final, 0.7 * segment(z, z0, z1, 0.005 * zoom / safe_ratio));
+        final = max(final, circle(z, z1, 0.01 * zoom / safe_ratio));
     }
     return final;
 }
@@ -107,19 +113,20 @@ void main() {
         col = mix(col, vec3(1.0), pathVal);
     }
 
-    float fp_r = 0.014 * u_zoom / u_screen_ratio;
+    float screen_ratio = max(u_screen_ratio, 0.25);
+    float fp_r = 0.014 * u_zoom / screen_ratio;
     vec3 fpColor = vec3(0.88, 0.28, 0.92);
     vec2 qfp0, qfp1;
     quadratic_fixed_points(u_param, qfp0, qfp1);
     col = mix(col, fpColor, circle(uv, qfp0, fp_r));
     col = mix(col, fpColor, circle(uv, qfp1, fp_r));
 
-    float crit_r = 0.013 * u_zoom / u_screen_ratio;
+    float crit_r = 0.013 * u_zoom / screen_ratio;
     vec3 critColor = vec3(0.15, 0.88, 0.82);
     vec2 critical_z2c = vec2(0.0, 0.0);
     col = mix(col, critColor, circle(uv, critical_z2c, crit_r));
 
-    float prm_r = 0.018 * u_zoom / u_screen_ratio;
+    float prm_r = 0.018 * u_zoom / screen_ratio;
     vec3 paramColor = vec3(0.95, 0.72, 0.12);
     col = mix(col, paramColor, circle(uv, u_param, prm_r));
 

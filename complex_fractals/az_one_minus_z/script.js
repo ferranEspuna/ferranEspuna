@@ -2,7 +2,7 @@ import GlslCanvas from "https://esm.run/glslCanvas";
 
 const BROADCAST_CHANNEL = "az_one_minus_z_sync";
 const CRITICAL = [0.5, 0.0];
-const MAX_PATH_POINTS = 256;
+const MAX_PATH_POINTS = 96;
 
 window.addEventListener("load", async () => {
     const canvas = document.getElementById("mainCanvas");
@@ -209,22 +209,25 @@ window.addEventListener("load", async () => {
 
     function resizeToCurrentDisplay() {
         const dpr = window.devicePixelRatio || 1;
-        const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
+        const viewport = window.visualViewport;
+        const viewportWidth = (viewport && viewport.width) || window.innerWidth || document.documentElement.clientWidth || 1;
+        const viewportHeight = (viewport && viewport.height) || window.innerHeight || document.documentElement.clientHeight || 1;
+        const viewportMin = Math.max(1, Math.min(viewportWidth, viewportHeight) * dpr);
 
         if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
-            canvas.width = Math.round(canvas.clientWidth * dpr);
-            canvas.height = Math.round(canvas.clientHeight * dpr);
+            canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+            canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
             sandbox.resize();
             const canvasMin = Math.min(canvas.width, canvas.height);
-            sandbox.setUniform("u_screen_ratio", canvasMin / screenMin);
+            sandbox.setUniform("u_screen_ratio", Math.max(0.25, canvasMin / viewportMin));
         }
 
         if (paramCanvas.clientWidth > 0 && paramCanvas.clientHeight > 0) {
-            paramCanvas.width = Math.round(paramCanvas.clientWidth * dpr);
-            paramCanvas.height = Math.round(paramCanvas.clientHeight * dpr);
+            paramCanvas.width = Math.max(1, Math.round(paramCanvas.clientWidth * dpr));
+            paramCanvas.height = Math.max(1, Math.round(paramCanvas.clientHeight * dpr));
             paramSandbox.resize();
             const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
-            paramSandbox.setUniform("u_screen_ratio", paramCanvasMin / screenMin);
+            paramSandbox.setUniform("u_screen_ratio", Math.max(0.25, paramCanvasMin / viewportMin));
         }
     }
 
@@ -578,30 +581,91 @@ window.addEventListener("load", async () => {
         });
     }
 
+    let fallbackFullscreenWrapper = null;
+
+    function nativeFullscreenElement() {
+        return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+
+    function activeFullscreenWrapper() {
+        return fallbackFullscreenWrapper || nativeFullscreenElement();
+    }
+
+    function updateFullscreenButtons() {
+        const active = activeFullscreenWrapper();
+        fullscreenBtnMain.textContent = active === wrapperMain ? "Exit Fullscreen" : "Fullscreen";
+        fullscreenBtnParam.textContent = active === wrapperParam ? "Exit Fullscreen" : "Fullscreen";
+    }
+
+    function handleFullscreenChange() {
+        updateFullscreenButtons();
+        setTimeout(() => {
+            resizeToCurrentDisplay();
+            reapplyState();
+        }, 150);
+    }
+
+    function enterFallbackFullscreen(targetWrapper) {
+        fallbackFullscreenWrapper = targetWrapper;
+        document.body.classList.add("fallback-fullscreen-active");
+        targetWrapper.classList.add("fallback-fullscreen");
+        handleFullscreenChange();
+    }
+
+    function exitFallbackFullscreen() {
+        if (!fallbackFullscreenWrapper) return;
+        fallbackFullscreenWrapper.classList.remove("fallback-fullscreen");
+        fallbackFullscreenWrapper = null;
+        document.body.classList.remove("fallback-fullscreen-active");
+        handleFullscreenChange();
+    }
+
+    async function requestNativeFullscreen(targetWrapper) {
+        const request = targetWrapper.requestFullscreen || targetWrapper.webkitRequestFullscreen;
+        if (!request) return false;
+        try {
+            const result = request.call(targetWrapper);
+            if (result && typeof result.then === "function") await result;
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            return !!nativeFullscreenElement();
+        } catch (err) {
+            console.warn("Native fullscreen failed; using fallback fullscreen.", err);
+            return false;
+        }
+    }
+
+    async function exitNativeFullscreen() {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
+        if (!exit) return;
+        const result = exit.call(document);
+        if (result && typeof result.then === "function") await result;
+    }
+
     async function toggleFullscreen(targetWrapper) {
-        if (!document.fullscreenElement) {
-            try {
-                await targetWrapper.requestFullscreen();
-            } catch (err) {
-                console.error(err);
-            }
+        if (fallbackFullscreenWrapper) {
+            exitFallbackFullscreen();
+            return;
+        }
+
+        if (nativeFullscreenElement()) {
+            await exitNativeFullscreen();
+            return;
+        }
+
+        const didEnterNative = await requestNativeFullscreen(targetWrapper);
+        if (didEnterNative) {
+            handleFullscreenChange();
         } else {
-            await document.exitFullscreen();
+            enterFallbackFullscreen(targetWrapper);
         }
     }
 
     fullscreenBtnMain.addEventListener("click", () => toggleFullscreen(wrapperMain));
     fullscreenBtnParam.addEventListener("click", () => toggleFullscreen(wrapperParam));
 
-    document.addEventListener("fullscreenchange", () => {
-        const fs = !!document.fullscreenElement;
-        fullscreenBtnMain.textContent = fs && document.fullscreenElement === wrapperMain ? "Exit Fullscreen" : "Fullscreen";
-        fullscreenBtnParam.textContent = fs && document.fullscreenElement === wrapperParam ? "Exit Fullscreen" : "Fullscreen";
-        setTimeout(() => {
-            resizeToCurrentDisplay();
-            reapplyState();
-        }, 150);
-    });
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    window.addEventListener("orientationchange", () => setTimeout(handleFullscreenChange, 250));
 
     function openPopup(mode) {
         const w = 600;

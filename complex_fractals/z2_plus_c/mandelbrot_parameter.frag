@@ -1,5 +1,9 @@
 #ifdef GL_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+#else
+precision mediump float;
+#endif
 #endif
 
 uniform vec2 u_resolution;
@@ -50,7 +54,7 @@ void main() {
         col = palette(esc);
     }
 
-    float dot_r = 0.018 * u_zoom / u_screen_ratio;
+    float dot_r = 0.018 * u_zoom / max(u_screen_ratio, 0.25);
     vec3 paramColor = vec3(0.95, 0.72, 0.12);
     col = mix(col, paramColor, circle(uv, u_current_param, dot_r));
 
