@@ -40,7 +40,7 @@ float circle(vec2 uv, vec2 c, float r) {
 float segment(vec2 uv, vec2 a, vec2 b, float thick){
 	vec2 ab = b - a;
 	float dab = dot(ab, ab);
-	if (10.0 * dab < thick){
+	if (100.0 * dab < thick * thick){
 		return 0.0;
 	}
 	vec2 ax = uv - a;
