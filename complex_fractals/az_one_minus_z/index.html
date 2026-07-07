@@ -1,67 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
-  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-  <title>Logistic Family</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <nav class="subpage-nav">
-    <a href="/">&larr; Home</a>
-  </nav>
-
-  <div class="wrapper">
-    <h1>Logistic Family</h1>
-
-    <div class="description" id="description"></div>
-
-    <div class="controls" style="margin-bottom: 1em;">
-      <label for="iterSlider">Iterations:</label>
-      <input type="range" id="iterSlider" min="1" max="256" value="64">
-      <span id="iterValue">64</span>
-    </div>
-
-    <div class="shader-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-      <div class="shader-window" id="windowMain" style="flex: 1; min-width: 300px;">
-        <h3>Dynamical Plane (z)</h3>
-        <div class="canvas-wrapper" id="wrapperMain">
-          <button id="fullscreenBtnMain" class="fullscreen-btn">Fullscreen</button>
-          <button id="popoutBtnMain" class="fullscreen-btn" style="right: auto; left: 10px;">Pop Out</button>
-          <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="phase.frag"></canvas>
-        </div>
-        <div class="controls"
-          style="margin-top: 0.5em; display: flex; flex-wrap: wrap; gap: 0.2em 1em; justify-content: center;">
-          <span style="white-space: nowrap;">
-            <input type="checkbox" id="showOrbitToggle">
-            <label for="showOrbitToggle">Show orbit</label>
-          </span>
-
-          <span id="orbitOriginControl" style="display: none; white-space: nowrap;">
-            <input type="checkbox" id="orbitOriginToggle">
-            <label for="orbitOriginToggle">Place orbit start</label>
-          </span>
-          <span id="trackCriticalControl" style="display: none; white-space: nowrap;">
-            <input type="checkbox" id="trackCriticalToggle" checked>
-            <label for="trackCriticalToggle">Lock to critical (z₀ = 0.5)</label>
-          </span>
-        </div>
-      </div>
-      <div class="shader-window" id="windowParam" style="flex: 1; min-width: 300px;">
-        <h3>Parameter Plane (a)</h3>
-        <div class="canvas-wrapper" id="wrapperParam">
-          <button id="fullscreenBtnParam" class="fullscreen-btn">Fullscreen</button>
-          <button id="popoutBtnParam" class="fullscreen-btn" style="right: auto; left: 10px;">Pop Out</button>
-          <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="parameter.frag"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+---
+layout: complex_fractal
+title: Logistic Family
+iteration_min: 1
+iteration_max: 256
+iteration_value: 64
+main_panel_title: Dynamical Plane (z)
+main_shader: phase.frag
+param_panel_title: Parameter Plane (a)
+param_shader: parameter.frag
+main_controls: |
+  <span class="nowrap">
+    <input type="checkbox" id="showOrbitToggle">
+    <label for="showOrbitToggle">Show orbit</label>
+  </span>
+  <span id="orbitOriginControl" class="nowrap hidden">
+    <input type="checkbox" id="orbitOriginToggle">
+    <label for="orbitOriginToggle">Place orbit start</label>
+  </span>
+  <span id="trackCriticalControl" class="nowrap hidden">
+    <input type="checkbox" id="trackCriticalToggle" checked>
+    <label for="trackCriticalToggle">Lock to critical (z₀ = 0.5)</label>
+  </span>
+---

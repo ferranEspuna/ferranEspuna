@@ -3,7 +3,6 @@ body {
     margin: 0;
     padding: 2em;
     overflow-y: auto;
-    /* allow scrolling */
     overflow-x: hidden;
 }
 
@@ -14,7 +13,16 @@ nav {
     z-index: 10;
 }
 
+.shader-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
 .shader-window {
+    flex: 1;
+    min-width: 300px;
     max-width: 800px;
     margin: 0 auto;
 }
@@ -26,11 +34,39 @@ canvas {
     border-radius: 0.5em;
     cursor: crosshair;
     touch-action: none;
-    /* needed for multi-touch */
 }
 
 .controls {
     margin-top: 1em;
+}
+
+.iteration-controls {
+    margin-bottom: 1em;
+}
+
+.color-controls {
+    margin-bottom: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
+}
+
+.panel-controls {
+    margin-top: 0.5em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2em 1em;
+    justify-content: center;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.hidden {
+    display: none;
 }
 
 .description {
@@ -58,18 +94,9 @@ button {
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    /* aspect-ratio: 1/1; Remove this to let content dictate, or keep? Canvas has it. */
 }
 
-.canvas-wrapper:fullscreen {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+.canvas-wrapper:fullscreen,
 .canvas-wrapper:-webkit-full-screen {
     width: 100vw;
     height: 100vh;
@@ -90,27 +117,18 @@ button {
     font-weight: bold;
 }
 
+.popout-btn {
+    right: auto;
+    left: 10px;
+}
+
 .fullscreen-btn:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 1);
 }
 
-canvas:fullscreen {
-    /* Reset canvas fullscreen styles as we wrapper is now fullscreen */
-    width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: auto !important;
-}
-
-/* Also target the canvas when its parent wrapper is fullscreen */
-.canvas-wrapper:fullscreen canvas {
-    width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-}
-
+canvas:fullscreen,
+.canvas-wrapper:fullscreen canvas,
 .canvas-wrapper:-webkit-full-screen canvas {
     width: 100% !important;
     height: 100% !important;
@@ -119,8 +137,33 @@ canvas:fullscreen {
     max-height: none !important;
 }
 
-/* POPUP MODE STYLES */
-/* POPUP MODE STYLES */
+body.fallback-fullscreen-active {
+    overflow: hidden;
+}
+
+.canvas-wrapper.fallback-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    background: #000;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas-wrapper.fallback-fullscreen canvas {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+}
+
 body.popup-mode {
     padding: 0;
     margin: 0;
@@ -137,6 +180,7 @@ body.popup-mode nav,
 body.popup-mode h1,
 body.popup-mode .description,
 body.popup-mode .controls,
+body.popup-mode .global-toolbar,
 body.popup-mode h3,
 body.popup-mode #popoutBtnMain,
 body.popup-mode #popoutBtnParam {
@@ -193,10 +237,8 @@ body.popup-mode canvas {
 body.popup-mode .fullscreen-btn {
     position: fixed !important;
     z-index: 200;
-    /* Ensure button is above canvas */
 }
 
-/* Specific hiding rules */
 body.popup-mode-main #windowParam {
     display: none !important;
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+  <title>{{ page.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/complex_fractals/fractal.css' | relative_url }}">
+</head>
+<body>
+  <nav class="subpage-nav">
+    <a href="{{ '/' | relative_url }}">&larr; Home</a>
+  </nav>
+
+  <div class="wrapper">
+    <h1>{{ page.heading | default: page.title }}</h1>
+
+    <div class="description" id="description"></div>
+
+    <div class="controls iteration-controls">
+      <label for="iterSlider">Iterations:</label>
+      <input type="range" id="iterSlider" min="{{ page.iteration_min }}" max="{{ page.iteration_max }}" value="{{ page.iteration_value }}">
+      <span id="iterValue">{{ page.iteration_value }}</span>
+    </div>
+
+    {% if page.extra_controls %}
+    {{ page.extra_controls }}
+    {% endif %}
+
+    <div class="shader-container">
+      <div class="shader-window" id="windowMain">
+        <h3>{{ page.main_panel_title }}</h3>
+        <div class="canvas-wrapper" id="wrapperMain">
+          <button id="fullscreenBtnMain" class="fullscreen-btn">Fullscreen</button>
+          <button id="popoutBtnMain" class="fullscreen-btn popout-btn">Pop Out</button>
+          <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="{{ page.main_shader }}"></canvas>
+        </div>
+        {% if page.main_controls %}
+        <div class="controls panel-controls">
+          {{ page.main_controls }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="shader-window" id="windowParam">
+        <h3>{{ page.param_panel_title }}</h3>
+        <div class="canvas-wrapper" id="wrapperParam">
+          <button id="fullscreenBtnParam" class="fullscreen-btn">Fullscreen</button>
+          <button id="popoutBtnParam" class="fullscreen-btn popout-btn">Pop Out</button>
+          <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="{{ page.param_shader }}"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="{{ page.script | default: 'script.js' }}"></script>
+</body>
+</html>

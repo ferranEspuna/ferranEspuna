@@ -1,54 +1,44 @@
 import GlslCanvas from "https://esm.run/glslCanvas";
+import {
+    applyCursor,
+    applyPopupMode,
+    byId,
+    cadd,
+    cinv,
+    cmul,
+    csub,
+    distance2D,
+    getCommonElements,
+    getPopupMode,
+    hexToRgb,
+    hideOnMobile,
+    isMobileDevice,
+    loadShaderPair,
+    normalizeInteractionMode,
+    panDeltaToPlane,
+    pointerToPlane,
+    renderAll,
+    resizeShaderCanvases,
+    rgbToHex,
+    setPathUniform,
+    setResponsiveDescription,
+    setVisible,
+    setupFullscreen,
+    setupPopouts,
+    touchPanDeltaToPlane,
+    touchToPlane,
+} from "../fractal_common.js";
 
-window.addEventListener("load", async () => {
-    const canvas = document.getElementById("mainCanvas");
-    const paramCanvas = document.getElementById("paramCanvas");
-    const wrapperMain = document.getElementById("wrapperMain");
-    const wrapperParam = document.getElementById("wrapperParam");
-    const slider = document.getElementById("iterSlider");
-    const iterDisplay = document.getElementById("iterValue");
-    const fullscreenBtnMain = document.getElementById("fullscreenBtnMain");
-    const fullscreenBtnParam = document.getElementById("fullscreenBtnParam");
-    const descriptionEl = document.getElementById("description");
-    // NEW DOM ELEMENTS
-    const showPathToggle = document.getElementById("showPathToggle");
-    const pathOriginControl = document.getElementById("pathOriginControl");
-    const pathOriginToggle = document.getElementById("pathOriginToggle");
-    const trackCenterControl = document.getElementById("trackCenterControl");
-    const trackCenterToggle = document.getElementById("trackCenterToggle");
-    const popoutBtnMain = document.getElementById("popoutBtnMain");
-    const popoutBtnParam = document.getElementById("popoutBtnParam");
-    const color0Input = document.getElementById("color0");
-    const color1Input = document.getElementById("color1");
-    const color2Input = document.getElementById("color2");
+const ROOT0 = [-0.4, 0.0];
+const ROOT1 = [0.4, 0.0];
+const DEFAULT_ROOT_COLORS = [
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0],
+];
 
-    const sandbox = new GlslCanvas(canvas);
-    const paramSandbox = new GlslCanvas(paramCanvas);
-
-    // -------------------
-    // Broadcast Channel for Sync
-    // -------------------
-    const channel = new BroadcastChannel('fractal_sync');
-
-    // -------------------
-    // Popup Mode Detection
-    // -------------------
-    const urlParams = new URLSearchParams(window.location.search);
-    const popupMode = urlParams.get('popup'); // 'main' or 'param'
-
-    if (popupMode) {
-        document.body.classList.add('popup-mode');
-        if (popupMode === 'main') {
-            document.body.classList.add('popup-mode-main');
-        } else if (popupMode === 'param') {
-            document.body.classList.add('popup-mode-param');
-        }
-    }
-
-    // -------------------
-    // Conditional instructions
-    // -------------------
-    const baseText = `
+const descriptions = {
+    base: `
     <p>
       This visualization renders the <strong>Newton fractal</strong> for a cubic polynomial with three roots. Each pixel is a starting point z₀; we iterate Newton’s method toward a root. Basin colors (customizable) show which root the orbit converges to; intermediate or dark shades mean slower convergence or failure to settle on a root within the iteration budget.
     </p>
@@ -61,9 +51,8 @@ window.addEventListener("load", async () => {
     <p>
       <em>Mathematical note:</em> Newton’s method can fall into <strong>attracting cycles</strong>. For cubics, the centroid is a natural probe orbit: the parameter view colors each third-root choice by where Newton sends the centroid. Dark or mottled regions often correspond to non-convergence or long transients.
     </p>
-  `;
-
-    const desktopInstructions = `
+  `,
+    desktop: `
   <p>
     <strong>Controls (Desktop):</strong><br>
     • <strong>Navigate:</strong> Right-click <em>on a specific canvas</em> to toggle its mode between <em>Move Mode</em> and <em>Pan/Zoom Mode</em>.<br>
@@ -76,9 +65,8 @@ window.addEventListener("load", async () => {
     • <strong>Pop Out:</strong> Open shaders in separate windows for multi-screen analysis (synchronized).<br>
     • <strong>Fullscreen:</strong> Available for both views.
   </p>
-  `;
-
-    const mobileInstructions = `
+  `,
+    mobile: `
   <p>
     <strong>Controls (Mobile):</strong><br>
     • <strong>Move Root/Point:</strong> Drag the gray or white dots with one finger. (Double-tap and drag anywhere if precise selection is difficult).<br>
@@ -86,287 +74,175 @@ window.addEventListener("load", async () => {
     • <strong>Analysis:</strong> Use the toggles to show the iteration path or track the centroid.<br>
     • <strong>Fullscreen:</strong> Tap the button for an immersive view.
   </p>
-  `;
+  `,
+};
 
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    descriptionEl.innerHTML = baseText + (isMobile ? mobileInstructions : desktopInstructions);
+window.addEventListener("load", async () => {
+    const {
+        canvas,
+        paramCanvas,
+        wrapperMain,
+        wrapperParam,
+        slider,
+        iterDisplay,
+        fullscreenBtnMain,
+        fullscreenBtnParam,
+        descriptionEl,
+        popoutBtnMain,
+        popoutBtnParam,
+    } = getCommonElements();
 
-    // Hide Pop Out buttons on mobile
-    if (isMobile) {
-        if (popoutBtnMain) popoutBtnMain.style.display = 'none';
-        if (popoutBtnParam) popoutBtnParam.style.display = 'none';
-    }
+    const showPathToggle = byId("showPathToggle");
+    const pathOriginControl = byId("pathOriginControl");
+    const pathOriginToggle = byId("pathOriginToggle");
+    const trackCenterControl = byId("trackCenterControl");
+    const trackCenterToggle = byId("trackCenterToggle");
+    const colorInputs = [byId("color0"), byId("color1"), byId("color2")];
 
-    // -------------------
-    // State
-    // -------------------
+    const sandbox = new GlslCanvas(canvas);
+    const paramSandbox = new GlslCanvas(paramCanvas);
+    const channel = new BroadcastChannel("fractal_sync");
+    const popupMode = getPopupMode();
+    const isMobile = isMobileDevice();
+
+    applyPopupMode(popupMode);
+    setResponsiveDescription(descriptionEl, descriptions, isMobile);
+    hideOnMobile(isMobile, popoutBtnMain, popoutBtnParam);
+
     let interactionModeMain = isMobile ? "root" : "pan";
     let interactionModeParam = isMobile ? "root" : "pan";
-
-    canvas.style.cursor = isMobile ? "crosshair" : "move";
-    paramCanvas.style.cursor = isMobile ? "crosshair" : "move";
-
-    // Independent state for Main Canvas
     let zoomMain = 1.0;
     let panMain = [0.0, 0.0];
-
-    // Independent state for Parameter Canvas
     let zoomParam = 1.0;
     let panParam = [0.0, 0.0];
-
     let rootPosition = [0.0, 0.866025];
-    // NEW STATE - Initialize from DOM to handle browser restore
     let showPath = showPathToggle ? showPathToggle.checked : false;
     let controlPathOrigin = pathOriginToggle ? pathOriginToggle.checked : false;
     let trackCenter = trackCenterToggle ? trackCenterToggle.checked : false;
-    let pathOrigin = [0.5, 0.5]; // Default path start
-
-    // Helper to get hex from input or default
-    const getColor = (el, defaultHex) => el ? el.value : defaultHex;
-
-    // Initialize colors from DOM
-    let rootColors = [
-        hexToRgb(getColor(color0Input, "#ff0000")),
-        hexToRgb(getColor(color1Input, "#00ff00")),
-        hexToRgb(getColor(color2Input, "#0000ff"))
-    ];
-
-    // Initial visibility check based on restored state
-    if (showPath) {
-        if (pathOriginControl) pathOriginControl.style.display = "inline";
-        if (trackCenterControl) trackCenterControl.style.display = "inline";
-    } else {
-        if (pathOriginControl) pathOriginControl.style.display = "none";
-        if (trackCenterControl) trackCenterControl.style.display = "none";
-    }
-
-    if (trackCenter) {
-        if (pathOriginToggle) pathOriginToggle.disabled = true;
-    }
-
-
-    function hexToRgb(hex) {
-        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-            return r + r + g + g + b + b;
-        });
-
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? [
-            parseInt(result[1], 16) / 255.0,
-            parseInt(result[2], 16) / 255.0,
-            parseInt(result[3], 16) / 255.0
-        ] : [0, 0, 0];
-    }
-
+    let pathOrigin = [0.5, 0.5];
+    let rootColors = colorInputs.map((input, index) => (
+        input ? hexToRgb(input.value) : DEFAULT_ROOT_COLORS[index]
+    ));
     let isDragging = false;
     let lastMousePos = { x: 0, y: 0 };
     let ongoingTouches = [];
     let touchMode = null;
-    let touchStartPos = null;
+    let lastTapTime = 0;
 
-    function getShaderMouse(event, targetCanvas) {
-        const rect = targetCanvas.getBoundingClientRect();
-        const x_css = event.clientX - rect.left;
-        const y_css = event.clientY - rect.top;
-        const small_resol = Math.min(rect.width, rect.height);
-        const uv_x = (2.0 * x_css - rect.width) / small_resol;
-        const uv_y = (2.0 * (rect.height - y_css) - rect.height) / small_resol;
+    const doubleTapThreshold = 300;
+    const rootTouchRadius = 0.1;
 
+    applyCursor(canvas, interactionModeMain);
+    applyCursor(paramCanvas, interactionModeParam);
+
+    function viewFor(targetCanvas) {
         const isMain = targetCanvas === canvas;
-        const z = isMain ? zoomMain : zoomParam;
-        const p = isMain ? panMain : panParam;
-
-        return [(uv_x * z) + p[0], (uv_y * z) + p[1]];
+        return {
+            isMain,
+            zoom: isMain ? zoomMain : zoomParam,
+            pan: isMain ? panMain : panParam,
+            mode: isMain ? interactionModeMain : interactionModeParam,
+        };
     }
 
-    function getTouchPos(touch, targetCanvas) {
-        const rect = targetCanvas.getBoundingClientRect();
-        const x_css = touch.clientX - rect.left;
-        const y_css = touch.clientY - rect.top;
-        const small_resol = Math.min(rect.width, rect.height);
-        const uv_x = (2.0 * x_css - rect.width) / small_resol;
-        const uv_y = (2.0 * (rect.height - y_css) - rect.height) / small_resol;
+    function pointFromPointer(event, targetCanvas) {
+        const view = viewFor(targetCanvas);
+        return pointerToPlane(event, targetCanvas, view.zoom, view.pan);
+    }
 
-        const isMain = targetCanvas === canvas;
-        const z = isMain ? zoomMain : zoomParam;
-        const p = isMain ? panMain : panParam;
+    function pointFromTouch(touch, targetCanvas) {
+        const view = viewFor(targetCanvas);
+        return touchToPlane(touch, targetCanvas, view.zoom, view.pan);
+    }
 
-        return [(uv_x * z) + p[0], (uv_y * z) + p[1]];
+    function centroidForRoot() {
+        return [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
+    }
+
+    function newtonStep(z) {
+        const a = csub(z, ROOT0);
+        const b = csub(z, ROOT1);
+        const c = csub(z, rootPosition);
+        const ab = cmul(a, b);
+        const bc = cmul(b, c);
+        const ca = cmul(c, a);
+        const f = cmul(ab, c);
+        const der = cadd(cadd(ab, bc), ca);
+        return csub(z, cmul(f, cinv(der)));
+    }
+
+    function buildPath(iterations) {
+        const path = [pathOrigin[0], pathOrigin[1]];
+        let z = [pathOrigin[0], pathOrigin[1]];
+        const steps = Math.min(iterations, 99);
+        for (let i = 0; i < steps; i++) {
+            z = newtonStep(z);
+            path.push(z[0], z[1]);
+        }
+        return path;
+    }
+
+    function eligiblePathPick() {
+        return showPath && controlPathOrigin && !trackCenter;
+    }
+
+    function refreshPathUi() {
+        setVisible(pathOriginControl, showPath);
+        setVisible(trackCenterControl, showPath);
+        if (!pathOriginToggle) return;
+        pathOriginToggle.disabled = trackCenter;
+        if (trackCenter) {
+            pathOriginToggle.checked = false;
+            controlPathOrigin = false;
+        }
     }
 
     function resizeToCurrentDisplay() {
-        const dpr = window.devicePixelRatio || 1;
-        const screenMin = Math.min(window.screen.width, window.screen.height) * dpr;
-
-        // Resize Main Canvas if visible
-        if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
-            const cssWidth = canvas.clientWidth;
-            const cssHeight = canvas.clientHeight;
-            canvas.width = Math.round(cssWidth * dpr);
-            canvas.height = Math.round(cssHeight * dpr);
-            sandbox.resize();
-
-            const canvasMin = Math.min(canvas.width, canvas.height);
-            const screenRatio = canvasMin / screenMin;
-            sandbox.setUniform("u_screen_ratio", screenRatio);
-        }
-
-        // Resize Param Canvas if visible
-        if (paramCanvas.clientWidth > 0 && paramCanvas.clientHeight > 0) {
-            const cssWidth2 = paramCanvas.clientWidth;
-            const cssHeight2 = paramCanvas.clientHeight;
-            paramCanvas.width = Math.round(cssWidth2 * dpr);
-            paramCanvas.height = Math.round(cssHeight2 * dpr);
-            paramSandbox.resize();
-
-            const paramCanvasMin = Math.min(paramCanvas.width, paramCanvas.height);
-            const paramScreenRatio = paramCanvasMin / screenMin;
-            paramSandbox.setUniform("u_screen_ratio", paramScreenRatio);
-        }
+        resizeShaderCanvases([
+            { canvas, sandbox },
+            { canvas: paramCanvas, sandbox: paramSandbox },
+        ]);
     }
 
-    function handleResize() { resizeToCurrentDisplay(); }
-
-    // -------------------
-    // State Broadcasting
-    // -------------------
-    function broadcastState(type, data) {
-        channel.postMessage({ type, data });
-    }
-
-    // MATH HELPERS
-    function cmul(a, b) { return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]; }
-    function cadd(a, b) { return [a[0] + b[0], a[1] + b[1]]; }
-    function csub(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
-    function cinv(z) {
-        let mag = Math.max(z[0] * z[0] + z[1] * z[1], 1e-6);
-        return [z[0] / mag, -z[1] / mag];
+    function setRootColorUniforms(targetSandbox) {
+        targetSandbox.setUniform("u_color0", rootColors[0][0], rootColors[0][1], rootColors[0][2]);
+        targetSandbox.setUniform("u_color1", rootColors[1][0], rootColors[1][1], rootColors[1][2]);
+        targetSandbox.setUniform("u_color2", rootColors[2][0], rootColors[2][1], rootColors[2][2]);
     }
 
     function updateUniforms() {
-        sandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        const iterations = parseInt(slider.value, 10);
+
+        sandbox.setUniform("u_iterations", iterations);
         sandbox.setUniform("u_zoom", zoomMain);
         sandbox.setUniform("u_pan", panMain[0], panMain[1]);
         sandbox.setUniform("u_root_position", rootPosition[0], rootPosition[1]);
         sandbox.setUniform("u_show_path", showPath ? 1.0 : 0.0);
 
-        if (showPath) {
-            let root0 = [-0.4, 0.0];
-            let root1 = [0.4, 0.0];
-            let root2 = rootPosition;
-            let iters = parseInt(slider.value, 10);
-            let path = [];
-            let z = [pathOrigin[0], pathOrigin[1]];
-            path.push(z[0], z[1]);
-            for (let i = 0; i < iters && i < 100; i++) {
-                let a = csub(z, root0);
-                let b = csub(z, root1);
-                let c = csub(z, root2);
-                let ab = cmul(a, b);
-                let bc = cmul(b, c);
-                let ca = cmul(c, a);
-                let f = cmul(ab, c);
-                let der = cadd(cadd(ab, bc), ca);
-                let step = cmul(f, cinv(der));
-                z = csub(z, step);
-                path.push(z[0], z[1]);
-            }
-            sandbox.setUniform("u_path_length", Math.floor(path.length / 2));
+        if (showPath) setPathUniform(sandbox, buildPath(iterations));
+        else sandbox.setUniform("u_path_length", 0.0);
 
-            // Bypass glslCanvas parameter parsing regex to inject uniform arrays directly via raw WebGL API
-            if (sandbox.gl && sandbox.program) {
-                let gl = sandbox.gl;
-                let program = sandbox.program;
-                let loc = gl.getUniformLocation(program, "u_path");
-                if (!loc) loc = gl.getUniformLocation(program, "u_path[0]");
-                if (loc) {
-                    gl.useProgram(program);
-                    gl.uniform2fv(loc, new Float32Array(path));
-                }
-            } else {
-                for (let i = 0; i < Math.floor(path.length / 2); i++) {
-                    sandbox.setUniform("u_path[" + i + "]", path[2 * i], path[2 * i + 1]);
-                }
-            }
-        } else {
-            sandbox.setUniform("u_path_length", 0.0);
-        }
-
-        paramSandbox.setUniform("u_iterations", parseInt(slider.value, 10));
+        paramSandbox.setUniform("u_iterations", iterations);
         paramSandbox.setUniform("u_zoom", zoomParam);
         paramSandbox.setUniform("u_pan", panParam[0], panParam[1]);
         paramSandbox.setUniform("u_current_root2", rootPosition[0], rootPosition[1]);
 
-        // Colors
-        sandbox.setUniform("u_color0", rootColors[0][0], rootColors[0][1], rootColors[0][2]);
-        sandbox.setUniform("u_color1", rootColors[1][0], rootColors[1][1], rootColors[1][2]);
-        sandbox.setUniform("u_color2", rootColors[2][0], rootColors[2][1], rootColors[2][2]);
-
-        paramSandbox.setUniform("u_color0", rootColors[0][0], rootColors[0][1], rootColors[0][2]);
-        paramSandbox.setUniform("u_color1", rootColors[1][0], rootColors[1][1], rootColors[1][2]);
-        paramSandbox.setUniform("u_color2", rootColors[2][0], rootColors[2][1], rootColors[2][2]);
-
-        if (sandbox.render) sandbox.render();
-        if (paramSandbox.render) paramSandbox.render();
+        setRootColorUniforms(sandbox);
+        setRootColorUniforms(paramSandbox);
+        renderAll(sandbox, paramSandbox);
     }
 
-    channel.onmessage = (event) => {
-        const { type, data } = event.data;
-        let needsUpdate = false;
+    function reapplyState() {
+        updateUniforms();
+        requestAnimationFrame(() => renderAll(sandbox, paramSandbox));
+    }
 
-        if (type === 'state') {
-            zoomMain = data.zoomMain;
-            panMain = data.panMain;
-            zoomParam = data.zoomParam;
-            panParam = data.panParam;
-            rootPosition = data.rootPosition;
-            showPath = data.showPath;
-            controlPathOrigin = data.controlPathOrigin;
-            trackCenter = data.trackCenter;
-            pathOrigin = data.pathOrigin;
-            slider.value = data.iterations;
-            iterDisplay.textContent = data.iterations;
-            rootColors = data.rootColors || [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
-
-            // Sync inputs
-            function rgbToHex(rgb) {
-                return "#" + ((1 << 24) + (Math.round(rgb[0] * 255) << 16) + (Math.round(rgb[1] * 255) << 8) + Math.round(rgb[2] * 255)).toString(16).slice(1);
-            }
-            if (color0Input) color0Input.value = rgbToHex(rootColors[0]);
-            if (color1Input) color1Input.value = rgbToHex(rootColors[1]);
-            if (color2Input) color2Input.value = rgbToHex(rootColors[2]);
-
-            // Update UI controls to match state
-            showPathToggle.checked = showPath;
-            pathOriginToggle.checked = controlPathOrigin;
-            trackCenterToggle.checked = trackCenter;
-
-            if (showPath) {
-                pathOriginControl.style.display = "inline";
-                trackCenterControl.style.display = "inline";
-            } else {
-                pathOriginControl.style.display = "none";
-                trackCenterControl.style.display = "none";
-            }
-
-            if (trackCenter) {
-                pathOriginToggle.disabled = true;
-            } else {
-                pathOriginToggle.disabled = false;
-            }
-
-            needsUpdate = true;
-        }
-
-        if (needsUpdate) {
-            updateUniforms();
-        }
-    };
+    function broadcastState(type, data) {
+        channel.postMessage({ type, data });
+    }
 
     function syncState() {
-        const state = {
+        broadcastState("state", {
             zoomMain,
             panMain,
             zoomParam,
@@ -377,432 +253,309 @@ window.addEventListener("load", async () => {
             trackCenter,
             pathOrigin,
             iterations: parseInt(slider.value, 10),
-            rootColors
-        };
-        broadcastState('state', state);
+            rootColors,
+            interactionModeMain,
+            interactionModeParam,
+        });
         updateUniforms();
     }
 
-    // -------------------
-    // Load both shaders
-    // -------------------
-    const fragUrl = new URL(canvas.getAttribute("data-fragment-url"), window.location.href);
-    const paramFragUrl = new URL(paramCanvas.getAttribute("data-fragment-url"), window.location.href);
+    channel.onmessage = (event) => {
+        const { type, data } = event.data;
+        if (type !== "state") return;
 
-    try {
-        // Load main shader
-        const response = await fetch(fragUrl, { mode: "same-origin" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const fragShader = await response.text();
-        sandbox.load(fragShader);
+        zoomMain = data.zoomMain;
+        panMain = data.panMain;
+        zoomParam = data.zoomParam;
+        panParam = data.panParam;
+        rootPosition = data.rootPosition;
+        showPath = data.showPath;
+        controlPathOrigin = data.controlPathOrigin;
+        trackCenter = data.trackCenter;
+        pathOrigin = data.pathOrigin;
+        rootColors = (data.rootColors || DEFAULT_ROOT_COLORS).map((color) => [
+            color[0],
+            color[1],
+            color[2],
+        ]);
+        slider.value = data.iterations;
+        iterDisplay.textContent = data.iterations;
+        interactionModeMain = data.interactionModeMain != null
+            ? normalizeInteractionMode(data.interactionModeMain)
+            : (isMobile ? "root" : "pan");
+        interactionModeParam = data.interactionModeParam != null
+            ? normalizeInteractionMode(data.interactionModeParam)
+            : (isMobile ? "root" : "pan");
 
-        // Load parameter space shader
-        const paramResponse = await fetch(paramFragUrl, { mode: "same-origin" });
-        if (!paramResponse.ok) throw new Error(`HTTP ${paramResponse.status}`);
-        const paramFragShader = await paramResponse.text();
-        paramSandbox.load(paramFragShader);
-
-        // ---- FIX: robust 2-frame initialization for BOTH shaders ----
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                resizeToCurrentDisplay();  // ensure correct framebuffer size for both canvases
-                updateUniforms();
-                // Force render both
-                if (sandbox.render) sandbox.render();
-                if (paramSandbox.render) paramSandbox.render();
-
-                if (popupMode) {
-                    broadcastState('hello', {});
-                }
-            });
+        colorInputs.forEach((input, index) => {
+            if (input) input.value = rgbToHex(rootColors[index]);
         });
+        if (showPathToggle) showPathToggle.checked = showPath;
+        if (pathOriginToggle) pathOriginToggle.checked = controlPathOrigin;
+        if (trackCenterToggle) trackCenterToggle.checked = trackCenter;
+        refreshPathUi();
+        applyCursor(canvas, interactionModeMain);
+        applyCursor(paramCanvas, interactionModeParam);
+        updateUniforms();
+    };
 
-    } catch (err) {
-        console.error("Failed to load shaders:", err);
-        const ctx = canvas.getContext("2d");
-        ctx.fillText("Error loading shader", 20, 20);
-        return;
-    }
+    refreshPathUi();
 
-    // Listen for hello to sync state to new windows
-    channel.addEventListener('message', (event) => {
-        if (event.data.type === 'hello' && !popupMode) {
-            syncState();
-        }
+    await loadShaderPair({
+        canvas,
+        sandbox,
+        paramCanvas,
+        paramSandbox,
+        onReady: () => {
+            resizeToCurrentDisplay();
+            updateUniforms();
+            renderAll(sandbox, paramSandbox);
+            if (popupMode) broadcastState("hello", {});
+        },
+        onError: () => {
+            const ctx = canvas.getContext("2d");
+            if (ctx) ctx.fillText("Error loading shader", 20, 20);
+        },
+    });
+
+    channel.addEventListener("message", (event) => {
+        if (event.data.type === "hello" && !popupMode) syncState();
     });
 
     iterDisplay.textContent = slider.value;
-
     slider.addEventListener("input", () => {
         iterDisplay.textContent = slider.value;
         syncState();
     });
 
-    // -------------------
-    // NEW TOGGLE LISTENERS
-    // -------------------
-    showPathToggle.addEventListener("change", () => {
-        showPath = showPathToggle.checked;
-
-        if (showPath) {
-            pathOriginControl.style.display = "inline"; // Show the second toggle
-            trackCenterControl.style.display = "inline"; // Show the third toggle
-        } else {
-            pathOriginControl.style.display = "none"; // Hide it
-            trackCenterControl.style.display = "none"; // Hide it
-            // Also uncheck and reset the controlPathOrigin state
-            if (controlPathOrigin) {
+    if (showPathToggle) {
+        showPathToggle.addEventListener("change", () => {
+            showPath = showPathToggle.checked;
+            if (!showPath) {
                 controlPathOrigin = false;
-                pathOriginToggle.checked = false;
-            }
-            // Reset trackCenter state
-            if (trackCenter) {
                 trackCenter = false;
-                trackCenterToggle.checked = false;
-                pathOriginToggle.disabled = false;
+                if (pathOriginToggle) {
+                    pathOriginToggle.checked = false;
+                    pathOriginToggle.disabled = false;
+                }
+                if (trackCenterToggle) trackCenterToggle.checked = false;
             }
-        }
-        syncState();
-    });
-
-    pathOriginToggle.addEventListener("change", () => {
-        controlPathOrigin = pathOriginToggle.checked;
-        syncState();
-    });
-
-    trackCenterToggle.addEventListener("change", () => {
-        trackCenter = trackCenterToggle.checked;
-        if (trackCenter) {
-            // Disable manual control
-            controlPathOrigin = false;
-            pathOriginToggle.checked = false;
-            pathOriginToggle.disabled = true;
-
-            // Snap to center immediately
-            pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-        } else {
-            // Re-enable manual control option
-            pathOriginToggle.disabled = false;
-        }
-        syncState();
-    });
-
-    // Color Listeners
-    function updateColor(index, hex) {
-        rootColors[index] = hexToRgb(hex);
-        syncState();
+            refreshPathUi();
+            syncState();
+        });
     }
 
-    if (color0Input) color0Input.addEventListener("input", (e) => updateColor(0, e.target.value));
-    if (color1Input) color1Input.addEventListener("input", (e) => updateColor(1, e.target.value));
-    if (color2Input) color2Input.addEventListener("input", (e) => updateColor(2, e.target.value));
+    if (pathOriginToggle) {
+        pathOriginToggle.addEventListener("change", () => {
+            controlPathOrigin = pathOriginToggle.checked;
+            syncState();
+        });
+    }
 
-    // -------------------
-    // Desktop interactions
-    // -------------------
-    function handleContextMenu(e) {
-        e.preventDefault();
-        const targetCanvas = e.target;
-        const isMain = targetCanvas === canvas;
+    if (trackCenterToggle) {
+        trackCenterToggle.addEventListener("change", () => {
+            trackCenter = trackCenterToggle.checked;
+            if (trackCenter) {
+                controlPathOrigin = false;
+                if (pathOriginToggle) pathOriginToggle.checked = false;
+                pathOrigin = centroidForRoot();
+            }
+            refreshPathUi();
+            syncState();
+        });
+    }
 
+    colorInputs.forEach((input, index) => {
+        if (!input) return;
+        input.addEventListener("input", (event) => {
+            rootColors[index] = hexToRgb(event.target.value);
+            syncState();
+        });
+    });
+
+    function handleContextMenu(event) {
+        if (event.target !== canvas && event.target !== paramCanvas) return;
+        event.preventDefault();
+        const isMain = event.target === canvas;
         if (isMain) {
-            if (interactionModeMain === 'root') {
-                interactionModeMain = 'pan';
-                canvas.style.cursor = 'move';
-            } else {
-                interactionModeMain = 'root';
-                canvas.style.cursor = 'crosshair';
-            }
+            interactionModeMain = interactionModeMain === "root" ? "pan" : "root";
+            applyCursor(canvas, interactionModeMain);
         } else {
-            if (interactionModeParam === 'root') {
-                interactionModeParam = 'pan';
-                paramCanvas.style.cursor = 'move';
-            } else {
-                interactionModeParam = 'root';
-                paramCanvas.style.cursor = 'crosshair';
-            }
+            interactionModeParam = interactionModeParam === "root" ? "pan" : "root";
+            applyCursor(paramCanvas, interactionModeParam);
         }
+        syncState();
     }
     canvas.addEventListener("contextmenu", handleContextMenu);
     paramCanvas.addEventListener("contextmenu", handleContextMenu);
 
-    function handleMouseDown(e) {
-        const targetCanvas = e.target;
-        const isMain = targetCanvas === canvas;
-        const currentMode = isMain ? interactionModeMain : interactionModeParam;
-
-        if (currentMode === 'pan' && e.button === 0) {
+    function handleMouseDown(event) {
+        if (event.target !== canvas && event.target !== paramCanvas) return;
+        const view = viewFor(event.target);
+        if (view.mode === "pan" && event.button === 0) {
             isDragging = true;
-            lastMousePos = { x: e.clientX, y: e.clientY };
+            lastMousePos = { x: event.clientX, y: event.clientY };
         }
     }
     canvas.addEventListener("mousedown", handleMouseDown);
     paramCanvas.addEventListener("mousedown", handleMouseDown);
 
-    window.addEventListener("mouseup", (e) => {
-        if (e.button === 0) {
-            isDragging = false;
-            syncState();
-        }
+    window.addEventListener("mouseup", (event) => {
+        if (event.button !== 0) return;
+        isDragging = false;
+        syncState();
     });
 
-    function handleMouseMove(e) {
-        const targetCanvas = e.target;
-        if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
+    function handleMouseMove(event) {
+        if (event.target !== canvas && event.target !== paramCanvas) return;
+        const targetCanvas = event.target;
+        const view = viewFor(targetCanvas);
+        const [shaderX, shaderY] = pointFromPointer(event, targetCanvas);
 
-        const isMain = targetCanvas === canvas;
-        const [shaderX, shaderY] = getShaderMouse(e, targetCanvas);
-        const currentMode = isMain ? interactionModeMain : interactionModeParam;
-
-        if (isDragging && currentMode === 'pan') {
-            const deltaX_css = e.clientX - lastMousePos.x;
-            const deltaY_css = e.clientY - lastMousePos.y;
-            const rect = targetCanvas.getBoundingClientRect();
-            const small_resol = Math.min(targetCanvas.width, targetCanvas.height);
-
-            const currentZoom = isMain ? zoomMain : zoomParam;
-            const deltaX_shader = (deltaX_css * (targetCanvas.width / rect.width) * 2.0 / small_resol) * currentZoom;
-            const deltaY_shader = (deltaY_css * (targetCanvas.height / rect.height) * 2.0 / small_resol) * currentZoom;
-
-            if (isMain) {
-                panMain[0] -= deltaX_shader;
-                panMain[1] += deltaY_shader;
+        if (isDragging && view.mode === "pan") {
+            const [deltaX, deltaY] = panDeltaToPlane(
+                event.clientX - lastMousePos.x,
+                event.clientY - lastMousePos.y,
+                targetCanvas,
+                view.zoom
+            );
+            if (view.isMain) {
+                panMain[0] -= deltaX;
+                panMain[1] += deltaY;
             } else {
-                panParam[0] -= deltaX_shader;
-                panParam[1] += deltaY_shader;
+                panParam[0] -= deltaX;
+                panParam[1] += deltaY;
             }
-
-            updateUniforms();
+            lastMousePos = { x: event.clientX, y: event.clientY };
             syncState();
-
-            lastMousePos = { x: e.clientX, y: e.clientY };
-        } else if (currentMode === 'root') {
-            if (isMain && showPath && controlPathOrigin) {
+        } else if (view.mode === "root") {
+            if (view.isMain && eligiblePathPick()) {
                 pathOrigin = [shaderX, shaderY];
             } else {
                 rootPosition = [shaderX, shaderY];
-
-                if (trackCenter) {
-                    pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-                }
+                if (trackCenter) pathOrigin = centroidForRoot();
             }
-            updateUniforms();
             syncState();
         }
     }
     canvas.addEventListener("mousemove", handleMouseMove);
     paramCanvas.addEventListener("mousemove", handleMouseMove);
 
-    function handleWheel(e) {
-        e.preventDefault();
-        const targetCanvas = e.target;
-        const isMain = targetCanvas === canvas;
-        const currentMode = isMain ? interactionModeMain : interactionModeParam;
+    function handleWheel(event) {
+        if (event.target !== canvas && event.target !== paramCanvas) return;
+        event.preventDefault();
+        const targetCanvas = event.target;
+        const view = viewFor(targetCanvas);
+        if (view.mode !== "pan") return;
 
-        if (currentMode === 'pan') {
-            const [mouseX_before, mouseY_before] = getShaderMouse(e, targetCanvas);
-            const zoomAmount = e.deltaY * 0.0005;
+        const [mx0, my0] = pointFromPointer(event, targetCanvas);
+        const zoomAmount = event.deltaY * 0.0005;
+        if (view.isMain) zoomMain *= 1.0 + zoomAmount;
+        else zoomParam *= 1.0 + zoomAmount;
+        const [mx1, my1] = pointFromPointer(event, targetCanvas);
 
-            if (isMain) {
-                zoomMain *= (1.0 + zoomAmount);
-            } else {
-                zoomParam *= (1.0 + zoomAmount);
-            }
-
-            const [mouseX_after, mouseY_after] = getShaderMouse(e, targetCanvas);
-
-            if (isMain) {
-                panMain[0] += (mouseX_before - mouseX_after);
-                panMain[1] += (mouseY_before - mouseY_after);
-            } else {
-                panParam[0] += (mouseX_before - mouseX_after);
-                panParam[1] += (mouseY_before - mouseY_after);
-            }
-
-            updateUniforms();
-            syncState();
+        if (view.isMain) {
+            panMain[0] += mx0 - mx1;
+            panMain[1] += my0 - my1;
+        } else {
+            panParam[0] += mx0 - mx1;
+            panParam[1] += my0 - my1;
         }
+        syncState();
     }
     canvas.addEventListener("wheel", handleWheel);
     paramCanvas.addEventListener("wheel", handleWheel);
 
-    // -------------------
-    // Mobile interactions
-    // -------------------
-    let lastTapTime = 0;
-    const doubleTapThreshold = 300; // ms
-    const rootTouchRadius = 0.1;
-
-    function distance2D(a, b) {
-        return Math.hypot(a[0] - b[0], a[1] - b[1]);
-    }
-
-    function handleTouchStart(e) {
-        e.preventDefault();
-        ongoingTouches = [...e.touches];
-        const targetCanvas = e.target;
+    function handleTouchStart(event) {
+        event.preventDefault();
+        ongoingTouches = [...event.touches];
+        const targetCanvas = event.target;
+        if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
 
         if (ongoingTouches.length === 1) {
-            const [x, y] = getTouchPos(ongoingTouches[0], targetCanvas);
+            const [x, y] = pointFromTouch(ongoingTouches[0], targetCanvas);
             const now = Date.now();
             const timeSinceLastTap = now - lastTapTime;
-
-            const isMain = targetCanvas === canvas;
-            const currentZoom = isMain ? zoomMain : zoomParam;
-            const dynamicRadius = rootTouchRadius * currentZoom;
-
+            const view = viewFor(targetCanvas);
+            const dynamicRadius = rootTouchRadius * view.zoom;
             const distToRoot = distance2D([x, y], rootPosition);
-            const distToPath = (showPath && isMain) ? distance2D([x, y], pathOrigin) : Infinity;
+            const distToPath = view.isMain && eligiblePathPick() ? distance2D([x, y], pathOrigin) : Infinity;
 
             if (timeSinceLastTap < doubleTapThreshold) {
-                if (isMain && showPath && controlPathOrigin) {
-                    touchMode = 'movePathOrigin';
-                } else {
-                    touchMode = 'moveRoot';
-                }
+                touchMode = view.isMain && eligiblePathPick() ? "movePathOrigin" : "moveRoot";
+            } else if (view.isMain && eligiblePathPick() && distToPath < dynamicRadius) {
+                touchMode = "movePathOrigin";
+            } else if (distToRoot < dynamicRadius) {
+                touchMode = "moveRoot";
             } else {
-                if (showPath && distToPath < dynamicRadius) {
-                    touchMode = 'movePathOrigin';
-                } else if (distToRoot < dynamicRadius) {
-                    touchMode = 'moveRoot';
-                } else {
-                    touchMode = null;
-                }
+                touchMode = null;
             }
-
-            touchStartPos = { x: ongoingTouches[0].clientX, y: ongoingTouches[0].clientY };
             lastTapTime = now;
         } else if (ongoingTouches.length === 2) {
-            touchMode = 'pan';
+            touchMode = "pan";
         }
     }
-    canvas.addEventListener("touchstart", handleTouchStart);
-    paramCanvas.addEventListener("touchstart", handleTouchStart);
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    paramCanvas.addEventListener("touchstart", handleTouchStart, { passive: false });
 
-    function handleTouchMove(e) {
-        e.preventDefault();
-        const targetCanvas = e.target;
-        if (e.touches.length === 2) touchMode = 'pan';
+    function handleTouchMove(event) {
+        event.preventDefault();
+        const targetCanvas = event.target;
+        if (targetCanvas !== canvas && targetCanvas !== paramCanvas) return;
 
-        if (touchMode === 'movePathOrigin' && e.touches.length === 1) {
-            const [x, y] = getTouchPos(e.touches[0], targetCanvas);
-            pathOrigin = [x, y];
-        } else if (touchMode === 'moveRoot' && e.touches.length === 1) {
-            const [x, y] = getTouchPos(e.touches[0], targetCanvas);
-            rootPosition = [x, y];
+        if (event.touches.length === 2) touchMode = "pan";
 
-            if (trackCenter) {
-                pathOrigin = [rootPosition[0] / 3.0, rootPosition[1] / 3.0];
-            }
-        } else if (touchMode === 'pan' && e.touches.length === 2) {
-            const t0 = e.touches[0];
-            const t1 = e.touches[1];
+        if (touchMode === "movePathOrigin" && event.touches.length === 1 && eligiblePathPick()) {
+            pathOrigin = pointFromTouch(event.touches[0], targetCanvas);
+        } else if (touchMode === "moveRoot" && event.touches.length === 1) {
+            rootPosition = pointFromTouch(event.touches[0], targetCanvas);
+            if (trackCenter) pathOrigin = centroidForRoot();
+        } else if (touchMode === "pan" && event.touches.length === 2) {
+            const t0 = event.touches[0];
+            const t1 = event.touches[1];
             const prevT0 = ongoingTouches[0];
             const prevT1 = ongoingTouches[1];
+            if (!prevT1) return;
 
+            const view = viewFor(targetCanvas);
             const prevDist = Math.hypot(prevT0.clientX - prevT1.clientX, prevT0.clientY - prevT1.clientY);
             const newDist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
-
-            const isMain = targetCanvas === canvas;
-
             if (prevDist > 0 && newDist > 0) {
                 const zoomFactor = prevDist / newDist;
-                if (isMain) {
-                    zoomMain *= zoomFactor;
-                } else {
-                    zoomParam *= zoomFactor;
-                }
+                if (view.isMain) zoomMain *= zoomFactor;
+                else zoomParam *= zoomFactor;
             }
 
-            const prevMidX = (prevT0.clientX + prevT1.clientX) / 2;
-            const prevMidY = (prevT0.clientY + prevT1.clientY) / 2;
-            const newMidX = (t0.clientX + t1.clientX) / 2;
-            const newMidY = (t0.clientY + t1.clientY) / 2;
+            const [deltaX, deltaY] = touchPanDeltaToPlane(
+                { x: (prevT0.clientX + prevT1.clientX) / 2, y: (prevT0.clientY + prevT1.clientY) / 2 },
+                { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 },
+                targetCanvas,
+                view.isMain ? zoomMain : zoomParam
+            );
 
-            const rect = targetCanvas.getBoundingClientRect();
-            const small_resol = Math.min(rect.width, rect.height);
-            const currentZoom = isMain ? zoomMain : zoomParam;
-
-            const deltaX_shader = ((newMidX - prevMidX) * 2.0 / small_resol) * currentZoom;
-            const deltaY_shader = ((newMidY - prevMidY) * 2.0 / small_resol) * currentZoom;
-
-            if (isMain) {
-                panMain[0] -= deltaX_shader;
-                panMain[1] += deltaY_shader;
+            if (view.isMain) {
+                panMain[0] -= deltaX;
+                panMain[1] += deltaY;
             } else {
-                panParam[0] -= deltaX_shader;
-                panParam[1] += deltaY_shader;
+                panParam[0] -= deltaX;
+                panParam[1] += deltaY;
             }
         }
 
-        updateUniforms();
         syncState();
-
-        ongoingTouches = [...e.touches];
+        ongoingTouches = [...event.touches];
     }
-    canvas.addEventListener("touchmove", handleTouchMove);
-    paramCanvas.addEventListener("touchmove", handleTouchMove);
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    paramCanvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 
-    // -------------------
-    // Fullscreen
-    // -------------------
-    function reapplyState() {
-        updateUniforms();
-        requestAnimationFrame(() => {
-            if (sandbox.render) sandbox.render();
-            if (paramSandbox.render) paramSandbox.render();
-        });
-    }
-
-    async function toggleFullscreen(targetWrapper) {
-        if (!document.fullscreenElement) {
-            try {
-                await targetWrapper.requestFullscreen();
-            } catch (err) {
-                console.error("Error attempting to enable fullscreen:", err);
-            }
-        } else {
-            await document.exitFullscreen();
-        }
-    }
-
-    fullscreenBtnMain.addEventListener("click", () => toggleFullscreen(wrapperMain));
-    fullscreenBtnParam.addEventListener("click", () => toggleFullscreen(wrapperParam));
-
-    document.addEventListener("fullscreenchange", () => {
-        const isFullscreen = !!document.fullscreenElement;
-        fullscreenBtnMain.textContent = "Fullscreen";
-        fullscreenBtnParam.textContent = "Fullscreen";
-
-        if (isFullscreen) {
-            if (document.fullscreenElement === wrapperMain) {
-                fullscreenBtnMain.textContent = "Exit Fullscreen";
-            } else if (document.fullscreenElement === wrapperParam) {
-                fullscreenBtnParam.textContent = "Exit Fullscreen";
-            }
-        }
-        setTimeout(() => { resizeToCurrentDisplay(); reapplyState(); }, 150);
+    setupFullscreen({
+        main: { wrapper: wrapperMain, button: fullscreenBtnMain },
+        param: { wrapper: wrapperParam, button: fullscreenBtnParam },
+        onChange: () => {
+            resizeToCurrentDisplay();
+            reapplyState();
+        },
     });
-
-    // -------------------
-    // Popout Logic
-    // -------------------
-    function openPopup(mode) {
-        const width = 600;
-        const height = 600;
-        const left = (window.screen.width - width) / 2;
-        const top = (window.screen.height - height) / 2;
-        window.open(`index.html?popup=${mode}`, `_blank_${mode}`, `width=${width},height=${height},left=${left},top=${top}`);
-    }
-
-    if (popoutBtnMain) popoutBtnMain.addEventListener("click", () => openPopup('main'));
-    if (popoutBtnParam) popoutBtnParam.addEventListener("click", () => openPopup('param'));
-
-    window.addEventListener("resize", handleResize);
-
-    // Fix for mobile blank canvas
-    function ensureCanvasRenders() {
-        if (sandbox.render) sandbox.render();
-        if (paramSandbox.render) paramSandbox.render();
-    }
+    setupPopouts({ mainButton: popoutBtnMain, paramButton: popoutBtnParam });
+    window.addEventListener("resize", resizeToCurrentDisplay);
 });
