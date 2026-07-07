@@ -1,5 +1,3 @@
-
-
 # Galletas veganas con pepitas de chocolate
 
 ## Ingredientes
