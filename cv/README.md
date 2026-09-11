@@ -3,7 +3,7 @@
 # Ferran Espuña
 
 Madrid, Spain  
-[ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · +34 600 24 69 87 · [GitHub](https://github.com/ferranEspuna)
+[ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · [GitHub](https://github.com/ferranEspuna)
 
 ## Research Interests
 
