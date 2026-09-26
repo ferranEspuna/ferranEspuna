@@ -1,4 +1,4 @@
 ---
 layout: default
 ---
-<article class="prose" data-sections>{{ content }}</article>
+<article class="prose" data-sections data-columns="{{ page.columns | default: false }}">{{ content }}</article>

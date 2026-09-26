@@ -1,4 +1,5 @@
 ---
+columns: true
 title: Research and CV
 permalink: /cv/
 ---

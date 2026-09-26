@@ -1,4 +1,5 @@
 ---
+columns: true
 layout: recipe
 category: recipe
 lang: es

@@ -1,4 +1,5 @@
 ---
+columns: true
 layout: complex_fractal
 category: fractal
 title: Mandelbrot & Julia

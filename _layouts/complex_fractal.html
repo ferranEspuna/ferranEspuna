@@ -5,7 +5,7 @@ layout: default
   <h1>{{ page.title | escape }}</h1>
   <p>{{ page.description | escape }} <a href="#guide">Read the guide</a>.</p>
 </div>
-<div class="section-grid fractal-sections">
+<div class="section-flow fractal-sections" data-columns="{{ page.columns | default: false }}">
 <p id="fractalStatus" class="section-wide" role="status">Loading the explorer…</p>
 <noscript class="section-wide"><p>Enable JavaScript to use the explorer. The guide below is available without it.</p></noscript>
 <fieldset id="explorerControls" disabled>

@@ -44,9 +44,22 @@ To add another ordinary page, use `layout: page`, a title, a permalink, and Mark
 
 ## Section layout
 
-Use `##` headings to divide a page into sections. Each heading and everything up to the next `##` stays together, including `###` subsections, lists, and images. Text before the first section stays above the grid. On wide screens sections fill rows from left to right (A B, then C D); on narrow screens they stack in Markdown order. No layout metadata is needed. Without JavaScript, the same content stays readable in one column.
+Add `columns: true` to a page's Markdown front matter to enable balanced newspaper-style columns:
 
-Fractal plots use the same grid as the guide's Markdown sections. Add another `##` heading to an explorer README to add another section. The export controls stay below the grid.
+```yaml
+---
+title: My page
+columns: true
+---
+```
+
+The layout fits as many readable columns as the screen allows (about 26rem minimum width each). Content runs down the first column, then down the next: A B C on the left, D E F on the right. Column heights are balanced by the browser; whole sections may differ in height. Narrow screens use one column.
+
+Set `columns: false`, or leave the setting out, to keep the entire page in a single readable column even on a wide screen. This setting applies to ordinary pages and individual fractal pages. Existing sectioned pages opt in explicitly, so you can change each independently.
+
+Use `##` headings to divide content into sections. Each section, including its `###` subsections, stays together where possible. Text before the first section stays above the columns. Without JavaScript, Markdown remains readable in one column.
+
+Fractal plots and guide sections share the same column flow. Each plot stays in one piece, with shared controls above the columns and exports below them. Add another `##` heading to an explorer README to add another section.
 
 ## Local development
 

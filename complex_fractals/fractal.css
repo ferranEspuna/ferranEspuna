@@ -6,11 +6,10 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .controls label { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
 .controls input[type="checkbox"] { margin: 0; }
 .hint { color: var(--muted); font-size: .9rem; }
-/* Preserve fieldset semantics while its panels share the Markdown grid. */
-.fractal-sections > #explorerControls, .shader-container, .fractal-guide.section-grid { display: contents; }
-.section-wide { grid-column: 1 / -1; margin-block: 0; }
-.fractal-sections { row-gap: 1.5rem; }
-.shader-window { min-width: 0; }
+/* Preserve fieldset semantics while its panels share the Markdown columns. */
+.fractal-sections > #explorerControls, .shader-container, .fractal-guide.section-flow { display: contents; }
+.section-wide { column-span: all; margin-block: 0 1rem; }
+.shader-window { min-width: 0; break-inside: avoid-column; padding-bottom: 1.5rem; }
 .shader-window h2 { margin-block: 0 .75rem; font-size: 1.2rem; }
 .canvas-wrapper { position: relative; background: #000; border-radius: .35rem; }
 .canvas-wrapper canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: .35rem; touch-action: none; }
@@ -23,7 +22,7 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 body.fallback-fullscreen-active { overflow: hidden; }
 body.popup-mode { overflow: hidden; }
 .popup-mode .back-nav, .popup-mode .fractal-intro, .popup-mode .fractal-guide, .popup-mode .hint, .popup-mode #fractalStatus, .popup-mode #explorerControls > .controls, .popup-mode .shader-window h2, .popup-mode .panel-controls { display: none; }
-.popup-mode .fractal-sections { display: block; }
+.popup-mode .fractal-sections { columns: auto; max-width: none; }
 .popup-mode main { padding: 0; width: 100%; }
 .popup-mode .shader-container { display: block; }
 .popup-mode-main #window-param, .popup-mode-param #window-main { display: none; }

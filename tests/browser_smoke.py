@@ -61,13 +61,23 @@ with sync_playwright() as p:
         assert popup.locator('#window-param').is_hidden()
         popup.close()
         assert page.evaluate("document.querySelector('#canvas-main').getContext('webgl').getError()") == 0
-    # H2 sections fill each row left-to-right, preserving all nested subsections.
+    # H2 sections flow downward before moving right; each section stays intact.
     page.goto(BASE + '/cv/')
     sections = page.locator('article > .section-block')
     assert sections.count() == 8
-    boxes = [sections.nth(i).bounding_box() for i in range(4)]
-    assert boxes[0]['y'] == boxes[1]['y'] and boxes[0]['x'] < boxes[1]['x']
-    assert boxes[2]['y'] == boxes[3]['y'] and boxes[2]['y'] > boxes[0]['y']
+    boxes = [section.bounding_box() for section in sections.all()]
+    assert len(set(box['x'] for box in boxes)) == 2
+    for first, second in zip(boxes, boxes[1:]):
+        assert second['x'] >= first['x']
+        if first['x'] == second['x']:
+            assert second['y'] >= first['y'] + first['height'] - 1
+    assert all(section.evaluate('(node) => node.getClientRects().length') == 1 for section in sections.all())
+    # Both explicit false and an omitted option fall back to one column.
+    page.locator('article').evaluate('(node) => node.dataset.columns = "false"')
+    assert len(set(section.bounding_box()['x'] for section in sections.all())) == 1
+    page.locator('article').evaluate('(node) => delete node.dataset.columns')
+    assert len(set(section.bounding_box()['x'] for section in sections.all())) == 1
+    page.locator('article').evaluate('(node) => node.dataset.columns = "true"')
     assert sections.nth(2).locator('h3').count() == 2
     page.screenshot(path='/tmp/site-cv-sections.png', full_page=True)
     page.set_viewport_size({'width': 390, 'height': 844})
@@ -80,8 +90,9 @@ with sync_playwright() as p:
     param = page.locator('#window-param').bounding_box()
     guide = page.locator('.fractal-guide > .section-block').nth(0).bounding_box()
     reading = page.locator('.fractal-guide > .section-block').nth(1).bounding_box()
-    assert main['y'] == param['y'] and main['x'] < param['x']
-    assert guide['y'] == reading['y'] and guide['y'] > main['y']
+    assert main['x'] == param['x'] and main['y'] < param['y']
+    assert guide['x'] == reading['x'] and guide['y'] < reading['y']
+    assert guide['x'] > main['x']
     assert page.locator('.back-nav a').nth(1).get_attribute('href') == '/complex_fractals/'
     page.screenshot(path='/tmp/site-desktop.png', full_page=True)
     mobile = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, device_scale_factor=2)

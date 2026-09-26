@@ -1,4 +1,5 @@
 ---
+columns: true
 layout: home
 title: Home
 permalink: /

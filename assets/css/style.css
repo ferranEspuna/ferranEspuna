@@ -52,9 +52,12 @@ img, video { max-width: 100%; }
 
 .back-nav { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-bottom: 1.5rem; }
 .back-nav a { padding-block: .5rem; }
-.section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 2.5rem; align-items: start; }
-.section-intro { grid-column: 1 / -1; width: 100%; margin-inline: 0; }
-.section-block { min-width: 0; width: 100%; max-width: 46rem; }
+/* Opt in per page. Content fills each column downward, then moves right. */
+.section-flow { max-width: 46rem; margin-inline: auto; }
+.section-flow[data-columns="true"] { max-width: none; column-width: 26rem; column-gap: 2.5rem; column-fill: balance; }
+.section-intro { column-span: all; width: 100%; margin: 0 0 2rem; }
+.section-block { min-width: 0; width: 100%; break-inside: avoid-column; padding-bottom: 2rem; }
 .section-block > h2:first-child { margin-top: 0; }
 .section-block > :last-child, .section-intro > :last-child { margin-bottom: 0; }
-@media print { .section-grid { display: block; } .section-block { margin-bottom: 2rem; break-inside: avoid; } }
+h2, h3 { break-after: avoid; }
+@media print { .section-flow[data-columns] { columns: auto; } }

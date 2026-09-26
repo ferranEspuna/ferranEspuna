@@ -4,7 +4,7 @@ for (const container of document.querySelectorAll('[data-sections]')) {
     if (![...container.children].some(child => child.tagName === 'H2')) continue;
     const nodes = [...container.childNodes];
     container.classList.remove('prose');
-    container.classList.add('section-grid');
+    container.classList.add('section-flow');
     let section = document.createElement('div');
     section.className = 'section-intro prose';
     container.append(section);
