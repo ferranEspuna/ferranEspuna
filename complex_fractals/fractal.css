@@ -1,4 +1,4 @@
-.fractal-intro { margin-bottom: 1.5rem; }
+.fractal-intro { margin: 0 0 1.5rem; }
 .fractal-intro h1 { margin-top: .75rem; }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -6,25 +6,28 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .controls label { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
 .controls input[type="checkbox"] { margin: 0; }
 .hint { color: var(--muted); font-size: .9rem; }
-.shader-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+/* Preserve fieldset semantics while its panels share the Markdown grid. */
+.fractal-sections > #explorerControls, .shader-container, .fractal-guide.section-grid { display: contents; }
+.section-wide { grid-column: 1 / -1; margin-block: 0; }
+.fractal-sections { row-gap: 1.5rem; }
 .shader-window { min-width: 0; }
 .shader-window h2 { margin-block: 0 .75rem; font-size: 1.2rem; }
 .canvas-wrapper { position: relative; background: #000; border-radius: .35rem; }
 .canvas-wrapper canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: .35rem; touch-action: none; }
 .fullscreen-btn { position: absolute; top: .5rem; right: .5rem; font-size: .85rem; }
 .panel-controls { gap: .5rem; }
-.fractal-guide { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+
 .canvas-wrapper:fullscreen, .canvas-wrapper.fallback-fullscreen { width: 100vw; height: 100dvh; background: #000; }
 .canvas-wrapper:fullscreen canvas, .canvas-wrapper.fallback-fullscreen canvas { width: 100%; height: 100%; aspect-ratio: auto; }
 .canvas-wrapper.fallback-fullscreen { position: fixed; inset: 0; z-index: 1000; }
 body.fallback-fullscreen-active { overflow: hidden; }
 body.popup-mode { overflow: hidden; }
-.popup-mode .site-header, .popup-mode .site-footer, .popup-mode .fractal-intro, .popup-mode .fractal-guide, .popup-mode .hint, .popup-mode #fractalStatus, .popup-mode #explorerControls > .controls, .popup-mode .shader-window h2, .popup-mode .panel-controls { display: none; }
+.popup-mode .back-nav, .popup-mode .fractal-intro, .popup-mode .fractal-guide, .popup-mode .hint, .popup-mode #fractalStatus, .popup-mode #explorerControls > .controls, .popup-mode .shader-window h2, .popup-mode .panel-controls { display: none; }
+.popup-mode .fractal-sections { display: block; }
 .popup-mode main { padding: 0; width: 100%; }
 .popup-mode .shader-container { display: block; }
 .popup-mode-main #window-param, .popup-mode-param #window-main { display: none; }
 .popup-mode .canvas-wrapper canvas { height: 100dvh; width: 100vw; aspect-ratio: auto; border-radius: 0; }
-@media (max-width: 700px) { .shader-container { grid-template-columns: 1fr; } }
 .export-section { border: 1px solid var(--border); border-radius: .35rem; padding: 1rem; margin-block: 1.5rem; }
 .export-section summary { font-weight: 650; min-height: 44px; }
 .export-section select { max-width: 100%; }

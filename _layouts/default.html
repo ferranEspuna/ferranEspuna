@@ -2,8 +2,9 @@
 <html lang="{{ page.lang | default: site.lang }}">
 {% include head.html %}
 <body{% if page.layout == 'complex_fractal' %} class="fractal-page"{% endif %}>
-  {% include header.html %}
-  <main id="content" class="wrapper" tabindex="-1">{{ content }}</main>
-  {% include footer.html %}
+  <main id="content" class="wrapper">
+    {% include back-nav.html %}
+    {{ content }}
+  </main>
 </body>
 </html>

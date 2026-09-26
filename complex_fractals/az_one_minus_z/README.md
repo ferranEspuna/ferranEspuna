@@ -11,6 +11,7 @@ main_shader: phase.frag
 param_shader: parameter.frag
 ---
 
+## Guide
 Repeat the rule **z → az(1 − z)**, allowing both `z` and `a` to be complex numbers. Moving `a` changes which starting points escape and which stay nearby.
 
 **Try this:** choose **Move point** in the parameter plane and drag around the gold dot. Enable **Show orbit** to see repeated steps from the critical point `z = ½`.

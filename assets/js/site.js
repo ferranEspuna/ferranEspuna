@@ -1,12 +1,24 @@
-const themeSelect = document.getElementById('themeSelect');
-if (themeSelect) {
-    themeSelect.value = document.documentElement.dataset.theme || 'system';
-    themeSelect.addEventListener('change', () => {
-        const theme = themeSelect.value;
-        if (theme === 'system') delete document.documentElement.dataset.theme;
-        else document.documentElement.dataset.theme = theme;
-        try { localStorage.setItem('theme', theme); } catch { /* Optional persistence. */ }
-    });
+// Group only top-level Markdown H2s. Nested headings and H3 subsections stay
+// with their parent section. DOM order remains the reading and keyboard order.
+for (const container of document.querySelectorAll('[data-sections]')) {
+    if (![...container.children].some(child => child.tagName === 'H2')) continue;
+    const nodes = [...container.childNodes];
+    container.classList.remove('prose');
+    container.classList.add('section-grid');
+    let section = document.createElement('div');
+    section.className = 'section-intro prose';
+    container.append(section);
+    for (const node of nodes) {
+        if (node.nodeName === 'H2') {
+            section = document.createElement('section');
+            section.className = 'section-block';
+            if (node.id) section.setAttribute('aria-labelledby', node.id);
+            container.append(section);
+        }
+        section.append(node);
+    }
+    const intro = container.querySelector('.section-intro');
+    if (!intro.textContent.trim() && !intro.children.length) intro.remove();
 }
 
 const search = document.getElementById('listSearch');
@@ -46,6 +58,8 @@ for (const checkbox of checkboxes) {
 }
 const reset = document.getElementById('resetChecklist');
 if (reset && checkboxes.length) {
+    // Keep the checklist action with Ingredients when the recipe uses columns.
+    checkboxes[0].closest('.section-block')?.append(reset);
     reset.hidden = false;
     reset.addEventListener('click', () => checkboxes.forEach(checkbox => {
         checkbox.checked = false;

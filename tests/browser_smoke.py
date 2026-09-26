@@ -12,9 +12,12 @@ with sync_playwright() as p:
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE)
-    page.locator('#themeSelect').select_option('dark')
+    page.emulate_media(color_scheme='dark')
+    page.evaluate("localStorage.setItem('theme', 'light')")
     page.goto(BASE + '/recipes/')
-    assert page.locator('#themeSelect').input_value() == 'dark'
+    assert page.locator('#themeSelect, header, footer').count() == 0
+    assert page.evaluate('getComputedStyle(document.body).backgroundColor') == 'rgb(24, 28, 25)'
+    assert page.locator('.back-nav a').first.get_attribute('href') == '/'
     page.locator('#listSearch').fill('no-such-recipe')
     assert page.locator('#contentList li:visible').count() == 0
     assert 'No recipes' in page.locator('#searchStatus').inner_text()
@@ -58,8 +61,28 @@ with sync_playwright() as p:
         assert popup.locator('#window-param').is_hidden()
         popup.close()
         assert page.evaluate("document.querySelector('#canvas-main').getContext('webgl').getError()") == 0
+    # H2 sections fill each row left-to-right, preserving all nested subsections.
+    page.goto(BASE + '/cv/')
+    sections = page.locator('article > .section-block')
+    assert sections.count() == 8
+    boxes = [sections.nth(i).bounding_box() for i in range(4)]
+    assert boxes[0]['y'] == boxes[1]['y'] and boxes[0]['x'] < boxes[1]['x']
+    assert boxes[2]['y'] == boxes[3]['y'] and boxes[2]['y'] > boxes[0]['y']
+    assert sections.nth(2).locator('h3').count() == 2
+    page.screenshot(path='/tmp/site-cv-sections.png', full_page=True)
+    page.set_viewport_size({'width': 390, 'height': 844})
+    boxes = [sections.nth(i).bounding_box() for i in range(4)]
+    assert all(boxes[i]['y'] < boxes[i+1]['y'] for i in range(3))
+    page.set_viewport_size({'width': 1280, 'height': 1000})
     page.goto(BASE + '/complex_fractals/newton_fractal/')
     page.wait_for_function("document.getElementById('fractalStatus').hidden")
+    main = page.locator('#window-main').bounding_box()
+    param = page.locator('#window-param').bounding_box()
+    guide = page.locator('.fractal-guide > .section-block').nth(0).bounding_box()
+    reading = page.locator('.fractal-guide > .section-block').nth(1).bounding_box()
+    assert main['y'] == param['y'] and main['x'] < param['x']
+    assert guide['y'] == reading['y'] and guide['y'] > main['y']
+    assert page.locator('.back-nav a').nth(1).get_attribute('href') == '/complex_fractals/'
     page.screenshot(path='/tmp/site-desktop.png', full_page=True)
     mobile = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, device_scale_factor=2)
     phone = mobile.new_page()
@@ -70,9 +93,9 @@ with sync_playwright() as p:
             phone.locator('#mode-param').select_option('point')
             phone.locator('#canvas-param').tap(position={'x': 120, 'y': 120})
         assert phone.evaluate('document.documentElement.scrollWidth <= innerWidth'), route
-        phone.locator('#themeSelect').select_option('light')
+        phone.emulate_media(color_scheme='light')
         assert phone.evaluate('getComputedStyle(document.body).backgroundColor') == 'rgb(250, 250, 248)'
-        phone.locator('#themeSelect').select_option('dark')
+        phone.emulate_media(color_scheme='dark')
         assert phone.evaluate('getComputedStyle(document.body).backgroundColor') == 'rgb(24, 28, 25)'
     phone.screenshot(path='/tmp/site-mobile.png', full_page=True)
     # A denied storage API must not disable page controls.

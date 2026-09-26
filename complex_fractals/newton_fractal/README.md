@@ -11,6 +11,7 @@ main_shader: shader.frag
 param_shader: parameter_space.frag
 ---
 
+## Guide
 Each pixel starts a calculation: repeatedly apply **Newton’s method** to find a root of a cubic polynomial. Its color shows which of the three roots it approaches. Move the third root to change the picture.
 
 **Try this:** choose **Move point** in the parameter plane and drag slowly near the two fixed roots. Increase the iterations to see the boundaries sharpen.

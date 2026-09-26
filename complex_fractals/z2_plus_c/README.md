@@ -11,6 +11,7 @@ main_shader: julia.frag
 param_shader: mandelbrot_parameter.frag
 ---
 
+## Guide
 Repeat the rule **z → z² + c**. Some starting points stay nearby; others escape. The Mandelbrot set maps the choices of `c`, while the other panel shows the corresponding Julia picture.
 
 **Try this:** choose **Move point** in the parameter plane, then tap or drag around the boundary of the dark region. Watch the Julia picture change from connected shapes to scattered islands.

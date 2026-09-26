@@ -1,7 +1,6 @@
 ---
 layout: listing
 title: Recipes
-nav_order: 2
 list_category: recipe
 permalink: /recipes/
 ---

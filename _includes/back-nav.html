@@ -1,0 +1,10 @@
+{% unless page.url == '/' %}
+<nav class="back-nav" aria-label="Back navigation">
+  <a href="{{ '/' | relative_url }}">← Home</a>
+  {% assign parent_url = page.url | split: '/' | pop | join: '/' | append: '/' %}
+  {% assign parent_page = site.pages | where: 'url', parent_url | first %}
+  {% if parent_page and parent_url != '/' %}
+  <a href="{{ parent_url | relative_url }}">← {{ parent_page.title | escape }}</a>
+  {% endif %}
+</nav>
+{% endunless %}

@@ -116,7 +116,8 @@ export async function startExplorer(config) {
             });
         }
         state.colors.forEach((_, i) => byId(`color${i}`)?.addEventListener('input', event => { state.colors[i] = event.target.value; changed(); }));
-        new ResizeObserver(resize).observe(byId('explorerControls'));
+        const resizeObserver = new ResizeObserver(resize);
+        for (const panel of panels) resizeObserver.observe(byId(`wrapper-${panel}`));
         window.addEventListener('resize', resize);
         window.addEventListener('pagehide', () => channel?.close(), { once: true });
         controls.disabled = false;

@@ -1,7 +1,6 @@
 ---
 layout: listing
 title: Fractals
-nav_order: 1
 list_category: fractal
 permalink: /complex_fractals/
 ---

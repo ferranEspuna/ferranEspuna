@@ -1,7 +1,5 @@
 ---
 title: Research and CV
-nav_title: Research
-nav_order: 3
 permalink: /cv/
 ---
 

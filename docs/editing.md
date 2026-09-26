@@ -9,7 +9,7 @@ All page text lives in Markdown. Use GitHub's file editor in a phone browser: op
 - `complex_fractals/README.md`: introduction to the explorers.
 - `complex_fractals/*/README.md`: each explorer's description, guide, and settings.
 
-Keep the block between `---` lines at the top. This is page metadata: `title` names the page, `description` appears in the listing, and `permalink` keeps its URL stable. A `nav_order` adds a page to the shared navigation; `nav_title` optionally shortens its label. Use `{{ '/path/' | relative_url }}` for internal links that also work when the site is hosted in a subdirectory.
+Keep the block between `---` lines at the top. This is page metadata: `title` names the page, `description` appears in the listing, and `permalink` keeps its URL stable. Back links are derived from the page URL: nested pages link to their parent page and to Home. Use `{{ '/path/' | relative_url }}` for internal links that also work when the site is hosted in a subdirectory.
 
 ## Add a recipe
 
@@ -42,15 +42,21 @@ The recipe listing updates automatically. Checklists save locally by ingredient 
 
 To add another ordinary page, use `layout: page`, a title, a permalink, and Markdown content. No Ruby registry or HTML file is needed. Existing URLs and old fractal redirects are preserved.
 
+## Section layout
+
+Use `##` headings to divide a page into sections. Each heading and everything up to the next `##` stays together, including `###` subsections, lists, and images. Text before the first section stays above the grid. On wide screens sections fill rows from left to right (A B, then C D); on narrow screens they stack in Markdown order. No layout metadata is needed. Without JavaScript, the same content stays readable in one column.
+
+Fractal plots use the same grid as the guide's Markdown sections. Add another `##` heading to an explorer README to add another section. The export controls stay below the grid.
+
 ## Local development
 
 Run `bundle install`, then `bundle exec jekyll serve`. Visit `http://localhost:4000`. `bundle exec jekyll build` creates `_site/`. Do not edit generated files there.
 
-The site has a single stylesheet and theme selector. System, light, and dark preferences apply everywhere. The fractal runtime is local JavaScript and WebGL, with no CDN runtime dependency. It renders on interaction rather than continuously while idle. Family scripts provide only the mathematical rule; shared rendering, navigation, orbit controls, and pop-outs live in `complex_fractals/`.
+The site has a single stylesheet and follows the system light/dark theme everywhere, including when that preference changes while a page is open. The fractal runtime is local JavaScript and WebGL, with no CDN runtime dependency. It renders on interaction rather than continuously while idle. Family scripts provide only the mathematical rule; shared rendering, navigation, orbit controls, and pop-outs live in `complex_fractals/`.
 
 ## Browser checks
 
-Install the Python `playwright` package in a virtual environment and run `playwright install chromium`. With the site running locally, run `python tests/browser_smoke.py`. Set `SITE_URL` to test another local address. The checks exercise all six shaders, pointer and keyboard controls, pop-out state, mobile layouts, theme persistence, recipe search, and saved checklists.
+Install the Python `playwright` package in a virtual environment and run `playwright install chromium`. With the site running locally, run `python tests/browser_smoke.py`. Set `SITE_URL` to test another local address. The checks exercise all six shaders, pointer and keyboard controls, pop-out state, mobile layouts, system themes, recipe search, and saved checklists.
 
 ## Fractal exports
 

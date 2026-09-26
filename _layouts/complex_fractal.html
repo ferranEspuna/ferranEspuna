@@ -2,15 +2,15 @@
 layout: default
 ---
 <div class="fractal-intro prose">
-  <a href="{{ '/complex_fractals/' | relative_url }}">← All fractals</a>
   <h1>{{ page.title | escape }}</h1>
   <p>{{ page.description | escape }} <a href="#guide">Read the guide</a>.</p>
 </div>
-<p id="fractalStatus" role="status">Loading the explorer…</p>
-<noscript><p>Enable JavaScript to use the explorer. The guide below is available without it.</p></noscript>
+<div class="section-grid fractal-sections">
+<p id="fractalStatus" class="section-wide" role="status">Loading the explorer…</p>
+<noscript class="section-wide"><p>Enable JavaScript to use the explorer. The guide below is available without it.</p></noscript>
 <fieldset id="explorerControls" disabled>
   <legend class="sr-only">Fractal controls</legend>
-  <div class="controls">
+  <div class="controls section-wide">
     <label for="iterSlider">Iterations</label>
     <input type="range" id="iterSlider" min="1" max="{{ page.iteration_max }}" value="{{ page.iteration_value }}">
     <output id="iterValue" for="iterSlider">{{ page.iteration_value }}</output>
@@ -20,7 +20,12 @@ layout: default
     <label>Root 3 <input type="color" id="color2" value="#0000ff"></label>
     {% endif %}
   </div>
-  <p id="interactionHelp" class="hint">Choose a mode, then drag or tap the plot. Pinch or use + / − to zoom. With a plot focused, use arrow keys to pan or move its point, + / − to zoom, and 0 to reset.</p>
+  <p id="interactionHelp" class="hint section-wide">Choose a mode, then drag or tap the plot. Pinch or use + / − to zoom. With a plot focused, use arrow keys to pan or move its point, + / − to zoom, and 0 to reset.</p>
+  <div class="controls section-wide">
+    <label><input type="checkbox" id="showOrbit">Show orbit</label>
+    <label><input type="checkbox" id="moveOrbit" disabled>Move orbit start</label>
+    <label><input type="checkbox" id="lockOrbit"{% unless page.family == 'newton' %} checked{% endunless %} disabled>{% if page.family == 'newton' %}Track centroid{% else %}Lock to critical point{% endif %}</label>
+  </div>
   <div class="shader-container">
     {% assign panels = 'main,param' | split: ',' %}
     {% for panel in panels %}
@@ -41,12 +46,9 @@ layout: default
     </section>
     {% endfor %}
   </div>
-  <div class="controls">
-    <label><input type="checkbox" id="showOrbit">Show orbit</label>
-    <label><input type="checkbox" id="moveOrbit" disabled>Move orbit start</label>
-    <label><input type="checkbox" id="lockOrbit"{% unless page.family == 'newton' %} checked{% endunless %} disabled>{% if page.family == 'newton' %}Track centroid{% else %}Lock to critical point{% endif %}</label>
-  </div>
+
 </fieldset>
+<div class="prose fractal-guide" data-sections>{{ content }}</div>
+</div>
 {% include fractal-export.html %}
-<div id="guide" class="prose fractal-guide">{{ content }}</div>
 <script type="module" src="{{ 'script.js' }}"></script>
