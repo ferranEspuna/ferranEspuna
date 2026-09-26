@@ -53,6 +53,24 @@ function balancedColumnStarts(heights, count) {
 for (const flow of document.querySelectorAll('.section-flow[data-columns]')) {
     const sections = [...flow.querySelectorAll('.section-block, .shader-window')]
         .filter(section => section.closest('[data-columns]') === flow);
+    if (!sections.length) continue;
+    // Use real columns: Firefox does not support CSS break-before: column.
+    // Keep plot controls inside their fieldset when moving them into stacks.
+    const columns = document.createElement('div');
+    columns.className = 'section-columns';
+    (flow.querySelector('#explorerControls') || flow).append(columns);
+    const stacks = [];
+    const addStack = () => {
+        const stack = document.createElement('div');
+        stack.className = 'column-stack';
+        columns.append(stack);
+        stacks.push(stack);
+    };
+    addStack();
+    for (const section of sections) {
+        if (section.closest('.fractal-guide')) section.classList.add('guide-section');
+        stacks[0].append(section);
+    }
     let frame = null;
     let lastMeasurement = '';
     const fitColumns = () => {
@@ -60,24 +78,42 @@ for (const flow of document.querySelectorAll('.section-flow[data-columns]')) {
         // Fullscreen plots have temporary dimensions, not page-column heights.
         if (document.fullscreenElement || document.webkitFullscreenElement ||
             document.body.matches('.popup-mode, .fallback-fullscreen-active')) return;
-        const style = getComputedStyle(flow);
+        const style = getComputedStyle(columns);
         const gap = parseFloat(style.columnGap) || 0;
-        const minimum = parseFloat(style.columnWidth) || flow.parentElement.clientWidth;
+        const minimum = 26 * parseFloat(getComputedStyle(document.documentElement).fontSize);
         const available = flow.parentElement.clientWidth;
         const slots = Math.max(1, Math.floor((available + gap) / (minimum + gap)));
         const count = flow.dataset.columns === 'true' ? Math.min(Math.max(1, sections.length), slots) : 1;
         const slotWidth = (available - (slots - 1) * gap) / slots;
         flow.style.setProperty('--flow-width', `${count * slotWidth + (count - 1) * gap}px`);
         flow.style.setProperty('--column-count', count);
+        while (stacks.length < count) addStack();
         // Measure after setting column width so wrapping is included in the cost.
         const heights = sections.map(section => section.getBoundingClientRect().height);
         const measurement = `${count}/${slotWidth}/${heights.join('/')}`;
         if (measurement === lastMeasurement) return;
         lastMeasurement = measurement;
         const starts = balancedColumnStarts(heights, count);
+        const groups = [[]];
         sections.forEach((section, index) => {
-            section.classList.toggle('column-start', starts.has(index));
+            if (starts.has(index)) groups.push([]);
+            groups.at(-1).push(section);
         });
+        const focused = document.activeElement;
+        groups.forEach((group, index) => {
+            let next = null;
+            // Insert backwards to retain reading order when a boundary shifts.
+            for (const section of [...group].reverse()) {
+                if (section.parentElement !== stacks[index] || section.nextSibling !== next) {
+                    stacks[index].insertBefore(section, next);
+                }
+                next = section;
+            }
+        });
+        while (stacks.length > count) stacks.pop().remove();
+        if (columns.contains(focused) && document.activeElement !== focused) {
+            focused.focus({ preventScroll: true });
+        }
     };
     const schedule = () => { if (frame === null) frame = requestAnimationFrame(fitColumns); };
     const observer = new ResizeObserver(schedule);

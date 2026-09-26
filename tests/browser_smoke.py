@@ -64,14 +64,14 @@ with sync_playwright() as p:
     # Two sections should occupy two centered slots, even with room for four.
     page.set_viewport_size({'width': 1920, 'height': 1080})
     page.goto(BASE)
-    page.wait_for_function('getComputedStyle(document.querySelector("article")).columnCount === "2"')
+    page.wait_for_function('document.querySelector("article").style.getPropertyValue("--column-count") === "2"')
     flow_box = page.locator('article').bounding_box()
     assert flow_box['width'] < 1000
     assert abs(flow_box['x'] - (1920 - flow_box['width']) / 2) < 1
     page.set_viewport_size({'width': 1280, 'height': 1000})
     # H2 sections flow downward before moving right; each section stays intact.
     page.goto(BASE + '/cv/')
-    sections = page.locator('article > .section-block')
+    sections = page.locator('article .section-block')
     assert sections.count() == 8
     boxes = [section.bounding_box() for section in sections.all()]
     assert len(set(box['x'] for box in boxes)) == 2
@@ -96,13 +96,18 @@ with sync_playwright() as p:
     page.wait_for_function("document.getElementById('fractalStatus').hidden")
     main = page.locator('#window-main').bounding_box()
     param = page.locator('#window-param').bounding_box()
-    guide = page.locator('.fractal-guide > .section-block').nth(0).bounding_box()
-    reading = page.locator('.fractal-guide > .section-block').nth(1).bounding_box()
+    guide = page.locator('.guide-section').nth(0).bounding_box()
+    reading = page.locator('.guide-section').nth(1).bounding_box()
     assert main['x'] == param['x'] and main['y'] < param['y']
     assert guide['x'] == reading['x'] and guide['y'] < reading['y']
     assert guide['x'] > main['x']
     assert page.locator('.back-nav a').nth(1).get_attribute('href') == '/complex_fractals/'
     page.screenshot(path='/tmp/site-desktop.png', full_page=True)
+    # Rebalancing must keep keyboard focus when a plot moves to another stack.
+    page.locator('#canvas-param').focus()
+    page.set_viewport_size({'width': 1920, 'height': 1080})
+    page.wait_for_timeout(100)
+    assert page.locator('#canvas-param').evaluate('node => node === document.activeElement')
     mobile = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, device_scale_factor=2)
     phone = mobile.new_page()
     for route in ['/', '/recipes/', '/recipes/cookies/', '/cv/'] + ['/complex_fractals/' + slug + '/' for slug in FRACTALS]:

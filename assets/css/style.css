@@ -54,11 +54,13 @@ img, video { max-width: 100%; }
 .back-nav a { padding-block: .5rem; }
 /* Opt in per page. Content fills each column downward, then moves right. */
 .section-flow { max-width: 46rem; margin-inline: auto; }
-.section-flow[data-columns="true"] { max-width: var(--flow-width, none); column-count: var(--column-count, auto); column-width: 26rem; column-gap: 2.5rem; column-fill: balance; }
-.section-intro { column-span: all; width: 100%; margin: 0 0 2rem; }
-.section-block { min-width: 0; width: 100%; break-inside: avoid-column; padding-bottom: 2rem; }
-.section-flow[data-columns="true"] .column-start { break-before: column; }
+.section-flow[data-columns="true"] { max-width: var(--flow-width, 46rem); }
+.section-columns { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 2.5rem; align-items: start; }
+.section-flow[data-columns="true"] .section-columns { grid-template-columns: repeat(var(--column-count, 1), minmax(0, 1fr)); }
+.column-stack { min-width: 0; }
+.section-intro { width: 100%; margin: 0 0 2rem; }
+.section-block { min-width: 0; width: 100%; padding-bottom: 2rem; }
 .section-block > h2:first-child { margin-top: 0; }
 .section-block > :last-child, .section-intro > :last-child { margin-bottom: 0; }
 h2, h3 { break-after: avoid; }
-@media print { .section-flow[data-columns] { columns: auto; } }
+@media print { .section-flow[data-columns] { max-width: none; } .section-columns { display: block; } }
