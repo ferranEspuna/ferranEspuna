@@ -1,9 +1,9 @@
----
+<!-- page
 layout: listing
 title: Fractals
 list_category: fractal
 permalink: /complex_fractals/
----
+-->
 
 # Explore complex fractals
 

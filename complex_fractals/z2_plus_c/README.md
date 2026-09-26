@@ -1,4 +1,4 @@
----
+<!-- page
 columns: true
 layout: complex_fractal
 category: fractal
@@ -10,7 +10,9 @@ iteration_max: 256
 iteration_value: 64
 main_shader: julia.frag
 param_shader: mandelbrot_parameter.frag
----
+-->
+
+# Mandelbrot & Julia
 
 ## Guide
 Repeat the rule **z → z² + c**. Some starting points stay nearby; others escape. The Mandelbrot set maps the choices of `c`, while the other panel shows the corresponding Julia picture.

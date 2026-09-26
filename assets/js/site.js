@@ -21,6 +21,28 @@ for (const container of document.querySelectorAll('[data-sections]')) {
     if (!intro.textContent.trim() && !intro.children.length) intro.remove();
 }
 
+// Use only the column slots that contain sections, retaining the readable
+// width of a slot and centering the resulting group within the page.
+for (const flow of document.querySelectorAll('.section-flow[data-columns]')) {
+    const sectionCount = Math.max(1, [...flow.querySelectorAll('.section-block, .shader-window')]
+        .filter(section => section.closest('[data-columns]') === flow).length);
+    const fitColumns = () => {
+        const style = getComputedStyle(flow);
+        const gap = parseFloat(style.columnGap) || 0;
+        const minimum = parseFloat(style.columnWidth) || flow.parentElement.clientWidth;
+        const available = flow.parentElement.clientWidth;
+        const slots = Math.max(1, Math.floor((available + gap) / (minimum + gap)));
+        const count = Math.min(sectionCount, slots);
+        const slotWidth = (available - (slots - 1) * gap) / slots;
+        flow.style.setProperty('--flow-width', `${count * slotWidth + (count - 1) * gap}px`);
+        flow.style.setProperty('--column-count', count);
+    };
+    new ResizeObserver(fitColumns).observe(flow.parentElement);
+    // Recalculate when the page setting changes, as well as on resize.
+    new MutationObserver(fitColumns).observe(flow, { attributes: true, attributeFilter: ['data-columns'] });
+    fitColumns();
+}
+
 const search = document.getElementById('listSearch');
 if (search) {
     search.closest('.search-control').hidden = false;

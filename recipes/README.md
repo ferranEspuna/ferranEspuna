@@ -1,9 +1,9 @@
----
+<!-- page
 layout: listing
 title: Recipes
 list_category: recipe
 permalink: /recipes/
----
+-->
 
 # Recipes
 

@@ -1,4 +1,4 @@
----
+<!-- page
 columns: true
 layout: complex_fractal
 category: fractal
@@ -10,7 +10,9 @@ iteration_max: 256
 iteration_value: 64
 main_shader: phase.frag
 param_shader: parameter.frag
----
+-->
+
+# Logistic Family
 
 ## Guide
 Repeat the rule **z → az(1 − z)**, allowing both `z` and `a` to be complex numbers. Moving `a` changes which starting points escape and which stay nearby.

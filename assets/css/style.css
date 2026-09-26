@@ -54,7 +54,7 @@ img, video { max-width: 100%; }
 .back-nav a { padding-block: .5rem; }
 /* Opt in per page. Content fills each column downward, then moves right. */
 .section-flow { max-width: 46rem; margin-inline: auto; }
-.section-flow[data-columns="true"] { max-width: none; column-width: 26rem; column-gap: 2.5rem; column-fill: balance; }
+.section-flow[data-columns="true"] { max-width: var(--flow-width, none); column-count: var(--column-count, auto); column-width: 26rem; column-gap: 2.5rem; column-fill: balance; }
 .section-intro { column-span: all; width: 100%; margin: 0 0 2rem; }
 .section-block { min-width: 0; width: 100%; break-inside: avoid-column; padding-bottom: 2rem; }
 .section-block > h2:first-child { margin-top: 0; }

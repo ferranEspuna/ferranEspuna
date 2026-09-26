@@ -1,9 +1,9 @@
----
+<!-- page
 columns: true
 layout: home
 title: Home
 permalink: /
----
+-->
 
 # Ferran Espuña
 
@@ -14,9 +14,9 @@ Madrid, Spain · [ferranespuna@gmail.com](mailto:ferranespuna@gmail.com) · [Git
 
 ## Explore
 
-- [Interactive fractals]({{ '/complex_fractals/' | relative_url }}) — change a number, follow an orbit, and see how a small change reshapes a whole picture. No background in mathematics needed.
-- [Recipes]({{ '/recipes/' | relative_url }}) — recipes in Spanish, with ingredient checklists that remember your progress on this device.
-- [Research and CV]({{ '/cv/' | relative_url }}) — my research interests, publications, and background.
+- [Interactive fractals](https://ferran.info/complex_fractals/) — change a number, follow an orbit, and see how a small change reshapes a whole picture. No background in mathematics needed.
+- [Recipes](https://ferran.info/recipes/) — recipes in Spanish, with ingredient checklists that remember your progress on this device.
+- [Research and CV](https://ferran.info/cv/) — my research interests, publications, and background.
 
 ## About me
 

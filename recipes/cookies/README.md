@@ -1,4 +1,4 @@
----
+<!-- page
 columns: true
 layout: recipe
 category: recipe
@@ -6,7 +6,7 @@ lang: es
 title: Galletas veganas con pepitas de chocolate
 description: Galletas con chocolate y leche vegetal, con 30 minutos de reposo y unos 15 de horno.
 permalink: /recipes/cookies/
----
+-->
 
 # Galletas veganas con pepitas de chocolate
 

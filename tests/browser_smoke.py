@@ -61,6 +61,14 @@ with sync_playwright() as p:
         assert popup.locator('#window-param').is_hidden()
         popup.close()
         assert page.evaluate("document.querySelector('#canvas-main').getContext('webgl').getError()") == 0
+    # Two sections should occupy two centered slots, even with room for four.
+    page.set_viewport_size({'width': 1920, 'height': 1080})
+    page.goto(BASE)
+    page.wait_for_function('getComputedStyle(document.querySelector("article")).columnCount === "2"')
+    flow_box = page.locator('article').bounding_box()
+    assert flow_box['width'] < 1000
+    assert abs(flow_box['x'] - (1920 - flow_box['width']) / 2) < 1
+    page.set_viewport_size({'width': 1280, 'height': 1000})
     # H2 sections flow downward before moving right; each section stays intact.
     page.goto(BASE + '/cv/')
     sections = page.locator('article > .section-block')

@@ -9,21 +9,21 @@ All page text lives in Markdown. Use GitHub's file editor in a phone browser: op
 - `complex_fractals/README.md`: introduction to the explorers.
 - `complex_fractals/*/README.md`: each explorer's description, guide, and settings.
 
-Keep the block between `---` lines at the top. This is page metadata: `title` names the page, `description` appears in the listing, and `permalink` keeps its URL stable. Back links are derived from the page URL: nested pages link to their parent page and to Home. Use `{{ '/path/' | relative_url }}` for internal links that also work when the site is hosted in a subdirectory.
+Keep the `<!-- page … -->` comment at the top. GitHub hides this comment instead of displaying a metadata table. This is page metadata: `title` names the page, `description` appears in the listing, and `permalink` keeps its URL stable. Back links are derived from the page URL: nested pages link to their parent page and to Home. Use normal Markdown links such as `[Fractals](https://ferran.info/complex_fractals/)`. These open the published site from both GitHub and the website; use relative repository links such as `[Editing guide](docs/editing.md)` when you want to link to a source file on GitHub.
 
 ## Add a recipe
 
 Create `recipes/my-recipe/README.md` using the GitHub editor:
 
 ```markdown
----
+<!-- page
 layout: recipe
 category: recipe
 title: My recipe
 description: A short description, including useful quantities or timing.
 lang: en
 permalink: /recipes/my-recipe/
----
+-->
 
 # My recipe
 
@@ -40,20 +40,20 @@ permalink: /recipes/my-recipe/
 
 The recipe listing updates automatically. Checklists save locally by ingredient text, so reordering ingredients does not move their checked states. Renaming an ingredient resets that ingredient's state.
 
-To add another ordinary page, use `layout: page`, a title, a permalink, and Markdown content. No Ruby registry or HTML file is needed. Existing URLs and old fractal redirects are preserved.
+To add another ordinary page, use `layout: page`, a title, a permalink, and Markdown content. The Jekyll generator discovers README files automatically; no registry or HTML file is needed. The existing Pages workflow supports this generator. A README with no settings comment uses its first `#` heading as the title and its folder as the URL. Existing URLs and old fractal redirects are preserved.
 
 ## Section layout
 
-Add `columns: true` to a page's Markdown front matter to enable balanced newspaper-style columns:
+Add `columns: true` to a page's hidden settings comment to enable balanced newspaper-style columns:
 
-```yaml
----
+```markdown
+<!-- page
 title: My page
 columns: true
----
+-->
 ```
 
-The layout fits as many readable columns as the screen allows (about 26rem minimum width each). Content runs down the first column, then down the next: A B C on the left, D E F on the right. Column heights are balanced by the browser; whole sections may differ in height. Narrow screens use one column.
+The layout fits as many readable columns as the screen allows (about 26rem minimum width each). Content runs down the first column, then down the next: A B C on the left, D E F on the right. Column heights are balanced by the browser; whole sections may differ in height. Narrow screens use one column. If fewer sections exist than available column slots, only the needed columns are shown and the group is centered.
 
 Set `columns: false`, or leave the setting out, to keep the entire page in a single readable column even on a wide screen. This setting applies to ordinary pages and individual fractal pages. Existing sectioned pages opt in explicitly, so you can change each independently.
 
@@ -66,6 +66,10 @@ Fractal plots and guide sections share the same column flow. Each plot stays in 
 Run `bundle install`, then `bundle exec jekyll serve`. Visit `http://localhost:4000`. `bundle exec jekyll build` creates `_site/`. Do not edit generated files there.
 
 The site has a single stylesheet and follows the system light/dark theme everywhere, including when that preference changes while a page is open. The fractal runtime is local JavaScript and WebGL, with no CDN runtime dependency. It renders on interaction rather than continuously while idle. Family scripts provide only the mathematical rule; shared rendering, navigation, orbit controls, and pop-outs live in `complex_fractals/`.
+
+## Build checks
+
+Run `python3 tests/markdown_pages_test.py` to check hidden settings, plain README defaults, excluded files, custom URLs, and useful errors for invalid settings or duplicate URLs.
 
 ## Browser checks
 

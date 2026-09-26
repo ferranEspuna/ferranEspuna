@@ -1,4 +1,4 @@
----
+<!-- page
 columns: true
 layout: complex_fractal
 category: fractal
@@ -10,7 +10,9 @@ iteration_max: 100
 iteration_value: 10
 main_shader: shader.frag
 param_shader: parameter_space.frag
----
+-->
+
+# Newton's Fractal
 
 ## Guide
 Each pixel starts a calculation: repeatedly apply **Newton’s method** to find a root of a cubic polynomial. Its color shows which of the three roots it approaches. Move the third root to change the picture.

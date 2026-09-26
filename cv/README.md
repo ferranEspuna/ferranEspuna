@@ -1,8 +1,8 @@
----
+<!-- page
 columns: true
 title: Research and CV
 permalink: /cv/
----
+-->
 
 # Ferran Espuña
 
@@ -97,6 +97,6 @@ European project on chip-scale microscopy. Work included computational imaging p
 
 **Complex fractal shaders.**  
 Interactive GLSL fragment shader visualising fractals emerging from complex dynamical systems.
-- [Newton's Fractal]({{ '/complex_fractals/newton_fractal/' | relative_url }})
-- [Logistic Family]({{ '/complex_fractals/az_one_minus_z/' | relative_url }})
-- [Mandelbrot Set]({{ '/complex_fractals/z2_plus_c/' | relative_url }})
+- [Newton's Fractal](https://ferran.info/complex_fractals/newton_fractal/)
+- [Logistic Family](https://ferran.info/complex_fractals/az_one_minus_z/)
+- [Mandelbrot Set](https://ferran.info/complex_fractals/z2_plus_c/)
