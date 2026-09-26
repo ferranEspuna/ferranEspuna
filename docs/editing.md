@@ -53,7 +53,7 @@ columns: true
 -->
 ```
 
-The layout fits as many readable columns as the screen allows (about 26rem minimum width each). Content runs down the first column, then down the next: A B C on the left, D E F on the right. Column heights are balanced by the browser; whole sections may differ in height. Narrow screens use one column. If fewer sections exist than available column slots, only the needed columns are shown and the group is centered.
+The layout fits as many readable columns as the screen allows (about 26rem minimum width each). Content runs down the first column, then down the next: A B C on the left, D E F on the right. Column breaks are chosen from the measured section heights to minimize differences between column heights while keeping sections in order. The layout recalculates when the screen or content size changes; a single long section can still make its column taller. Narrow screens use one column. If fewer sections exist than available column slots, only the needed columns are shown and the group is centered.
 
 Set `columns: false`, or leave the setting out, to keep the entire page in a single readable column even on a wide screen. This setting applies to ordinary pages and individual fractal pages. Existing sectioned pages opt in explicitly, so you can change each independently.
 
@@ -76,6 +76,8 @@ Run `python3 tests/markdown_pages_test.py` to check hidden settings, plain READM
 Install the Python `playwright` package in a virtual environment and run `playwright install chromium`. With the site running locally, run `python tests/browser_smoke.py`. Set `SITE_URL` to test another local address. The checks exercise all six shaders, pointer and keyboard controls, pop-out state, mobile layouts, system themes, recipe search, and saved checklists.
 
 Run `python tests/fractal_interaction_test.py` for right-click mode changes, wheel zoom, real touch double-tap/pinch sequences, and fullscreen exits. Point placement is independent of keyboard focus. On mobile it lasts for one double-tap-and-drag gesture; a second finger cancels placement and restores the point before zooming. The fullscreen entry button hides while fullscreen is active. Where native fullscreen is unavailable, a same-page history entry makes the browser’s Back action close the expanded plot.
+
+Run `python tests/column_balance_test.py` to check measured-height balancing against every possible ordered partition, including the CV’s Education placement, resizing, and content changes.
 
 ## Fractal exports
 

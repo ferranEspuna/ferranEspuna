@@ -21,25 +21,73 @@ for (const container of document.querySelectorAll('[data-sections]')) {
     if (!intro.textContent.trim() && !intro.children.length) intro.remove();
 }
 
-// Use only the column slots that contain sections, retaining the readable
-// width of a slot and centering the resulting group within the page.
+// Partition consecutive sections by measured height. Minimizing the sum of
+// squared column heights also minimizes variance, without reordering sections.
+function balancedColumnStarts(heights, count) {
+    const sums = [0];
+    for (const height of heights) sums.push(sums.at(-1) + height);
+    const costs = Array.from({ length: count + 1 }, () => Array(heights.length + 1).fill(Infinity));
+    const previous = Array.from({ length: count + 1 }, () => []);
+    costs[0][0] = 0;
+    for (let column = 1; column <= count; column++) {
+        for (let end = column; end <= heights.length; end++) {
+            for (let start = column - 1; start < end; start++) {
+                const height = sums[end] - sums[start];
+                const cost = costs[column - 1][start] + height * height;
+                if (cost < costs[column][end]) {
+                    costs[column][end] = cost;
+                    previous[column][end] = start;
+                }
+            }
+        }
+    }
+    const starts = new Set();
+    let end = heights.length;
+    for (let column = count; column > 1; column--) {
+        end = previous[column][end];
+        starts.add(end);
+    }
+    return starts;
+}
+
 for (const flow of document.querySelectorAll('.section-flow[data-columns]')) {
-    const sectionCount = Math.max(1, [...flow.querySelectorAll('.section-block, .shader-window')]
-        .filter(section => section.closest('[data-columns]') === flow).length);
+    const sections = [...flow.querySelectorAll('.section-block, .shader-window')]
+        .filter(section => section.closest('[data-columns]') === flow);
+    let frame = null;
+    let lastMeasurement = '';
     const fitColumns = () => {
+        frame = null;
+        // Fullscreen plots have temporary dimensions, not page-column heights.
+        if (document.fullscreenElement || document.webkitFullscreenElement ||
+            document.body.matches('.popup-mode, .fallback-fullscreen-active')) return;
         const style = getComputedStyle(flow);
         const gap = parseFloat(style.columnGap) || 0;
         const minimum = parseFloat(style.columnWidth) || flow.parentElement.clientWidth;
         const available = flow.parentElement.clientWidth;
         const slots = Math.max(1, Math.floor((available + gap) / (minimum + gap)));
-        const count = Math.min(sectionCount, slots);
+        const count = flow.dataset.columns === 'true' ? Math.min(Math.max(1, sections.length), slots) : 1;
         const slotWidth = (available - (slots - 1) * gap) / slots;
         flow.style.setProperty('--flow-width', `${count * slotWidth + (count - 1) * gap}px`);
         flow.style.setProperty('--column-count', count);
+        // Measure after setting column width so wrapping is included in the cost.
+        const heights = sections.map(section => section.getBoundingClientRect().height);
+        const measurement = `${count}/${slotWidth}/${heights.join('/')}`;
+        if (measurement === lastMeasurement) return;
+        lastMeasurement = measurement;
+        const starts = balancedColumnStarts(heights, count);
+        sections.forEach((section, index) => {
+            section.classList.toggle('column-start', starts.has(index));
+        });
     };
-    new ResizeObserver(fitColumns).observe(flow.parentElement);
-    // Recalculate when the page setting changes, as well as on resize.
-    new MutationObserver(fitColumns).observe(flow, { attributes: true, attributeFilter: ['data-columns'] });
+    const schedule = () => { if (frame === null) frame = requestAnimationFrame(fitColumns); };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(flow.parentElement);
+    // Rebalance when fonts, images, or widget controls change section heights.
+    sections.forEach(section => observer.observe(section));
+    new MutationObserver(schedule).observe(flow, { attributes: true, attributeFilter: ['data-columns'] });
+    new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('fullscreenchange', schedule);
+    document.addEventListener('webkitfullscreenchange', schedule);
     fitColumns();
 }
 

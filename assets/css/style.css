@@ -57,6 +57,7 @@ img, video { max-width: 100%; }
 .section-flow[data-columns="true"] { max-width: var(--flow-width, none); column-count: var(--column-count, auto); column-width: 26rem; column-gap: 2.5rem; column-fill: balance; }
 .section-intro { column-span: all; width: 100%; margin: 0 0 2rem; }
 .section-block { min-width: 0; width: 100%; break-inside: avoid-column; padding-bottom: 2rem; }
+.section-flow[data-columns="true"] .column-start { break-before: column; }
 .section-block > h2:first-child { margin-top: 0; }
 .section-block > :last-child, .section-intro > :last-child { margin-bottom: 0; }
 h2, h3 { break-after: avoid; }
