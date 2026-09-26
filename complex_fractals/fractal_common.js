@@ -20,31 +20,34 @@ export const clampZoom = zoom => Math.max(1e-6, Math.min(1e6, zoom));
 export function setupFullscreen(panel, onChange) {
     const wrapper = byId(`wrapper-${panel}`);
     const button = byId(`fullscreen-${panel}`);
-    const active = () => document.fullscreenElement === wrapper || wrapper.classList.contains('fallback-fullscreen');
     const update = () => {
-        button.textContent = active() ? 'Exit fullscreen' : 'Fullscreen';
+        button.hidden = (document.fullscreenElement || document.webkitFullscreenElement) === wrapper || wrapper.classList.contains('fallback-fullscreen');
         requestAnimationFrame(onChange);
     };
-    const exitFallback = () => {
-        wrapper.classList.remove('fallback-fullscreen');
-        document.body.classList.remove('fallback-fullscreen-active');
+    const syncFallback = () => {
+        const active = history.state?.fractalFullscreen === panel;
+        wrapper.classList.toggle('fallback-fullscreen', active);
+        document.body.classList.toggle('fallback-fullscreen-active', Boolean(history.state?.fractalFullscreen));
         update();
-        button.focus();
     };
     button.addEventListener('click', async () => {
-        if (wrapper.classList.contains('fallback-fullscreen')) return exitFallback();
-        if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('fallback-fullscreen-active')) return;
         try {
-            if (!wrapper.requestFullscreen) throw new Error('Use fallback');
-            await wrapper.requestFullscreen();
+            const request = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen;
+            if (!request) throw new Error('Use fallback');
+            await request.call(wrapper);
         } catch {
-            wrapper.classList.add('fallback-fullscreen');
-            document.body.classList.add('fallback-fullscreen-active');
-            update();
+            // Browsers without element fullscreen still get a viewport-sized plot.
+            // A same-page history entry lets their Back gesture close it naturally.
+            history.pushState({ ...history.state, fractalFullscreen: panel }, '', location.href);
+            syncFallback();
         }
     });
     document.addEventListener('fullscreenchange', update);
+    document.addEventListener('webkitfullscreenchange', update);
+    window.addEventListener('popstate', syncFallback);
     document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && wrapper.classList.contains('fallback-fullscreen')) exitFallback();
+        if (event.key === 'Escape' && wrapper.classList.contains('fallback-fullscreen')) history.back();
     });
+    syncFallback();
 }

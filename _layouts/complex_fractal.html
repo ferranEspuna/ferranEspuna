@@ -20,7 +20,7 @@ layout: default
     <label>Root 3 <input type="color" id="color2" value="#0000ff"></label>
     {% endif %}
   </div>
-  <p id="interactionHelp" class="hint section-wide">Choose a mode, then drag or tap the plot. Pinch or use + / − to zoom. With a plot focused, use arrow keys to pan or move its point, + / − to zoom, and 0 to reset.</p>
+  <p id="interactionHelp" class="hint section-wide">Desktop: right-click to switch between pan and point placement; scroll to zoom. Mobile: double-tap and hold the second tap to move a point; pinch to zoom. See the guide for details.</p>
   <div class="controls section-wide">
     <label><input type="checkbox" id="showOrbit">Show orbit</label>
     <label><input type="checkbox" id="moveOrbit" disabled>Move orbit start</label>
@@ -36,8 +36,7 @@ layout: default
         <button type="button" class="fullscreen-btn" id="fullscreen-{{ panel }}">Fullscreen</button>
       </div>
       <div class="controls panel-controls">
-        <label class="sr-only" for="mode-{{ panel }}">Interaction mode for {{ panel }} plane</label>
-        <select id="mode-{{ panel }}"><option value="pan">Pan / zoom</option><option value="point">Move point</option></select>
+        <span class="interaction-mode hint" id="modeStatus-{{ panel }}" role="status"></span>
         <button type="button" id="zoomIn-{{ panel }}" aria-label="Zoom in on {{ panel }} plane">+</button>
         <button type="button" id="zoomOut-{{ panel }}" aria-label="Zoom out on {{ panel }} plane">−</button>
         <button type="button" id="reset-{{ panel }}">Reset view</button>

@@ -43,7 +43,7 @@ with sync_playwright() as p:
         page.locator('#reset-main').click()
         page.wait_for_timeout(100)
         assert canvas.evaluate('(canvas) => canvas.toDataURL()') == original
-        page.locator('#mode-main').select_option('point')
+        canvas.press('m')
         canvas.focus()
         page.keyboard.press('ArrowRight')
         page.wait_for_timeout(100)
@@ -109,7 +109,6 @@ with sync_playwright() as p:
         phone.goto(BASE + route)
         if route.endswith(tuple(slug + '/' for slug in FRACTALS)):
             phone.wait_for_function("document.getElementById('fractalStatus').hidden")
-            phone.locator('#mode-param').select_option('point')
             phone.locator('#canvas-param').tap(position={'x': 120, 'y': 120})
         assert phone.evaluate('document.documentElement.scrollWidth <= innerWidth'), route
         phone.emulate_media(color_scheme='light')

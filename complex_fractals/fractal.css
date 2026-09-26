@@ -33,3 +33,7 @@ body.popup-mode { overflow: hidden; }
 .export-section > p { max-width: 60rem; }
 .export-section .controls label { flex-wrap: wrap; }
 .popup-mode .export-section { display: none; }
+
+.canvas-wrapper:fullscreen .fullscreen-btn, .canvas-wrapper.fallback-fullscreen .fullscreen-btn { display: none; }
+.interaction-mode { flex-basis: 100%; }
+@media (pointer: coarse) { .interaction-mode { display: none; } }

@@ -75,6 +75,8 @@ Run `python3 tests/markdown_pages_test.py` to check hidden settings, plain READM
 
 Install the Python `playwright` package in a virtual environment and run `playwright install chromium`. With the site running locally, run `python tests/browser_smoke.py`. Set `SITE_URL` to test another local address. The checks exercise all six shaders, pointer and keyboard controls, pop-out state, mobile layouts, system themes, recipe search, and saved checklists.
 
+Run `python tests/fractal_interaction_test.py` for right-click mode changes, wheel zoom, real touch double-tap/pinch sequences, and fullscreen exits. Point placement is independent of keyboard focus. On mobile it lasts for one double-tap-and-drag gesture; a second finger cancels placement and restores the point before zooming. The fullscreen entry button hides while fullscreen is active. Where native fullscreen is unavailable, a same-page history entry makes the browser’s Back action close the expanded plot.
+
 ## Fractal exports
 
 Open **Export image or video** under the plots. Choose a plane, resolution, and shape, then save a PNG or record a video. PNGs support longest edges of 1920, 3840, or 7680 pixels, subject to the device's canvas/GPU limits. Videos support 1920 and 3840 pixels. These are new renders at the selected size, not enlarged screenshots.

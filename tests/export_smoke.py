@@ -48,7 +48,7 @@ with sync_playwright() as p:
         assert sum(abs(a-b) for a,b in zip(marker['clean'][:3], marker['live'][:3])) > 50, marker
         page.locator('#exportPanel').select_option('param')
         before = png()
-        page.locator('#mode-param').select_option('point')
+        page.locator('#canvas-param').press('m')
         page.locator('#canvas-param').focus()
         page.keyboard.press('ArrowRight')
         page.wait_for_timeout(100)
