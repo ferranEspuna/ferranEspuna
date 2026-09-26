@@ -1,8 +1,6 @@
 ---
 layout: page
 ---
-<div class="recipe-container">
-  {{ content }}
-</div>
-
-{%- include checkbox-logic.html -%}
+<a href="{{ '/recipes/' | relative_url }}">← All recipes</a>
+{{ content }}
+<button type="button" id="resetChecklist" hidden>Reset ingredients</button>

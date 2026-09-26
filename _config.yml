@@ -1,7 +1,24 @@
-theme: jekyll-theme-minimal
+title: Ferran Espuña
+url: https://ferran.info
+lang: en
+description: Mathematics, interactive fractals, and recipes by Ferran Espuña.
+markdown: kramdown
+kramdown:
+  input: GFM
 exclude:
-  - README.md
-  - cv/README.md
-  - recipes/burritos/README.md
-  - recipes/cookies/README.md
-  - complex_fractals/README.md
+  - Gemfile
+  - Gemfile.lock
+  - docs
+  - tests
+  - vendor
+  - node_modules
+  - package.json
+  - package-lock.json
+  - playwright.config.js
+  - test-results
+  - playwright-report
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page

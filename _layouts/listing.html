@@ -1,0 +1,17 @@
+---
+layout: page
+---
+{{ content }}
+{% if page.list_category == 'recipe' %}
+<div class="search-control" hidden>
+  <label for="listSearch">Search recipes</label>
+  <input type="search" id="listSearch" placeholder="Search by name or description">
+  <p id="searchStatus" role="status"></p>
+</div>
+{% endif %}
+<ul class="content-list" id="contentList">
+  {% assign entries = site.pages | where: 'category', page.list_category | sort: 'title' %}
+  {% for item in entries %}
+  <li><h2><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></h2><p>{{ item.description | escape }}</p></li>
+  {% endfor %}
+</ul>

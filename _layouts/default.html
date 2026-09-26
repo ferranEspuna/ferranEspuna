@@ -1,15 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: site.lang | default: " en" }}">
-
-{%- include head.html -%}
-
-<body>
-  <main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      {{ content }}
-    </div>
-  </main>
-  {% include checkbox-logic.html %}
+<html lang="{{ page.lang | default: site.lang }}">
+{% include head.html %}
+<body{% if page.layout == 'complex_fractal' %} class="fractal-page"{% endif %}>
+  {% include header.html %}
+  <main id="content" class="wrapper" tabindex="-1">{{ content }}</main>
+  {% include footer.html %}
 </body>
-
 </html>

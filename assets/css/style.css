@@ -1,0 +1,61 @@
+:root {
+  color-scheme: light;
+  --background: #fafaf8;
+  --surface: #f0f1ed;
+  --text: #252922;
+  --muted: #5e655b;
+  --link: #226249;
+  --border: #cbd0c6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; --background: #181c19; --surface: #242a25; --text: #e3e8df; --muted: #afb9ab; --link: #95d3b4; --border: #465044; }
+}
+:root[data-theme="dark"] { color-scheme: dark; --background: #181c19; --surface: #242a25; --text: #e3e8df; --muted: #afb9ab; --link: #95d3b4; --border: #465044; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--text); font: 17px/1.65 system-ui, sans-serif; }
+.wrapper { width: min(100% - 2rem, 76rem); margin-inline: auto; }
+.site-header { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 2rem; padding-block: 1.2rem; border-bottom: 1px solid var(--border); }
+.site-title { font-weight: 650; color: var(--text); }
+.site-header nav { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+.site-header a { padding-block: .5rem; text-decoration: none; }
+.site-header a:hover, [aria-current="page"] { text-decoration: underline !important; text-underline-offset: .3em; }
+.theme-control { margin-left: auto; display: flex; gap: .5rem; align-items: center; font-size: .85rem; }
+main { padding-block: 2rem 3rem; min-height: 65vh; }
+.prose { max-width: 46rem; margin-inline: auto; }
+h1, h2, h3 { line-height: 1.25; font-weight: 650; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); margin: 0 0 1.25rem; letter-spacing: -.03em; }
+h2 { font-size: 1.4rem; margin: 2rem 0 .75rem; }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+p, ul, ol { margin-block: 0 1.2rem; }
+li + li { margin-top: .4rem; }
+a { color: var(--link); text-underline-offset: .16em; overflow-wrap: anywhere; }
+a:hover { text-decoration-thickness: 2px; }
+button, input, select { font: inherit; accent-color: var(--link); }
+button, select, input[type="search"], input[type="number"] { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: .3rem; min-height: 44px; padding: .45rem .7rem; }
+button, select, summary { cursor: pointer; }
+button:hover { border-color: var(--link); }
+button:disabled { cursor: wait; opacity: .55; }
+:focus-visible { outline: 3px solid var(--link); outline-offset: 3px; }
+input[type="range"] { min-height: 44px; max-width: 100%; }
+input[type="color"] { width: 44px; height: 44px; padding: 3px; background: var(--surface); border: 1px solid var(--border); }
+input[type="checkbox"] { width: 1.2rem; height: 1.2rem; vertical-align: middle; margin-right: .6rem; }
+code, pre { background: var(--surface); border-radius: .2rem; }
+code { padding: .1rem .3rem; }
+pre { padding: 1rem; overflow: auto; }
+img, video { max-width: 100%; }
+.site-footer { display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between; padding-block: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+.content-list { padding: 0; list-style: none; }
+.content-list li { padding-block: 1.25rem; border-bottom: 1px solid var(--border); }
+.content-list h2 { margin: 0 0 .5rem; font-size: 1.2rem; }
+.content-list p { margin: 0; color: var(--muted); }
+.search-control label { display: block; }
+.search-control input { width: 100%; }
+#searchStatus { font-size: .9rem; color: var(--muted); margin-top: .4rem; }
+.task-list { padding-left: 0; list-style: none; }
+.task-list-item { padding: .6rem; border-bottom: 1px solid var(--border); cursor: pointer; }
+.task-list-item.checked { text-decoration: line-through; color: var(--muted); }
+.skip-link { position: absolute; top: -10rem; left: 1rem; padding: .5rem 1rem; background: var(--background); z-index: 2000; }
+.skip-link:focus { top: .5rem; }
+[hidden] { display: none !important; }
+@media (max-width: 600px) { .site-header { gap: .5rem 1rem; } .site-header nav { order: 3; width: 100%; } body { font-size: 16px; } }
+@media print { .site-header, .site-footer, button, .search-control { display: none; } :root { --background: white; --text: black; --link: black; } main { padding: 0; } }

@@ -1,60 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
-  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-  <title>{{ page.title }}</title>
-  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-  <link rel="stylesheet" href="{{ '/complex_fractals/fractal.css' | relative_url }}">
-</head>
-<body>
-  <nav class="subpage-nav">
-    <a href="{{ '/' | relative_url }}">&larr; Home</a>
-  </nav>
-
-  <div class="wrapper">
-    <h1>{{ page.heading | default: page.title }}</h1>
-
-    <div class="description" id="description"></div>
-
-    <div class="controls iteration-controls">
-      <label for="iterSlider">Iterations:</label>
-      <input type="range" id="iterSlider" min="{{ page.iteration_min }}" max="{{ page.iteration_max }}" value="{{ page.iteration_value }}">
-      <span id="iterValue">{{ page.iteration_value }}</span>
-    </div>
-
-    {% if page.extra_controls %}
-    {{ page.extra_controls }}
+---
+layout: default
+---
+<div class="fractal-intro prose">
+  <a href="{{ '/complex_fractals/' | relative_url }}">← All fractals</a>
+  <h1>{{ page.title | escape }}</h1>
+  <p>{{ page.description | escape }} <a href="#guide">Read the guide</a>.</p>
+</div>
+<p id="fractalStatus" role="status">Loading the explorer…</p>
+<noscript><p>Enable JavaScript to use the explorer. The guide below is available without it.</p></noscript>
+<fieldset id="explorerControls" disabled>
+  <legend class="sr-only">Fractal controls</legend>
+  <div class="controls">
+    <label for="iterSlider">Iterations</label>
+    <input type="range" id="iterSlider" min="1" max="{{ page.iteration_max }}" value="{{ page.iteration_value }}">
+    <output id="iterValue" for="iterSlider">{{ page.iteration_value }}</output>
+    {% if page.family == 'newton' %}
+    <label>Root 1 <input type="color" id="color0" value="#ff0000"></label>
+    <label>Root 2 <input type="color" id="color1" value="#00ff00"></label>
+    <label>Root 3 <input type="color" id="color2" value="#0000ff"></label>
     {% endif %}
-
-    <div class="shader-container">
-      <div class="shader-window" id="windowMain">
-        <h3>{{ page.main_panel_title }}</h3>
-        <div class="canvas-wrapper" id="wrapperMain">
-          <button id="fullscreenBtnMain" class="fullscreen-btn">Fullscreen</button>
-          <button id="popoutBtnMain" class="fullscreen-btn popout-btn">Pop Out</button>
-          <canvas class="glslCanvas" id="mainCanvas" data-fragment-url="{{ page.main_shader }}"></canvas>
-        </div>
-        {% if page.main_controls %}
-        <div class="controls panel-controls">
-          {{ page.main_controls }}
-        </div>
-        {% endif %}
-      </div>
-      <div class="shader-window" id="windowParam">
-        <h3>{{ page.param_panel_title }}</h3>
-        <div class="canvas-wrapper" id="wrapperParam">
-          <button id="fullscreenBtnParam" class="fullscreen-btn">Fullscreen</button>
-          <button id="popoutBtnParam" class="fullscreen-btn popout-btn">Pop Out</button>
-          <canvas class="glslCanvas" id="paramCanvas" data-fragment-url="{{ page.param_shader }}"></canvas>
-        </div>
-      </div>
-    </div>
   </div>
-
-  <script type="module" src="{{ page.script | default: 'script.js' }}"></script>
-</body>
-</html>
+  <p id="interactionHelp" class="hint">Choose a mode, then drag or tap the plot. Pinch or use + / − to zoom. With a plot focused, use arrow keys to pan or move its point, + / − to zoom, and 0 to reset.</p>
+  <div class="shader-container">
+    {% assign panels = 'main,param' | split: ',' %}
+    {% for panel in panels %}
+    <section class="shader-window" id="window-{{ panel }}" aria-labelledby="title-{{ panel }}">
+      <h2 id="title-{{ panel }}">{% if panel == 'main' %}Dynamical plane{% else %}Parameter plane{% endif %}</h2>
+      <div class="canvas-wrapper" id="wrapper-{{ panel }}">
+        <canvas id="canvas-{{ panel }}" tabindex="0" aria-label="{{ page.title | escape }}: {{ panel }} plane" aria-describedby="interactionHelp" data-fragment-url="{% if panel == 'main' %}{{ page.main_shader }}{% else %}{{ page.param_shader }}{% endif %}">This explorer needs a browser with WebGL.</canvas>
+        <button type="button" class="fullscreen-btn" id="fullscreen-{{ panel }}">Fullscreen</button>
+      </div>
+      <div class="controls panel-controls">
+        <label class="sr-only" for="mode-{{ panel }}">Interaction mode for {{ panel }} plane</label>
+        <select id="mode-{{ panel }}"><option value="pan">Pan / zoom</option><option value="point">Move point</option></select>
+        <button type="button" id="zoomIn-{{ panel }}" aria-label="Zoom in on {{ panel }} plane">+</button>
+        <button type="button" id="zoomOut-{{ panel }}" aria-label="Zoom out on {{ panel }} plane">−</button>
+        <button type="button" id="reset-{{ panel }}">Reset view</button>
+        <button type="button" id="popout-{{ panel }}">Pop out</button>
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+  <div class="controls">
+    <label><input type="checkbox" id="showOrbit">Show orbit</label>
+    <label><input type="checkbox" id="moveOrbit" disabled>Move orbit start</label>
+    <label><input type="checkbox" id="lockOrbit"{% unless page.family == 'newton' %} checked{% endunless %} disabled>{% if page.family == 'newton' %}Track centroid{% else %}Lock to critical point{% endif %}</label>
+  </div>
+</fieldset>
+<div id="guide" class="prose fractal-guide">{{ content }}</div>
+<script type="module" src="{{ 'script.js' }}"></script>

@@ -46,15 +46,8 @@ GEM
       safe_yaml (~> 1.0)
       terminal-table (>= 1.8, < 4.0)
       webrick (~> 1.7)
-    jekyll-feed (0.15.1)
-      jekyll (>= 3.7, < 5.0)
     jekyll-sass-converter (3.1.0)
       sass-embedded (~> 1.75)
-    jekyll-seo-tag (2.8.0)
-      jekyll (>= 3.8, < 5.0)
-    jekyll-theme-minimal (0.2.0)
-      jekyll (> 3.5, < 5.0)
-      jekyll-seo-tag (~> 2.0)
     jekyll-watch (2.2.1)
       listen (~> 3.0)
     json (2.18.1)
@@ -114,12 +107,6 @@ DEPENDENCIES
   bigdecimal
   csv
   jekyll (~> 4.3)
-  jekyll-feed (~> 0.12)
-  jekyll-theme-minimal
-  liquid (>= 4.0.4)
-  tzinfo (~> 1.2)
-  tzinfo-data
-  wdm (~> 0.1.1)
   webrick
 
 CHECKSUMS
@@ -144,10 +131,7 @@ CHECKSUMS
   http_parser.rb (0.8.1) sha256=9ae8df145b39aa5398b2f90090d651c67bd8e2ebfe4507c966579f641e11097a
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   jekyll (4.4.1) sha256=4c1144d857a5b2b80d45b8cf5138289579a9f8136aadfa6dd684b31fe2bc18c1
-  jekyll-feed (0.15.1) sha256=49fda707b6e81e43d9863841293afd5026038d7a05865150e2b1831e6d9eb8ff
   jekyll-sass-converter (3.1.0) sha256=83925d84f1d134410c11d0c6643b0093e82e3a3cf127e90757a85294a3862443
-  jekyll-seo-tag (2.8.0) sha256=3f2ed1916d56f14ebfa38e24acde9b7c946df70cb183af2cb5f0598f21ae6818
-  jekyll-theme-minimal (0.2.0) sha256=a225210c35573ad2c9e57b81f16f678ca6c314394ec692502ccc6189d7e52d82
   jekyll-watch (2.2.1) sha256=bc44ed43f5e0a552836245a54dbff3ea7421ecc2856707e8a1ee203a8387a7e1
   json (2.18.1) sha256=fe112755501b8d0466b5ada6cf50c8c3f41e897fa128ac5d263ec09eedc9f986
   kramdown (2.3.1) sha256=59e938cfa42a3d6169b295727fe09c4c91d742336c8fbd1042529f4db664ab49
@@ -177,4 +161,4 @@ CHECKSUMS
   webrick (1.9.2) sha256=beb4a15fc474defed24a3bda4ffd88a490d517c9e4e6118c3edce59e45864131
 
 BUNDLED WITH
-  4.0.3
+  4.0.20

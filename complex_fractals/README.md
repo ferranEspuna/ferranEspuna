@@ -1,18 +1,17 @@
+---
+layout: listing
+title: Fractals
+nav_order: 1
+list_category: fractal
+permalink: /complex_fractals/
+---
 
+# Explore complex fractals
 
-This section packages interactive, real-time GLSL fragment shaders visualizing chaotic dynamical systems and complex functions. 
+A simple rule, repeated many times, can create surprisingly intricate pictures. These explorers let you change the rule and see what happens, directly in your browser.
 
-Each interactive visualizer uses a dual-panel layout, split-sync state broadcasting across windows, and touch-responsive gesture support.
+**Start with Mandelbrot & Julia:** choose **Move point** on the parameter panel, then tap or drag inside it. Watch the picture in the other panel change.
 
-## Interactive Visualizers
+Each explorer has two views. The **dynamical plane** shows what happens to different starting points for one rule. The **parameter plane** is a map of different choices of that rule. A complex number is just a point here: its real part runs horizontally and its imaginary part vertically.
 
-*   [**Newton's Fractal**](/complex_fractals/newton_fractal/) - Visualize the basins of attraction for Newton's root-finding method on cubic polynomials. Drag the third root or step-by-step orbit path.
-*   [**Logistic Family**](/complex_fractals/az_one_minus_z/) - Explore fixed points, critical orbits, and chaotic regions under the complex logistic map $f_a(z) = a z (1 - z)$ with dual phase/parameter space navigation.
-*   [**Mandelbrot & Julia**](/complex_fractals/z2_plus_c/) - The classic complex quadratic map $f_c(z) = z^2 + c$. Toggle between the parameter space (Mandelbrot set) and dynamical plane (Julia sets).
-
-## Architecture
-
-All visualizers are designed with:
-1.  **Dual-panel layout**: Dynamical space vs Parameter space.
-2.  **State sync**: Web BroadcastChannel API syncs zoom, pan, parameters, and paths across popout/main window instances.
-3.  **WebGL shaders**: Rendered on the client's GPU via `glslCanvas` libraries.
+Use **Pan / zoom** to explore, and **Reset view** if you get lost. More iterations reveal finer structure but take longer to draw. The pictures use your device's graphics hardware (WebGL).

@@ -77,7 +77,7 @@ float draw_path(vec2 z, float zoom, float ratio) {
     
 	float final = circle(z, u_path[0], 0.01 * zoom / ratio);
 
-	for (int i = 0; i < MAX_ITERS; ++i) {
+	for (int i = 0; i < MAX_ITERS - 1; ++i) {
         if (float(i) >= u_path_length - 1.0) break;
         vec2 z0 = u_path[i];
         vec2 new_z0 = u_path[i+1];
