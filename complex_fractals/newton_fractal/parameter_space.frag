@@ -3,6 +3,7 @@ precision highp float;
 #endif
 
 uniform vec2 u_resolution;
+uniform float u_hide_overlays;
 uniform float u_iterations;
 uniform float u_zoom;
 uniform vec2 u_pan;
@@ -66,6 +67,11 @@ void main() {
     
     // Color based on convergence to root0, root1, or root2 (which is uv)
     vec3 color = color(out_comp, root0, root1, root2);
+
+    if (u_hide_overlays > 0.5) {
+        gl_FragColor = vec4(color, 1.0);
+        return;
+    }
     
     // Draw fixed roots for context
     float dot_r = 0.015 * u_zoom / u_screen_ratio;

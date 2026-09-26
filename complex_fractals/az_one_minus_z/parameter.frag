@@ -7,6 +7,7 @@ precision mediump float;
 #endif
 
 uniform vec2 u_resolution;
+uniform float u_hide_overlays;
 uniform float u_iterations;
 uniform float u_zoom;
 uniform vec2 u_pan;
@@ -57,6 +58,11 @@ void main() {
     vec3 col = vec3(0.02, 0.03, 0.05);
     if (esc < u_iterations - 0.5) {
         col = palette(esc);
+    }
+
+    if (u_hide_overlays > 0.5) {
+        gl_FragColor = vec4(col, 1.0);
+        return;
     }
 
     float dot_r = 0.018 * u_zoom / max(u_screen_ratio, 0.25);

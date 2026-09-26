@@ -51,3 +51,13 @@ The site has a single stylesheet and theme selector. System, light, and dark pre
 ## Browser checks
 
 Install the Python `playwright` package in a virtual environment and run `playwright install chromium`. With the site running locally, run `python tests/browser_smoke.py`. Set `SITE_URL` to test another local address. The checks exercise all six shaders, pointer and keyboard controls, pop-out state, mobile layouts, theme persistence, recipe search, and saved checklists.
+
+## Fractal exports
+
+Open **Export image or video** under the plots. Choose a plane, resolution, and shape, then save a PNG or record a video. PNGs support longest edges of 1920, 3840, or 7680 pixels, subject to the device's canvas/GPU limits. Videos support 1920 and 3840 pixels. These are new renders at the selected size, not enlarged screenshots.
+
+**Slow zoom** records a 4× zoom toward the current center without changing the interactive view. **Record live controls** follows your changes to the selected plane. Both omit every marker and orbit overlay. Because only the export canvas is captured, the mouse, page controls, and theme never appear in the file.
+
+Recording happens in real time, targeting 30 fps. Actual smoothness depends on the device, resolution, and iteration count. The browser chooses a supported WebM or MP4 encoder. Stop saves the partial recording; cancel discards it. Hiding the tab stops and saves the partial video to avoid a stalled recording. A download link remains available if the automatic download is blocked on mobile. Export settings are separate from the live explorer, and temporary graphics and media resources are released after each export.
+
+Implementation: `complex_fractals/export.js`, `_includes/fractal-export.html`, and the `u_hide_overlays` uniform in each shader. The exporter uses [canvas captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream) and [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder). Run `python tests/export_smoke.py` for PNG dimensions, overlay removal, recorded-video playback, cancellation, and unsupported-browser checks.

@@ -3,6 +3,7 @@ precision highp float;
 #endif
 
 uniform vec2 u_resolution;
+uniform float u_hide_overlays;
 uniform float u_time;
 uniform float u_iterations;
 
@@ -111,6 +112,11 @@ void main() {
 
     vec2 out_comp = newton(uv, root0, root1, root2);
     vec3 color = color(out_comp, root0, root1, root2);
+
+    if (u_hide_overlays > 0.5) {
+        gl_FragColor = vec4(color, 1.0);
+        return;
+    }
 
     // We need to apply zoom to the dot radius so it stays the same size on screen
     // And divide by u_screen_ratio to keep it fixed relative to physical screen

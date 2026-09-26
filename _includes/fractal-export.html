@@ -1,0 +1,25 @@
+<details id="exportSection" class="export-section" hidden>
+  <summary>Export image or video</summary>
+  <p>Save a clean render at full resolution, without point markers, orbit paths, or the cursor. The selected view’s center and scale are preserved; changing the shape reveals more of the longer axis.</p>
+  <fieldset id="exportSettings">
+    <legend class="sr-only">Export settings</legend>
+    <div class="controls">
+      <label>View <select id="exportPanel"><option value="main">Dynamical plane</option><option value="param">Parameter plane</option></select></label>
+      <label>Longest edge <select id="exportSize"><option value="1920">1920 px</option><option value="3840">3840 px (4K)</option><option value="7680">7680 px (images only)</option></select></label>
+      <label>Shape <select id="exportShape"><option value="view">Current view</option><option value="square">Square</option><option value="landscape">Landscape (16:9)</option><option value="portrait">Portrait (9:16)</option></select></label>
+    </div>
+    <button type="button" id="exportImage">Save PNG</button>
+    <div class="controls">
+      <label>Video <select id="exportMotion"><option value="zoom">Slow zoom (4×)</option><option value="live">Record live controls</option></select></label>
+      <label>Duration <select id="exportDuration"><option value="5">5 seconds</option><option value="10" selected>10 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select></label>
+      <button type="button" id="exportVideo">Record video</button>
+    </div>
+  </fieldset>
+  <p id="videoSupport" class="hint">Videos record in real time, targeting 30 frames per second. Keep this tab visible. Lower the resolution or iterations if playback is choppy. The file format depends on your browser.</p>
+  <div class="controls">
+    <button type="button" id="exportStop" hidden>Stop and save</button>
+    <button type="button" id="exportCancel" hidden>Cancel recording</button>
+    <a id="exportDownload" hidden>Download export</a>
+  </div>
+  <p id="exportStatus" role="status" aria-live="polite"></p>
+</details>

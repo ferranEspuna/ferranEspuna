@@ -47,5 +47,6 @@ layout: default
     <label><input type="checkbox" id="lockOrbit"{% unless page.family == 'newton' %} checked{% endunless %} disabled>{% if page.family == 'newton' %}Track centroid{% else %}Lock to critical point{% endif %}</label>
   </div>
 </fieldset>
+{% include fractal-export.html %}
 <div id="guide" class="prose fractal-guide">{{ content }}</div>
 <script type="module" src="{{ 'script.js' }}"></script>

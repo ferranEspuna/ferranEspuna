@@ -1,3 +1,4 @@
+import { setupExports } from './export.js';
 import { Renderer } from './renderer.js';
 import { byId, hexToRgb, setupFullscreen } from './fractal_common.js';
 import { setupInteraction } from './interaction.js';
@@ -122,6 +123,7 @@ export async function startExplorer(config) {
         refreshControls();
         resize();
         status.hidden = true;
+        setupExports({ renderers, uniforms, name: config.channel });
     } catch (error) {
         for (const renderer of Object.values(renderers)) renderer.destroy();
         controls.disabled = true;
