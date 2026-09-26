@@ -88,7 +88,7 @@ with sync_playwright() as p:
     page.locator('#exportCancel').wait_for(state='visible')
     page.wait_for_timeout(300)
     page.locator('#exportCancel').click()
-    page.wait_for_function("document.getElementById('exportStatus').textContent === 'Recording canceled.'")
+    page.wait_for_function("document.getElementById('exportStatus').textContent.startsWith('Canceled.')")
     assert page.locator('#exportDownload').get_attribute('href') == saved_link
     assert page.locator('#exportImage').is_enabled()
     # Check that a stopped 4K live recording produces a playable high-resolution file.
@@ -107,14 +107,16 @@ with sync_playwright() as p:
         return [v.videoWidth, v.videoHeight];
     }''')
     assert dimensions == [3840, 2160], dimensions
-    # No recorder support must leave images usable.
+    # No WebCodecs support must leave images and motion capture usable.
     unsupported = browser.new_page()
-    unsupported.add_init_script('window.MediaRecorder = undefined;')
+    unsupported.add_init_script('window.VideoEncoder = undefined;')
     unsupported.goto(BASE + '/complex_fractals/z2_plus_c/')
     unsupported.wait_for_function("!document.getElementById('exportSection').hidden")
     unsupported.locator('#exportSection summary').click()
-    assert unsupported.locator('#exportVideo').is_disabled()
+    assert unsupported.locator('#exportRender').is_disabled()
+    assert unsupported.locator('#exportVideo').is_enabled()
+    assert 'WebCodecs' in unsupported.locator('#videoSupport').inner_text()
     assert unsupported.locator('#exportImage').is_enabled()
     assert not errors, errors
     browser.close()
-    print('PASS: all six clean shaders, PNG dimensions, 4K video, animated playback, cancellation, stop, and missing recorder support')
+    print('PASS: all six clean shaders, PNG dimensions, 4K video, animated playback, cancellation, stop, and missing WebCodecs support')

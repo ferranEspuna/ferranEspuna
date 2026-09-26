@@ -12,10 +12,30 @@
     <div class="controls">
       <label>Video <select id="exportMotion"><option value="zoom">Slow zoom (4×)</option><option value="live">Record live controls</option></select></label>
       <label>Duration <select id="exportDuration"><option value="5">5 seconds</option><option value="10" selected>10 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select></label>
-      <button type="button" id="exportVideo">Record video</button>
+      <label>Frame rate <select id="exportFps"><option value="24">24 fps</option><option value="25">25 fps</option><option value="30" selected>30 fps</option><option value="50">50 fps</option><option value="60">60 fps</option></select></label>
     </div>
+    <div class="controls">
+      <label>Smoothing <select id="exportSmooth"><option value="0">Off</option><option value="0.15">Light</option><option value="0.35">Medium</option><option value="0.7">Strong</option></select></label>
+      <label><input type="checkbox" id="exportLoop">Smooth loop for all motion</label>
+    </div>
+    <p class="hint">Smoothing softens pan, zoom, and parameter movement. Loop mode plays the motion in the first 80% of the video and smoothly returns all values to their starting values in the last 20%.</p>
+    <div class="controls">
+      <button type="button" id="exportVideo">Record new video</button>
+      <button type="button" id="exportPreview" disabled>Preview saved motion</button>
+      <button type="button" id="exportRender" disabled>Re-render saved video</button>
+    </div>
+    <fieldset id="exportReplace" disabled>
+      <legend>Re-record selected movements</legend>
+      <div class="controls">
+        <label><input type="checkbox" id="replacePan" checked>Pan</label>
+        <label><input type="checkbox" id="replaceZoom">Zoom</label>
+        <label><input type="checkbox" id="replaceParameters">Parameters</label>
+        <button type="button" id="exportOverdub">Re-record selected</button>
+      </div>
+      <p class="hint">Use the explorer controls to replace any checked movements in both planes. Unchecked movements play from the previous take, keeping their smoothing and loop settings. The saved duration is preserved; stopping early holds the last new values. Parameters include the point or root, iterations, and colors.</p>
+    </fieldset>
   </fieldset>
-  <p id="videoSupport" class="hint">Videos record in real time, targeting 30 frames per second. Keep this tab visible. Lower the resolution or iterations if playback is choppy. The file format depends on your browser.</p>
+  <p id="videoSupport" class="hint">Motion is saved in this tab until you reload. Video is then rendered frame by frame at your chosen frame rate, waiting for every frame to encode. Rendering can take longer than playback. Keep the tab visible while recording live movement. Re-render or preview to apply new smoothing and loop settings to the whole saved take.</p>
   <div class="controls">
     <button type="button" id="exportStop" hidden>Stop and save</button>
     <button type="button" id="exportCancel" hidden>Cancel recording</button>
