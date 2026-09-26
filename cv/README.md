@@ -23,6 +23,14 @@ Supervisor: Pablo Candela
 
 Research area: arithmetic combinatorics, with emphasis on higher-order Fourier analysis, Gowers norms, inverse theorems, nilspaces, and additive structures.
 
+## Publications
+
+**Espuña, Ferran.** “Finding Partite Hypergraphs Efficiently.” *Information Processing Letters*, 2026.  
+[DOI](https://doi.org/10.1016/j.ipl.2026.106624) · [arXiv](https://arxiv.org/abs/2508.10641)
+
+Palomar, Jorge, et al. “A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages.” *Proceedings of COLING-LREC 2024*.  
+[Paper](https://aclanthology.org/2024.lrec-main.31/)
+
 ## Education
 
 ### M.Sc. in Advanced Mathematics and Mathematical Engineering  
@@ -39,15 +47,6 @@ Relevant coursework: Commutative Algebra, Number Theory, Coding Theory, Cryptogr
 2023  
 GPA: 9.0/10  
 Extraordinary Bachelor’s Degree Award.
-
-
-## Publications
-
-**Espuña, Ferran.** “Finding Partite Hypergraphs Efficiently.” *Information Processing Letters*, 2026.  
-[DOI](https://doi.org/10.1016/j.ipl.2026.106624) · [arXiv](https://arxiv.org/abs/2508.10641)
-
-Palomar, Jorge, et al. “A CURATEd CATalog: Rethinking the Extraction of Pretraining Corpora for Mid-Resourced Languages.” *Proceedings of COLING-LREC 2024*.  
-[Paper](https://aclanthology.org/2024.lrec-main.31/)
 
 ## Research Experience
 
